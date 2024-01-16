@@ -1,0 +1,1 @@
+return pluginConfig.getString("key")
