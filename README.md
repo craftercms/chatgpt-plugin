@@ -127,6 +127,7 @@ property to your `tinymceOptions` (as described above). For instance to change t
   ]
 }
 ```
+This configuration allows you to create your own `openaishortcuts`, since it uses the Open AI API format. Name the shortcut via `label` and modify `content` to a prompt according to your needs. Use prompt engineering strategies (https://platform.openai.com/docs/guides/prompt-engineering) for better results.
 
 Review `CrafterCMSOpenAIConfig` and `BASE_CONFIG` on [the tiny plugin source](./sources/src/craftercms_openai.tsx) for more options and examples.
 
@@ -143,7 +144,7 @@ requests to the plugin.
 
 If desired, the helper can render a button to open the Chat window on demand. This is done by  adding a `ui`
 property to the widget configuration which can have a value of "IconButton" or "ListItemButton".
-- Use "IconButton" if you want to display the button on the Toobar.
+- Use "IconButton" if you want to display the button on the toolbar.
 - Use "ListItemButton" if you want to display the button on the sidebar.
 
 The example below shows how to add the helper to the **toolbar** and display a button to open the Chat window.
@@ -159,7 +160,10 @@ The example below shows how to add the helper to the **toolbar** and display a b
           name="components"
           file="index.js"
         />
-        <configuration ui="IconButton" />
+        <configuration>
+          <label>ChatGPT Helper</label>
+          <icon>"IconButton"</icon>
+        </configuration>
       </widget>
 ...
 ```
@@ -168,7 +172,7 @@ The example below shows how to add the helper to the **toolbar** and display a b
 
 - Clone this repository.
 - Run `yarn install` to install dependencies.
-   - If things installed correctly, the `postinstall` script should have copied the tinymce directory to `public/tinymce`. If not you can manually run `yarn postinstall` or `node postinstall.cjs`. 
+   - If everything installed correctly, the `postinstall` script should have copied the tinymce directory to `public/tinymce`. If not you can manually run `yarn postinstall` or `node postinstall.cjs`. 
 - Run `yarn start` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
 - Run `yarn package` to create the CrafterCMS plugin build. See local installation instructions above for instructions on how to continually deploy and test locally.
 - Fork and create a pull request to contribute.
