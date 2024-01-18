@@ -1,0 +1,87 @@
+# This file describes a plugin for use in CrafterCMS
+# The version of the format for this file
+descriptorVersion: 2
+
+# Describe the plugin
+plugin:
+  type: site
+  id: org.craftercms.openai
+  name: OpenAI ChatGPT Integration
+  tags:
+    - authoring
+    - tools
+  version:
+    major: 1
+    minor: 0
+    patch: 2
+  description: OpenAI ChatGPT Integration
+  documentation: "https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/README.md"
+  website:
+    name: ChatGPT Plugin
+    url: https://github.com/craftercms/chatgpt-plugin
+  media:
+    screenshots:
+      - title: ChatGPT Plugin
+        description: CrafterCMS ChatGPT Plugin
+        url: "https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/.crafter/logo.png"
+  developer:
+    company:
+      name: CrafterCMS
+      email: info@craftercms.com
+      url: https://craftercms.com
+  build:
+    id: kabeb4b44e6a24b5e0481c6ba97901d0b02716c9
+    date: 2024-01-20T00:00:00Z
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  crafterCmsVersions:
+    - major: 4
+      minor: 1
+      patch: 2
+    - major: 4
+      minor: 1
+      patch: 3
+    - major: 4
+      minor: 1
+      patch: 4
+    - major: 4
+      minor: 2
+      patch: 0
+    - major: 4
+      minor: 2
+      patch: 1
+    - major: 4
+      minor: 2
+      patch: 2
+  crafterCmsEditions:
+    - community
+    - enterprise
+  parameters:
+    - label: Key
+      name: key
+      description: OpenAI API Key
+  installation:
+    - type: preview-app
+      parentXpath: //widget[@id='craftercms.components.ToolsPanel']
+      elementXpath: //widget[@id="craftercms.components.openai.Helper"]
+      element:
+        name: configuration
+        children:
+          - name: widgets
+            children:
+              - name: widget
+                attributes:
+                  - name: id
+                    value: craftercms.components.openai.Helper
+                children:
+                  - name: plugin
+                    attributes:
+                      - name: id
+                        value: org.craftercms
+                      - name: type
+                        value: openai
+                      - name: name
+                        value: components
+                      - name: file
+                        value: index.js
