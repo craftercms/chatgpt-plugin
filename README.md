@@ -4,7 +4,7 @@
 
 Install the plugin via Crafter Studio's Plugin Management UI under "Project Tools" > "Plugin Management" > "Search & install".
 
-You'll enter your key on the plugin configuration form and it will end up on a file on your CrafterCMS project:
+You'll enter your key on the plugin configuration form, and it will end up on a file on your CrafterCMS project:
 ```
 {sandbox}/config/plugins/org/craftercms/openai/config.xml
 ``` 
@@ -68,36 +68,36 @@ Merge the JSON below with your `tinymceOptions`:
 ```
 
 The plugin exports certain TinyMCE buttons that you can use in your editor toolbar(s). You don't need to use all of them, 
-simply choose the one that suits you best.
+choose the one that suits you best.
 
-#### chatgptdialog
+#### `chatgptdialog`
 
-A simple button which will update the Chat window for a free-form chat experience. The chat window will provide a button to 
-insert the generated text into the editor. If there's a selection prior to clicking the button, the selection will be passed
+A simple button that will update the Chat window for a free-form chat experience. The chat window will provide a button to 
+insert the generated text into the editor. If there's a selection before clicking the button, the selection will be passed
 as "context" to the API so people can speak with the assistant referring to said context.
 
 <img src=".crafter/chatgptdialog_button.png">
 
-#### openaishortcuts
+#### `openaishortcuts`
 
 A split button that provides a list of shortcuts. These can be configured by passing a `shortcuts` property to the TinyMCE plugin config via the `craftercms_openai` key.
 
-Shortcuts should be an array of objects with a `label` and `messages` properties, or, in TypeScript notation: `Array<{ label: string; messages: ChatCompletionMessageParam[] }>`
+Shortcuts should be an array of objects with `label` and `messages` properties, or, in TypeScript notation: `Array<{ label: string; messages: ChatCompletionMessageParam[] }>`
 
-Both the `openaishortcuts` and `openai` toolbar buttons are configured by the same `shortcuts` property.
+The `openaishortcuts` and `openai` toolbar buttons are configured by the same `shortcuts` property.
 
 <img src=".crafter/openaishortcuts_button_open.png" width="200">
 
-#### openai
+#### `openai`
 
 A split button that provides both a list of shortcuts and direct access to free-form chat. It is
 a combination of the `openaishortcuts` and `chatgptdialog` buttons.
 
 Shortcuts can be configured by passing a `shortcuts` property to the TinyMCE plugin config via the `craftercms_openai` key.
 
-Both the `openaishortcuts` and `openai` toolbar buttons are configured by the same `shortcuts` property.
+The `openaishortcuts` and `openai` toolbar buttons are configured by the same `shortcuts` property.
 
-Clicking the main button area, the icon, would open the free-form chat window.
+The icon would open the free-form chat window by clicking the main button area.
 
 <img src=".crafter/openai_split_button.png">
 
@@ -109,8 +109,8 @@ Clicking the down-pointing caret would open a list of shortcuts to select one fr
 
 [//]: # (TODO: Document the `{context}` usage)
 
-To configure the behaviour of the Chat window that's opened via the rich text editor, add a `craftercms_openai`
-property to your `tinymceOptions` (as described above). For instance to change the shortcuts, you can add the following:
+To configure the behavior of the Chat window that's opened via the rich text editor, add a `craftercms_openai`
+property to your `tinymceOptions` (as described above). For instance, to change the shortcuts, you can add the following:
 
 ```json
 "craftercms_openai": {
@@ -127,7 +127,11 @@ property to your `tinymceOptions` (as described above). For instance to change t
   ]
 }
 ```
-This configuration allows you to create your own `openaishortcuts`, since it uses the Open AI API format. Name the shortcut via `label` and modify `content` to a prompt according to your needs. Use prompt engineering strategies (https://platform.openai.com/docs/guides/prompt-engineering) for better results.
+This configuration allows you to create your custom shortcuts. The shortcut has two properties:
+- `label`, which is what the user sees as the name of the shortcut
+- `messages`, which is an array of `ChatCompletionMessageParam`
+
+Use prompt engineering strategies (https://platform.openai.com/docs/guides/prompt-engineering) for better results.
 
 Review `CrafterCMSOpenAIConfig` and `BASE_CONFIG` on [the tiny plugin source](./sources/src/craftercms_openai.tsx) for more options and examples.
 
@@ -135,36 +139,36 @@ Review `CrafterCMSOpenAIConfig` and `BASE_CONFIG` on [the tiny plugin source](./
 
 The helper component enables ChatGPT to work with XB's RTE.
 
-The ChatGptHelper component must be added to your `ui.xml` to either the sidebar (`craftercms.components.ToolsPanel`), or the 
+The ChatGptHelper component must be added to your `ui.xml` to either the sidebar (`craftercms.components.ToolsPanel`) or the 
 toolbar (`craftercms.components.PreviewToolbar`). 
 
 This is done automatically by the plugin installation process (see `craftercms-plugin.yaml` > `installation` property). By
-default, the helper is added to the sidebar, and it doesn't render anything visible to the user, it is there to attend XB's
+default, the helper is added to the sidebar, and it doesn't render anything visible to the user; it is there to attend XB's
 requests to the plugin. 
 
 If desired, the helper can render a button to open the Chat window on demand. This is done by  adding a `ui`
-property to the widget configuration which can have a value of "IconButton" or "ListItemButton".
-- Use "IconButton" if you want to display the button on the toolbar.
-- Use "ListItemButton" if you want to display the button on the sidebar.
+property to the widget configuration with a value of "IconButton" or "ListItemButton".
+- Use "IconButton" to display the button on the toolbar.
+- Use "ListItemButton" to display the button on the sidebar.
 
 The example below shows how to add the helper to the **toolbar** and display a button to open the Chat window.
 
 ```xml
 <widget id="craftercms.components.ToolsPanel">
-  <configuration>
-    <widgets>
-      <widget id="craftercms.components.openai.Helper">
-        <plugin
-          id="org.craftercms"
-          type="openai"
-          name="components"
-          file="index.js"
-        />
-        <configuration>
-          <label>ChatGPT Helper</label>
-          <icon>"IconButton"</icon>
-        </configuration>
-      </widget>
+	<configuration>
+		<widgets>
+			<widget id="craftercms.components.openai.Helper">
+			<plugin
+				id="org.craftercms"
+				type="openai"
+				name="components"
+				file="index.js"
+			/>
+			<configuration ui="IconButton" />
+		</widget>
+		...
+	</configuration>
+</widget>
 ...
 ```
 
@@ -172,9 +176,9 @@ The example below shows how to add the helper to the **toolbar** and display a b
 
 - Clone this repository.
 - Run `yarn install` to install dependencies.
-   - If everything installed correctly, the `postinstall` script should have copied the tinymce directory to `public/tinymce`. If not you can manually run `yarn postinstall` or `node postinstall.cjs`. 
+   - If everything is installed correctly, the `postinstall` script should have copied the TinyMCE directory to `public/tinymce`. If not, you can manually run `yarn postinstall` or `node postinstall.cjs`. 
 - Run `yarn start` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
-- Run `yarn package` to create the CrafterCMS plugin build. See local installation instructions above for instructions on how to continually deploy and test locally.
+- Run `yarn package` to create the CrafterCMS plugin build. See local installation instructions above for instructions on continually deploying and testing locally.
 - Fork and create a pull request to contribute.
 
 ## Questions
