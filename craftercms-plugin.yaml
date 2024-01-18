@@ -5,7 +5,7 @@ descriptorVersion: 2
 # Describe the plugin
 plugin:
   type: site
-  id: org.craftercms.openai
+  id: org.craftercms.plugin.openai
   name: OpenAI ChatGPT Integration
   tags:
     - authoring
@@ -13,7 +13,7 @@ plugin:
   version:
     major: 1
     minor: 0
-    patch: 2
+    patch: 3
   description: OpenAI ChatGPT Integration
   documentation: "https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/README.md"
   website:
