@@ -13,7 +13,7 @@ plugin:
   version:
     major: 1
     minor: 0
-    patch: 2
+    patch: 3
   description: OpenAI ChatGPT Integration
   documentation: "https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/README.md"
   website:
@@ -64,7 +64,7 @@ plugin:
   installation:
     - type: preview-app
       parentXpath: //widget[@id='craftercms.components.ToolsPanel']
-      elementXpath: //widget[@id="craftercms.components.openai.Helper"]
+      elementXpath: //widget[@id='craftercms.components.openai.Helper']
       element:
         name: configuration
         children:
