@@ -76,7 +76,7 @@ A simple button that will update the Chat window for a free-form chat experience
 insert the generated text into the editor. If there's a selection before clicking the button, the selection will be passed
 as "context" to the API so people can speak with the assistant referring to said context.
 
-<img src=".crafter/chatgptdialog_button.png">
+<img src="https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/.crafter/chatgptdialog_button.png">
 
 #### `openaishortcuts`
 
@@ -86,7 +86,7 @@ Shortcuts should be an array of objects with `label` and `messages` properties, 
 
 The `openaishortcuts` and `openai` toolbar buttons are configured by the same `shortcuts` property.
 
-<img src=".crafter/openaishortcuts_button_open.png" width="200">
+<img src="https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/.crafter/openaishortcuts_button_open.png" width="200">
 
 #### `openai`
 
@@ -99,11 +99,11 @@ The `openaishortcuts` and `openai` toolbar buttons are configured by the same `s
 
 The icon would open the free-form chat window by clicking the main button area.
 
-<img src=".crafter/openai_split_button.png">
+<img src="https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/.crafter/openai_split_button.png">
 
 Clicking the down-pointing caret would open a list of shortcuts to select one from.
 
-<img src=".crafter/openai_split_button_open.png" width="200">
+<img src="https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/.crafter/openai_split_button_open.png" width="200">
 
 ### Configuration
 
