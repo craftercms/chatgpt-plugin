@@ -13,7 +13,7 @@ plugin:
   version:
     major: 1
     minor: 0
-    patch: 6
+    patch: 7
   description: OpenAI ChatGPT Integration
   documentation: "https://raw.githubusercontent.com/craftercms/chatgpt-plugin/main/README.md"
   website:
@@ -57,6 +57,18 @@ plugin:
     - major: 4
       minor: 1
       patch: 8
+    - major: 4
+      minor: 1
+      patch: 9
+    - major: 4
+      minor: 1
+      patch: 10
+    - major: 4
+      minor: 1
+      patch: 11
+    - major: 4
+      minor: 1
+      patch: 12
     - major: 4
       minor: 2
       patch: 0
