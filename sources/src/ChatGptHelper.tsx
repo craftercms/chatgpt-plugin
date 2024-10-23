@@ -34,11 +34,13 @@ export function ChatGptHelper(props: ChatGptHelperProps) {
   const { ui } = props;
   const user = useActiveUser();
   const [open, setOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [chatGPTPopoverProps, setChatGPTPopoverProps] = useState<Partial<ChatGPTPopoverProps>>(() =>
     createChatGptPopoverProps(user)
   );
   const handleOpenButtonClick = () => {
     setOpen(true);
+    setIsMinimized(false);
   };
   const handleClose = () => {
     getHostToGuestBus().next({ type: chatGptClosedMessageId });
@@ -52,6 +54,7 @@ export function ChatGptHelper(props: ChatGptHelperProps) {
         if (message.type === openChatGptMessageId) {
           setChatGPTPopoverProps(createChatGptPopoverProps(user, message.payload));
           setOpen(true);
+          setIsMinimized(false);
         }
       });
       return () => {
@@ -76,7 +79,13 @@ export function ChatGptHelper(props: ChatGptHelperProps) {
             onClick={handleOpenButtonClick}
           />
         ))}
-      <ChatGPTPopover {...chatGPTPopoverProps} open={open} onClose={handleClose} />
+      <ChatGPTPopover
+        {...chatGPTPopoverProps}
+        open={open}
+        onClose={handleClose}
+        isMinimized={isMinimized}
+        onMinimize={() => setIsMinimized((prev) => !prev)}
+      />
     </>
   );
 }

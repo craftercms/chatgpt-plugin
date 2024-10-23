@@ -9,10 +9,12 @@ import {
   TextField,
   ThemeProvider,
   Tooltip,
+  Typography,
   useMediaQuery
 } from '@mui/material';
 import Tiny from './Tiny.tsx';
 import OpenAILogo from './OpenAI';
+import ChatGPTPopover from './ChatGPTPopover';
 import ChatGPTPromptPopover from './ChatGPTPromptPopover';
 
 function AppWrap() {
@@ -28,6 +30,8 @@ function AppWrap() {
   }, [prefersDarkMode]);
   const [value, setValue] = useState('Skydiving risks');
   const [anchorEl, setAnchorEl] = useState(null);
+  const [chatGPTPromptPopoverAnchorEl, setChatGPTPromptPopoverAnchorEl] = useState(null);
+  const [isMinimized, setIsMinimized] = useState(false);
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 5 }}>
@@ -62,6 +66,27 @@ function AppWrap() {
             body: { background: theme.palette.background.default },
             '#root': { height: '100%' }
           }}
+        />
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>Open ChatGPT Prompt Popover:</Typography>
+          <IconButton
+            onClick={(e) => {
+              setChatGPTPromptPopoverAnchorEl(e.target);
+              setIsMinimized(false);
+            }}
+          >
+            <OpenAILogo />
+          </IconButton>
+        </Box>
+        <ChatGPTPopover
+          open={Boolean(chatGPTPromptPopoverAnchorEl)}
+          anchorEl={chatGPTPromptPopoverAnchorEl}
+          onClose={() => setChatGPTPromptPopoverAnchorEl(null)}
+          chatGPTProps={{
+            userName: 'John Doe'
+          }}
+          isMinimized={isMinimized}
+          onMinimize={() => setIsMinimized((prev) => !prev)}
         />
       </Box>
     </ThemeProvider>

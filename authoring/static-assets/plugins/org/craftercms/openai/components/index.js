@@ -1,7 +1,9 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, AppBar } = craftercms.libs.MaterialUI;
+const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, Popper, AppBar } = craftercms.libs.MaterialUI;
 const CloseRounded = craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded');
-const { useState, useRef, useEffect } = craftercms.libs.React;
+const RemoveRounded = craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded');
+const OpenInBrowserRounded = craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded');
+const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
@@ -3510,28 +3512,82 @@ function ChatGPT(props) {
                     } }) })] }));
 }
 
+function ChatGPTAppBar({ children, ...appBarProps }) {
+    return (jsx(AppBar, { position: "static", ...appBarProps, sx: {
+            display: 'flex',
+            flexDirection: 'row',
+            placeContent: 'space-between',
+            alignItems: 'center',
+            pl: 2,
+            pr: 1,
+            py: 1,
+            ...appBarProps?.sx
+        }, children: children }));
+}
 function ChatGPTPopover(props) {
-    const { open, onClose, appBarProps, chatGPTProps, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
-    return (jsxs(Popover, { open: open, onClose: onClose, keepMounted: false, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: { invisible: false, sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' } }, ...popoverProps, sx: {
-            [`> .${paperClasses.root}`]: {
-                width,
-                height,
-                display: 'flex',
-                flexDirection: 'column',
-                bottom: 10,
-                right: 10
-            },
-            ...popoverProps?.sx
-        }, children: [jsxs(AppBar, { position: "static", ...appBarProps, sx: {
-                    display: 'flex',
-                    flexDirection: 'row',
-                    placeContent: 'space-between',
-                    alignItems: 'center',
-                    pl: 2,
-                    pr: 1,
-                    py: 1,
-                    ...appBarProps?.sx
-                }, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsx(IconButton, { color: "inherit", "aria-label": "close", onClick: (e) => onClose?.(e, 'closeButton'), children: jsx(CloseRounded, {}) })] }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }));
+    const { open, onClose, appBarProps, chatGPTProps, isMinimized = false, onMinimize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const handleMinimize = useCallback(() => {
+        onMinimize?.();
+    }, [onMinimize]);
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape' && !isMinimized) {
+                handleMinimize();
+            }
+        };
+        if (open) {
+            document.addEventListener('keydown', handleKeyDown);
+        }
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open, isMinimized, handleMinimize]);
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open, onClose: onClose, disableEscapeKeyDown: true, keepMounted: false, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
+                    invisible: false,
+                    sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+                    onClick: (event) => {
+                        event.stopPropagation();
+                        handleMinimize();
+                    }
+                }, ...popoverProps, sx: {
+                    visibility: isMinimized ? 'hidden' : 'visible',
+                    [`> .${paperClasses.root}`]: {
+                        width,
+                        height,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'absolute',
+                        bottom: 10,
+                        right: 10
+                    },
+                    ...popoverProps?.sx
+                }, children: [jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsxs("div", { children: [jsx(IconButton, { color: "inherit", "aria-label": "minimize", onClick: handleMinimize, children: jsx(RemoveRounded, {}) }), jsx(IconButton, { color: "inherit", "aria-label": "close", onClick: (e) => onClose?.(e, 'closeButton'), children: jsx(CloseRounded, {}) })] })] }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(Popper, { open: isMinimized, anchorEl: () => document.body, modifiers: [
+                    {
+                        name: 'applyStyles',
+                        enabled: true,
+                        fn: ({ state }) => {
+                            Object.assign(state.elements.popper.style, {
+                                zIndex: 1300,
+                                position: 'absolute',
+                                transform: 'none',
+                                inset: 'auto',
+                                bottom: '10px',
+                                right: '10px'
+                            });
+                        },
+                    },
+                ], sx: {
+                    [`> .${paperClasses.root}`]: {
+                        width: 250,
+                        height: 'auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        position: 'absolute',
+                        bottom: 10,
+                        right: 10,
+                        padding: '16px 20px'
+                    },
+                }, children: jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsx("div", { children: jsx(IconButton, { color: "inherit", onClick: handleMinimize, "aria-label": "expand", children: jsx(OpenInBrowserRounded, {}) }) })] }) })] }));
 }
 
 /*
@@ -3577,9 +3633,11 @@ function ChatGptHelper(props) {
     const { ui } = props;
     const user = useActiveUser();
     const [open, setOpen] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
     const [chatGPTPopoverProps, setChatGPTPopoverProps] = useState(() => createChatGptPopoverProps(user));
     const handleOpenButtonClick = () => {
         setOpen(true);
+        setIsMinimized(false);
     };
     const handleClose = () => {
         getHostToGuestBus().next({ type: chatGptClosedMessageId });
@@ -3593,6 +3651,7 @@ function ChatGptHelper(props) {
                 if (message.type === openChatGptMessageId) {
                     setChatGPTPopoverProps(createChatGptPopoverProps(user, message.payload));
                     setOpen(true);
+                    setIsMinimized(false);
                 }
             });
             return () => {
@@ -3602,7 +3661,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized((prev) => !prev) })] }));
 }
 
 const plugin = {
