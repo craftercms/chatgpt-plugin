@@ -3,11 +3,9 @@ import ReactDOM from 'react-dom/client';
 import {
   Box,
   createTheme,
-  GlobalStyles,
   IconButton,
   InputAdornment,
   TextField,
-  ThemeProvider,
   Tooltip,
   Typography,
   useMediaQuery
@@ -16,7 +14,8 @@ import Tiny from './Tiny.tsx';
 import OpenAILogo from './OpenAI';
 import ChatGPTPopover from './ChatGPTPopover';
 import ChatGPTPromptPopover from './ChatGPTPromptPopover';
-
+import GlobalStyles from '@craftercms/studio-ui/components/GlobalStyles';
+import CrafterThemeProvider from '@craftercms/studio-ui/components/CrafterThemeProvider';
 function AppWrap() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const theme = useMemo(() => {
@@ -33,7 +32,7 @@ function AppWrap() {
   const [chatGPTPromptPopoverAnchorEl, setChatGPTPromptPopoverAnchorEl] = useState(null);
   const [isMinimized, setIsMinimized] = useState(false);
   return (
-    <ThemeProvider theme={theme}>
+    <CrafterThemeProvider themeOptions={theme}>
       <Box sx={{ p: 5 }}>
         <TextField
           fullWidth
@@ -60,13 +59,7 @@ function AppWrap() {
           print={(content) => setValue(content)}
         />
         <Tiny />
-        <GlobalStyles
-          styles={{
-            'body, html': { margin: 0, padding: 0, height: '100%' },
-            body: { background: theme.palette.background.default },
-            '#root': { height: '100%' }
-          }}
-        />
+        <GlobalStyles cssBaseline={true} />
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>Open ChatGPT Prompt Popover:</Typography>
           <IconButton
@@ -87,9 +80,10 @@ function AppWrap() {
           }}
           isMinimized={isMinimized}
           onMinimize={() => setIsMinimized((prev) => !prev)}
+          onMaximize={() => setIsMinimized((prev) => !prev)}
         />
       </Box>
-    </ThemeProvider>
+    </CrafterThemeProvider>
   );
 }
 

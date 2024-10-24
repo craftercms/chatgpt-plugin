@@ -5,14 +5,13 @@ import {
   paperClasses,
   Popover,
   PopoverProps,
-  Popper,
   Typography
 } from '@mui/material';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import RemoveRounded from '@mui/icons-material/RemoveRounded';
-import OpenInBrowserRounded from '@mui/icons-material/OpenInBrowserRounded';
 import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
 import React, { ReactNode, useCallback, useEffect } from 'react';
+import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 
 interface ChatGPTAppBarProps extends AppBarProps {
   children: ReactNode;
@@ -22,6 +21,7 @@ function ChatGPTAppBar({ children, ...appBarProps }: Readonly<ChatGPTAppBarProps
   return (
     <AppBar
       position="static"
+      color="inherit"
       {...appBarProps}
       sx={{
         display: 'flex',
@@ -47,6 +47,7 @@ export interface ChatGPTPopoverProps extends PopoverProps {
   chatGPTProps?: ChatGPTProps;
   isMinimized?: boolean;
   onMinimize?: () => void;
+  onMaximize?: () => void;
 }
 
 function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
@@ -57,6 +58,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     chatGPTProps,
     isMinimized = false,
     onMinimize,
+    onMaximize,
     appBarTitle = 'AI Assistant',
     width = 450,
     height = 500,
@@ -104,6 +106,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         {...popoverProps}
         sx={{
           visibility: isMinimized ? 'hidden' : 'visible',
+          zIndex: 1400,
           [`> .${paperClasses.root}`]: {
             width,
             height,
@@ -127,49 +130,13 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             </IconButton>
           </div>
         </ChatGPTAppBar>
-      <ChatGPT {...chatGPTProps} sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }} />
+        <ChatGPT {...chatGPTProps} sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }} />
       </Popover>
-      <Popper
+      <MinimizedBar
         open={isMinimized}
-        anchorEl={() => document.body}
-        modifiers={[
-          {
-            name: 'applyStyles',
-            enabled: true,
-            fn: ({ state }) => {
-              Object.assign(state.elements.popper.style, {
-                zIndex: 1300,
-                position: 'absolute',
-                transform: 'none',
-                inset: 'auto',
-                bottom: '10px',
-                right: '10px'
-              });
-            },
-          },
-        ]}
-        sx={{
-          [`> .${paperClasses.root}`]: {
-            width: 250,
-            height: 'auto',
-            display: 'flex',
-            flexDirection: 'row',
-            position: 'absolute',
-            bottom: 10,
-            right: 10,
-            padding: '16px 20px'
-          },
-        }}
-      >
-        <ChatGPTAppBar {...appBarProps}>
-          <Typography variant="h6" color="inherit" component="div">{appBarTitle}</Typography>
-            <div>
-              <IconButton color="inherit" onClick={handleMinimize} aria-label="expand">
-                <OpenInBrowserRounded />
-              </IconButton>
-            </div>
-        </ChatGPTAppBar>
-      </Popper>
+        onMaximize={onMaximize}
+        title={appBarTitle}
+      />
     </>
   );
 }
