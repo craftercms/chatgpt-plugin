@@ -1,13 +1,13 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, Popper, AppBar } = craftercms.libs.MaterialUI;
+const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, AppBar } = craftercms.libs.MaterialUI;
 const CloseRounded = craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded');
 const RemoveRounded = craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded');
-const OpenInBrowserRounded = craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/OpenInBrowserRounded');
 const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
+const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
@@ -3513,7 +3513,7 @@ function ChatGPT(props) {
 }
 
 function ChatGPTAppBar({ children, ...appBarProps }) {
-    return (jsx(AppBar, { position: "static", ...appBarProps, sx: {
+    return (jsx(AppBar, { position: "static", color: "inherit", ...appBarProps, sx: {
             display: 'flex',
             flexDirection: 'row',
             placeContent: 'space-between',
@@ -3525,7 +3525,7 @@ function ChatGPTAppBar({ children, ...appBarProps }) {
         }, children: children }));
 }
 function ChatGPTPopover(props) {
-    const { open, onClose, appBarProps, chatGPTProps, isMinimized = false, onMinimize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const { open, onClose, appBarProps, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
     const handleMinimize = useCallback(() => {
         onMinimize?.();
     }, [onMinimize]);
@@ -3551,6 +3551,7 @@ function ChatGPTPopover(props) {
                     }
                 }, ...popoverProps, sx: {
                     visibility: isMinimized ? 'hidden' : 'visible',
+                    zIndex: 1400,
                     [`> .${paperClasses.root}`]: {
                         width,
                         height,
@@ -3561,33 +3562,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsxs("div", { children: [jsx(IconButton, { color: "inherit", "aria-label": "minimize", onClick: handleMinimize, children: jsx(RemoveRounded, {}) }), jsx(IconButton, { color: "inherit", "aria-label": "close", onClick: (e) => onClose?.(e, 'closeButton'), children: jsx(CloseRounded, {}) })] })] }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(Popper, { open: isMinimized, anchorEl: () => document.body, modifiers: [
-                    {
-                        name: 'applyStyles',
-                        enabled: true,
-                        fn: ({ state }) => {
-                            Object.assign(state.elements.popper.style, {
-                                zIndex: 1300,
-                                position: 'absolute',
-                                transform: 'none',
-                                inset: 'auto',
-                                bottom: '10px',
-                                right: '10px'
-                            });
-                        },
-                    },
-                ], sx: {
-                    [`> .${paperClasses.root}`]: {
-                        width: 250,
-                        height: 'auto',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        position: 'absolute',
-                        bottom: 10,
-                        right: 10,
-                        padding: '16px 20px'
-                    },
-                }, children: jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsx("div", { children: jsx(IconButton, { color: "inherit", onClick: handleMinimize, "aria-label": "expand", children: jsx(OpenInBrowserRounded, {}) }) })] }) })] }));
+                }, children: [jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsxs("div", { children: [jsx(IconButton, { color: "inherit", "aria-label": "minimize", onClick: handleMinimize, children: jsx(RemoveRounded, {}) }), jsx(IconButton, { color: "inherit", "aria-label": "close", onClick: (e) => onClose?.(e, 'closeButton'), children: jsx(CloseRounded, {}) })] })] }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle })] }));
 }
 
 /*
@@ -3661,7 +3636,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized((prev) => !prev) })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized((prev) => !prev), onMaximize: () => setIsMinimized((prev) => !prev) })] }));
 }
 
 const plugin = {
