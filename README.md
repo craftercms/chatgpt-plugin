@@ -190,6 +190,14 @@ The example below shows how to add the helper to the **toolbar** and display a b
 ...
 ```
 
+By default, user can select the model from the dropdown menu. Administrators can disable this feature by updating the `enableCustomModel` property to `false` in the widget configuration.
+
+```xml
+...
+<configuration enableCustomModel="false" />
+...
+```
+
 ## Contributing
 
 - Clone this repository.

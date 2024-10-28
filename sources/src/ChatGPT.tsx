@@ -27,6 +27,7 @@ import StopRounded from '@mui/icons-material/StopRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
 import { createChatCompletion } from './util';
+import { defaultModel } from './consts';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -109,9 +110,7 @@ function copyToClipboard(textToCopy: string): Promise<void> {
   // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
   return (
     navigator.clipboard?.writeText(textToCopy) ??
-    new Promise((resolve, reject) =>
-      reject('Copying to clipboard is only available in secure contexts or user-initiated callbacks.')
-    )
+    Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.'))
   );
 }
 
@@ -176,7 +175,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   // region const { ... } = props;
   const {
     sxs,
-    model = 'gpt-4',
+    model = defaultModel,
     userName,
     scrollToReply = true,
     initialMessages,

@@ -21,6 +21,7 @@ import { ChatCompletionChunk, ChatCompletionMessageParam } from 'openai/resource
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions';
 import OpenAILogo from './OpenAI.tsx';
 import { Stream } from 'openai/streaming';
+import { defaultModel } from './consts.ts';
 
 export interface ChatGPTPromptPopoverProps extends PopoverProps {
   context?: string;
@@ -32,7 +33,7 @@ export interface ChatGPTPromptPopoverProps extends PopoverProps {
   options?: Array<{ label: string; messages: Array<ChatCompletionMessageParam> }>;
 }
 
-function ChatGPTPromptPopover(props: ChatGPTPromptPopoverProps) {
+function ChatGPTPromptPopover(props: Readonly<ChatGPTPromptPopoverProps>) {
   const { model, print, options, context, ...popoverProps } = props;
   const inputRef = useRef<HTMLInputElement>();
   return (
@@ -56,7 +57,7 @@ function Internal(
   }
 ) {
   const {
-    model = 'gpt-4',
+    model = defaultModel,
     print,
     context,
     inputRef,
@@ -203,7 +204,7 @@ function Internal(
       </Box>
       {response && (
         <Box sx={{ p: 2, pt: 0, maxWidth: 500 }}>
-          <Typography sx={{ pb: 1 }} children={response} />
+          <Typography sx={{ pb: 1 }}>{response}</Typography>
           <Button
             disabled={streaming}
             onClick={() => {

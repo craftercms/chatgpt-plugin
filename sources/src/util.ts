@@ -87,3 +87,18 @@ export function createUsername(user: User) {
   const { firstName, lastName, username } = user;
   return `${firstName} ${lastName}`.trim() || username;
 }
+
+
+/**
+ * Fetches the list of models from OpenAI.
+ * @returns The list of models.
+ */
+export async function listModels() {
+  try {
+    const response = await getOpenAiInstance().models.list();
+    return response.data.sort((a, b) => a.id.localeCompare(b.id));
+  } catch (error) {
+    console.error("Error fetching models:", error);
+    return [];
+  }
+}

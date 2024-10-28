@@ -1,5 +1,5 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
+const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, Menu, MenuItem, FormControlLabel, Radio, CircularProgress } = craftercms.libs.MaterialUI;
 const { forwardRef, useState, useRef, useEffect, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
@@ -10,6 +10,7 @@ const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasO
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
 const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
+const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
@@ -3249,6 +3250,30 @@ function createUsername(user) {
     const { firstName, lastName, username } = user;
     return `${firstName} ${lastName}`.trim() || username;
 }
+/**
+ * Fetches the list of models from OpenAI.
+ * @returns The list of models.
+ */
+async function listModels() {
+    try {
+        const response = await getOpenAiInstance().models.list();
+        return response.data.sort((a, b) => a.id.localeCompare(b.id));
+    }
+    catch (error) {
+        console.error("Error fetching models:", error);
+        return [];
+    }
+}
+
+const helperWidgetId = 'craftercms.components.openai.Helper';
+const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
+const chatWidgetId = 'craftercms.components.openai.ChatGPT';
+const popoverWidgetId = 'craftercms.components.openai.ChatGPTPopover';
+const openChatGptMessageId = 'craftercms.openai.OpenChatGPT';
+const chatGptResultMessageId = 'craftercms.openai.ChatGPTResult';
+const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
+// default ChatGPT model
+const defaultModel = 'gpt-4o';
 
 const StyledBox = styled(Box)(
 // language=CSS
@@ -3321,7 +3346,7 @@ function createSrcDoc(html, theme) {
 function copyToClipboard(textToCopy) {
     // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
     return (navigator.clipboard?.writeText(textToCopy) ??
-        new Promise((resolve, reject) => reject('Copying to clipboard is only available in secure contexts or user-initiated callbacks.')));
+        Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.')));
 }
 function stringToColor(string) {
     let hash = 0;
@@ -3345,7 +3370,7 @@ function nameToInitials(name) {
 }
 const ChatGPT = forwardRef((props, ref) => {
     // region const { ... } = props;
-    const { sxs, model = 'gpt-4', userName, scrollToReply = true, initialMessages, aiAvatarColour = '#19c37d', extraActions, emptyStateOptions = [
+    const { sxs, model = defaultModel, userName, scrollToReply = true, initialMessages, aiAvatarColour = '#19c37d', extraActions, emptyStateOptions = [
         {
             id: 'useCasualTone',
             title: 'Set a casual tone for the AI content',
@@ -3521,11 +3546,41 @@ const ChatGPT = forwardRef((props, ref) => {
                     } }) })] }));
 });
 
+function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
+    const [models, setModels] = useState([]);
+    useEffect(() => {
+        listModels().then(modelList => {
+            setModels(modelList);
+        });
+    }, []);
+    return (jsxs(Fragment, { children: [jsx(Button, { id: "model-select-button", variant: "text", color: "inherit", onClick: enableCustomModel ? handleSettingsClick : undefined, "aria-controls": modelMenuAnchorEl ? 'model-select-menu' : undefined, "aria-haspopup": "true", "aria-expanded": Boolean(modelMenuAnchorEl), sx: {
+                    typography: 'subtitle1',
+                    textTransform: 'none',
+                    borderRadius: 1,
+                    minWidth: 0
+                }, endIcon: enableCustomModel ? jsx(ExpandMoreRounded, {}) : null, children: selectedModel }), enableCustomModel && (jsx(Menu, { id: "model-select-menu", anchorEl: modelMenuAnchorEl, open: Boolean(modelMenuAnchorEl), onClose: handleClose, MenuListProps: {
+                    'aria-labelledby': 'model-select-button',
+                }, sx: {
+                    zIndex: 1400
+                }, children: models && models.length > 0 ? (models.map(model => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
+}
 function ChatGPTPopover(props) {
     const theme = useTheme();
-    const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 544, enableCustomModel = true, ...popoverProps } = props;
     const chatGptRef = useRef(null);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
+    const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState(null);
+    const [selectedModel, setSelectedModel] = useState(defaultModel);
+    const handleSettingsClick = (event) => {
+        setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
+    };
+    const handleModelSelect = (modelId) => {
+        setSelectedModel(modelId);
+        handleClose();
+    };
+    const handleClose = () => {
+        setModelMenuAnchorEl(null);
+    };
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e, reason) => {
                     if (chatGptRef.current?.hasConversation()) {
                         setOpenAlertDialog(true);
@@ -3547,7 +3602,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }) }), jsx(ChatGPT, { ...chatGPTProps, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }
@@ -3580,14 +3635,6 @@ function useActiveUser() {
   return useSelector((state) => state.user);
 }
 
-const helperWidgetId = 'craftercms.components.openai.Helper';
-const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
-const chatWidgetId = 'craftercms.components.openai.ChatGPT';
-const popoverWidgetId = 'craftercms.components.openai.ChatGPTPopover';
-const openChatGptMessageId = 'craftercms.openai.OpenChatGPT';
-const chatGptResultMessageId = 'craftercms.openai.ChatGPTResult';
-const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
-
 /* Only want a single "Helper" instance listening, but people may use multiple helpers to put
  * the button in multiple places at once. This mechanism would leave the listening off if the
  * active listener unmounts. If this indeed becomes a problem, will revisit the mechanism. */
@@ -3600,7 +3647,7 @@ const createChatGptPopoverProps = (user, other) => {
     };
 };
 function ChatGptHelper(props) {
-    const { ui } = props;
+    const { ui, enableCustomModel = 'true' } = props;
     const user = useActiveUser();
     const [open, setOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
@@ -3631,7 +3678,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, enableCustomModel: enableCustomModel.toLowerCase() === 'true', open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
 }
 
 const plugin = {
