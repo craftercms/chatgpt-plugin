@@ -1,6 +1,6 @@
 import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
 import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
