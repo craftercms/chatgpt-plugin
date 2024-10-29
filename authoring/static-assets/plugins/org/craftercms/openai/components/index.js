@@ -3539,7 +3539,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, onMinimizeButtonClick: handleMinimize, onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: handleMinimize, onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }

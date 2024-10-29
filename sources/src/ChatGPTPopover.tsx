@@ -73,6 +73,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
       >
         <DialogHeader
           title={appBarTitle}
+          sxs={{ root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }}
           onMinimizeButtonClick={handleMinimize}
           onCloseButtonClick={(e) => onClose(e, null)}
         />
