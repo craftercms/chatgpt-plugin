@@ -35,31 +35,15 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
 
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
-  const handleMinimize = useCallback(() => {
+  const handleMinimize = () => {
     onMinimize?.();
-  }, [onMinimize]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isMinimized) {
-        setOpenAlertDialog(true);
-      }
-    };
-
-    if (open) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, isMinimized, handleMinimize]);
+  };
 
   return (
     <>
       <Popover
         open={open && !isMinimized}
-        onClose={onClose}
+        onClose={() => setOpenAlertDialog(true)}
         disableEscapeKeyDown={true}
         keepMounted={isMinimized}
         anchorReference="none"
@@ -104,7 +88,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         disableBackdropClick
         disableEscapeKeyDown
         open={openAlertDialog}
-        title="Confirm closing this chat?"
+        title="Close this chat?"
         body="The current conversation will be lost."
         buttons={
           <>

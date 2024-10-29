@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
 const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
-const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
+const { useState, useRef, useEffect } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
@@ -3518,23 +3518,10 @@ function ChatGPTPopover(props) {
     const theme = useTheme();
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const handleMinimize = useCallback(() => {
+    const handleMinimize = () => {
         onMinimize?.();
-    }, [onMinimize]);
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape' && !isMinimized) {
-                setOpenAlertDialog(true);
-            }
-        };
-        if (open) {
-            document.addEventListener('keydown', handleKeyDown);
-        }
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [open, isMinimized, handleMinimize]);
-    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: onClose, disableEscapeKeyDown: true, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
+    };
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), disableEscapeKeyDown: true, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
                     onClick: (event) => {
@@ -3556,7 +3543,7 @@ function ChatGPTPopover(props) {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }
-                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Confirm closing this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton, { onClick: (e) => {
+                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton, { onClick: () => {
