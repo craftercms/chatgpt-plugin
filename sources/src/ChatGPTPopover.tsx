@@ -44,7 +44,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
       <Popover
         open={open && !isMinimized}
         onClose={() => setOpenAlertDialog(true)}
-        disableEscapeKeyDown={true}
         keepMounted={isMinimized}
         anchorReference="none"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

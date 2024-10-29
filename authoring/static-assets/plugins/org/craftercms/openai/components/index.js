@@ -3521,7 +3521,7 @@ function ChatGPTPopover(props) {
     const handleMinimize = () => {
         onMinimize?.();
     };
-    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), disableEscapeKeyDown: true, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
                     onClick: (event) => {
