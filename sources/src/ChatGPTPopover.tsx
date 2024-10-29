@@ -19,7 +19,7 @@ import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
-import { listModels } from './util.ts';
+import { listChatModels } from './util.ts';
 import { defaultModel } from './consts.ts';
 
 interface ChatGPTModelSelectProps {
@@ -41,7 +41,7 @@ function ChatGPTModelSelect({
 }: Readonly<ChatGPTModelSelectProps>) {
   const [models, setModels] = useState<Array<{ id: string }>>([]);
   useEffect(() => {
-    listModels().then(modelList => {
+    listChatModels().then(modelList => {
       setModels(modelList);
     });
   }, []);

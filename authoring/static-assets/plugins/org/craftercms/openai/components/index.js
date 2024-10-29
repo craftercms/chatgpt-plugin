@@ -3251,13 +3251,19 @@ function createUsername(user) {
     return `${firstName} ${lastName}`.trim() || username;
 }
 /**
- * Fetches the list of models from OpenAI.
+ * Fetches the list of chat models from OpenAI.
+ * https://platform.openai.com/docs/models/model-endpoint-compatibility
  * @returns The list of models.
  */
-async function listModels() {
+async function listChatModels() {
     try {
         const response = await getOpenAiInstance().models.list();
-        return response.data.sort((a, b) => a.id.localeCompare(b.id));
+        return response.data
+            .filter(model => !model.id.includes('realtime') &&
+            !model.id.includes('audio') &&
+            !model.id.includes('turbo-instruct') &&
+            (model.id.includes('gpt-3.5') || model.id.includes('gpt-4')))
+            .sort((a, b) => a.id.localeCompare(b.id));
     }
     catch (error) {
         console.error("Error fetching models:", error);
@@ -3549,7 +3555,7 @@ const ChatGPT = forwardRef((props, ref) => {
 function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
     const [models, setModels] = useState([]);
     useEffect(() => {
-        listModels().then(modelList => {
+        listChatModels().then(modelList => {
             setModels(modelList);
         });
     }, []);
