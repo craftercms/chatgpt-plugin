@@ -1,43 +1,11 @@
-import {
-  AppBar,
-  AppBarProps,
-  IconButton,
-  paperClasses,
-  Popover,
-  PopoverProps,
-  Typography
-} from '@mui/material';
-import CloseRounded from '@mui/icons-material/CloseRounded';
-import RemoveRounded from '@mui/icons-material/RemoveRounded';
+import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
-
-interface ChatGPTAppBarProps extends AppBarProps {
-  children: ReactNode;
-}
-
-function ChatGPTAppBar({ children, ...appBarProps }: Readonly<ChatGPTAppBarProps>) {
-  return (
-    <AppBar
-      position="static"
-      color="inherit"
-      {...appBarProps}
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        placeContent: 'space-between',
-        alignItems: 'center',
-        pl: 2,
-        pr: 1,
-        py: 1,
-        ...appBarProps?.sx
-      }}
-    >
-      {children}
-    </AppBar>
-  );
-}
+import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
+import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
+import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
+import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
   appBarTitle?: string;
@@ -51,10 +19,10 @@ export interface ChatGPTPopoverProps extends PopoverProps {
 }
 
 function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
+  const theme = useTheme();
   const {
     open,
     onClose,
-    appBarProps,
     chatGPTProps,
     isMinimized = false,
     onMinimize,
@@ -65,6 +33,8 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     ...popoverProps
   } = props;
 
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
+
   const handleMinimize = useCallback(() => {
     onMinimize?.();
   }, [onMinimize]);
@@ -72,7 +42,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !isMinimized) {
-        handleMinimize();
+        setOpenAlertDialog(true);
       }
     };
 
@@ -88,10 +58,10 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   return (
     <>
       <Popover
-        open={open}
+        open={open && !isMinimized}
         onClose={onClose}
         disableEscapeKeyDown={true}
-        keepMounted={false}
+        keepMounted={isMinimized}
         anchorReference="none"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         anchorPosition={{ top: 100, left: 100 }}
@@ -100,42 +70,70 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
           sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
           onClick: (event) => {
             event.stopPropagation();
-            handleMinimize();
+            setOpenAlertDialog(true);
           }
         }}
         {...popoverProps}
         sx={{
-          visibility: isMinimized ? 'hidden' : 'visible',
-          zIndex: 1400,
+          zIndex: theme.zIndex.modal + 1,
           [`> .${paperClasses.root}`]: {
             width,
             height,
             display: 'flex',
             flexDirection: 'column',
-            position: 'absolute',
             bottom: 10,
             right: 10
           },
           ...popoverProps?.sx
         }}
       >
-        <ChatGPTAppBar {...appBarProps}>
-          <Typography variant="h6" color="inherit" component="div">{appBarTitle}</Typography>
-          <div>
-            <IconButton color="inherit" aria-label="minimize" onClick={handleMinimize}>
-              <RemoveRounded />
-            </IconButton>
-            <IconButton color="inherit" aria-label="close" onClick={(e) => onClose?.(e, 'closeButton' as 'backdropClick')}>
-              <CloseRounded />
-            </IconButton>
-          </div>
-        </ChatGPTAppBar>
+        <DialogHeader
+          title={appBarTitle}
+          onMinimizeButtonClick={handleMinimize}
+          onCloseButtonClick={(e) => onClose(e, null)}
+        />
         <ChatGPT {...chatGPTProps} sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }} />
       </Popover>
-      <MinimizedBar
-        open={isMinimized}
-        onMaximize={onMaximize}
-        title={appBarTitle}
+      <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
+      <AlertDialog
+        sxs={{
+          root: {
+            zIndex: theme.zIndex.modal + 2
+          }
+        }}
+        disableBackdropClick
+        disableEscapeKeyDown
+        open={openAlertDialog}
+        title="Confirm closing this chat?"
+        body="The current conversation will be lost."
+        buttons={
+          <>
+            <PrimaryButton
+              onClick={(e) => {
+                setOpenAlertDialog(false);
+                onClose(e, null);
+              }}
+              autoFocus
+              fullWidth
+              size="large"
+            >
+              Close
+            </PrimaryButton>
+            <SecondaryButton
+              onClick={() => {
+                setOpenAlertDialog(false);
+                handleMinimize();
+              }}
+              fullWidth
+              size="large"
+            >
+              Minimize
+            </SecondaryButton>
+            <SecondaryButton onClick={() => setOpenAlertDialog(false)} fullWidth size="large">
+              Cancel
+            </SecondaryButton>
+          </>
+        }
       />
     </>
   );

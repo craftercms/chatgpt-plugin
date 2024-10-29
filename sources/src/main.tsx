@@ -16,6 +16,8 @@ import ChatGPTPopover from './ChatGPTPopover';
 import ChatGPTPromptPopover from './ChatGPTPromptPopover';
 import GlobalStyles from '@craftercms/studio-ui/components/GlobalStyles';
 import CrafterThemeProvider from '@craftercms/studio-ui/components/CrafterThemeProvider';
+import I18nProvider from '@craftercms/studio-ui/components/I18nProvider';
+
 function AppWrap() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const theme = useMemo(() => {
@@ -33,56 +35,60 @@ function AppWrap() {
   const [isMinimized, setIsMinimized] = useState(false);
   return (
     <CrafterThemeProvider themeOptions={theme}>
-      <Box sx={{ p: 5 }}>
-        <TextField
-          fullWidth
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          sx={{ mb: 3 }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Tooltip title="Send message">
-                  <IconButton onClick={(e) => setAnchorEl(e.target)}>
-                    <OpenAILogo />
-                  </IconButton>
-                </Tooltip>
-              </InputAdornment>
-            )
-          }}
-        />
-        <ChatGPTPromptPopover
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          context={value}
-          onClose={() => setAnchorEl(null)}
-          print={(content) => setValue(content)}
-        />
-        <Tiny />
-        <GlobalStyles cssBaseline={true} />
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>Open ChatGPT Prompt Popover:</Typography>
-          <IconButton
-            onClick={(e) => {
-              setChatGPTPromptPopoverAnchorEl(e.target);
-              setIsMinimized(false);
+      <I18nProvider>
+        <Box sx={{ p: 5 }}>
+          <TextField
+            fullWidth
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            sx={{ mb: 3 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip title="Send message">
+                    <IconButton onClick={(e) => setAnchorEl(e.target)}>
+                      <OpenAILogo />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              )
             }}
-          >
-            <OpenAILogo />
-          </IconButton>
+          />
+          <ChatGPTPromptPopover
+            open={Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            context={value}
+            onClose={() => setAnchorEl(null)}
+            print={(content) => setValue(content)}
+          />
+          <Tiny />
+          <GlobalStyles cssBaseline={true} />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>
+              Open ChatGPT Prompt Popover:
+            </Typography>
+            <IconButton
+              onClick={(e) => {
+                setChatGPTPromptPopoverAnchorEl(e.target);
+                setIsMinimized(false);
+              }}
+            >
+              <OpenAILogo />
+            </IconButton>
+          </Box>
+          <ChatGPTPopover
+            open={Boolean(chatGPTPromptPopoverAnchorEl)}
+            anchorEl={chatGPTPromptPopoverAnchorEl}
+            onClose={() => setChatGPTPromptPopoverAnchorEl(null)}
+            chatGPTProps={{
+              userName: 'John Doe'
+            }}
+            isMinimized={isMinimized}
+            onMinimize={() => setIsMinimized((prev) => !prev)}
+            onMaximize={() => setIsMinimized((prev) => !prev)}
+          />
         </Box>
-        <ChatGPTPopover
-          open={Boolean(chatGPTPromptPopoverAnchorEl)}
-          anchorEl={chatGPTPromptPopoverAnchorEl}
-          onClose={() => setChatGPTPromptPopoverAnchorEl(null)}
-          chatGPTProps={{
-            userName: 'John Doe'
-          }}
-          isMinimized={isMinimized}
-          onMinimize={() => setIsMinimized((prev) => !prev)}
-          onMaximize={() => setIsMinimized((prev) => !prev)}
-        />
-      </Box>
+      </I18nProvider>
     </CrafterThemeProvider>
   );
 }

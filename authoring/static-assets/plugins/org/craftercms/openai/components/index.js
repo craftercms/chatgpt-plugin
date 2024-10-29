@@ -1,13 +1,15 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, AppBar } = craftercms.libs.MaterialUI;
-const CloseRounded = craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded');
-const RemoveRounded = craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/RemoveRounded');
+const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
 const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
 const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
+const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
+const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
+const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
+const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
@@ -3512,27 +3514,17 @@ function ChatGPT(props) {
                     } }) })] }));
 }
 
-function ChatGPTAppBar({ children, ...appBarProps }) {
-    return (jsx(AppBar, { position: "static", color: "inherit", ...appBarProps, sx: {
-            display: 'flex',
-            flexDirection: 'row',
-            placeContent: 'space-between',
-            alignItems: 'center',
-            pl: 2,
-            pr: 1,
-            py: 1,
-            ...appBarProps?.sx
-        }, children: children }));
-}
 function ChatGPTPopover(props) {
-    const { open, onClose, appBarProps, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const theme = useTheme();
+    const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const handleMinimize = useCallback(() => {
         onMinimize?.();
     }, [onMinimize]);
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Escape' && !isMinimized) {
-                handleMinimize();
+                setOpenAlertDialog(true);
             }
         };
         if (open) {
@@ -3542,27 +3534,35 @@ function ChatGPTPopover(props) {
             document.removeEventListener('keydown', handleKeyDown);
         };
     }, [open, isMinimized, handleMinimize]);
-    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open, onClose: onClose, disableEscapeKeyDown: true, keepMounted: false, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: onClose, disableEscapeKeyDown: true, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
                     onClick: (event) => {
                         event.stopPropagation();
-                        handleMinimize();
+                        setOpenAlertDialog(true);
                     }
                 }, ...popoverProps, sx: {
-                    visibility: isMinimized ? 'hidden' : 'visible',
-                    zIndex: 1400,
+                    zIndex: theme.zIndex.modal + 1,
                     [`> .${paperClasses.root}`]: {
                         width,
                         height,
                         display: 'flex',
                         flexDirection: 'column',
-                        position: 'absolute',
                         bottom: 10,
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsxs(ChatGPTAppBar, { ...appBarProps, children: [jsx(Typography, { variant: "h6", color: "inherit", component: "div", children: appBarTitle }), jsxs("div", { children: [jsx(IconButton, { color: "inherit", "aria-label": "minimize", onClick: handleMinimize, children: jsx(RemoveRounded, {}) }), jsx(IconButton, { color: "inherit", "aria-label": "close", onClick: (e) => onClose?.(e, 'closeButton'), children: jsx(CloseRounded, {}) })] })] }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle })] }));
+                }, children: [jsx(DialogHeader, { title: appBarTitle, onMinimizeButtonClick: handleMinimize, onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                    root: {
+                        zIndex: theme.zIndex.modal + 2
+                    }
+                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Confirm closing this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton, { onClick: (e) => {
+                                setOpenAlertDialog(false);
+                                onClose(e, null);
+                            }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton, { onClick: () => {
+                                setOpenAlertDialog(false);
+                                handleMinimize();
+                            }, fullWidth: true, size: "large", children: "Minimize" }), jsx(SecondaryButton, { onClick: () => setOpenAlertDialog(false), fullWidth: true, size: "large", children: "Cancel" })] }) })] }));
 }
 
 /*
