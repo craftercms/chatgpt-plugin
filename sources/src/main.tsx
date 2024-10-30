@@ -84,8 +84,8 @@ function AppWrap() {
               userName: 'John Doe'
             }}
             isMinimized={isMinimized}
-            onMinimize={() => setIsMinimized((prev) => !prev)}
-            onMaximize={() => setIsMinimized((prev) => !prev)}
+            onMinimize={() => setIsMinimized(true)}
+            onMaximize={() => setIsMinimized(false)}
           />
         </Box>
       </I18nProvider>

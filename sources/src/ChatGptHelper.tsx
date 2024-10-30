@@ -84,8 +84,8 @@ export function ChatGptHelper(props: ChatGptHelperProps) {
         open={open}
         onClose={handleClose}
         isMinimized={isMinimized}
-        onMinimize={() => setIsMinimized((prev) => !prev)}
-        onMaximize={() => setIsMinimized((prev) => !prev)}
+        onMinimize={() => setIsMinimized(true)}
+        onMaximize={() => setIsMinimized(false)}
       />
     </>
   );

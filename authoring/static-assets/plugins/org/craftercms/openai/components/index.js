@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
 const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
-const { useState, useRef, useEffect } = craftercms.libs.React;
+const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
@@ -10,8 +10,8 @@ const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasO
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
 const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
-const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
+const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
 const { merge } = craftercms.libs.rxjs;
 
@@ -3516,11 +3516,18 @@ function ChatGPT(props) {
 
 function ChatGPTPopover(props) {
     const theme = useTheme();
+    const dialogsState = useSelector((state) => state.dialogs);
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const handleMinimize = () => {
+    const handleMinimize = useCallback(() => {
         onMinimize?.();
-    };
+    }, [onMinimize]);
+    // In case the Edit form is opened, make sure the chat is minimized
+    useEffect(() => {
+        if (open && dialogsState.edit.open && !dialogsState.edit.isMinimized) {
+            handleMinimize();
+        }
+    }, [dialogsState, handleMinimize, open]);
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
@@ -3623,7 +3630,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized((prev) => !prev), onMaximize: () => setIsMinimized((prev) => !prev) })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
 }
 
 const plugin = {
