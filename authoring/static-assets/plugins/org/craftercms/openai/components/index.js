@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
 const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
-const { useState, useRef, useEffect } = craftercms.libs.React;
+const { forwardRef, useState, useRef, useEffect, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
@@ -3300,8 +3300,8 @@ function createSrcDoc(html, theme) {
   <style>
   * { box-sizing: border-box }
   html, body {
-    margin: 0; 
-    padding: 0; 
+    margin: 0;
+    padding: 0;
     background-color: transparent!important;
     font-family: ${theme.typography.fontFamily};
     font-size: ${theme.typography.fontSize}px;
@@ -3343,7 +3343,7 @@ function nameToInitials(name) {
     const initials = parts.map((part) => part.charAt(0).toUpperCase());
     return initials.join('');
 }
-function ChatGPT(props) {
+const ChatGPT = forwardRef((props, ref) => {
     // region const { ... } = props;
     const { sxs, model = 'gpt-4', userName, scrollToReply = true, initialMessages, aiAvatarColour = '#19c37d', extraActions, emptyStateOptions = [
         {
@@ -3400,6 +3400,7 @@ function ChatGPT(props) {
         //   { role: 'user', content: 'What\'s the best time to drink coffee?' },
         //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
         ]);
+    const hasConversationRef = useRef(false);
     const messagesRef = useRef(messages);
     const streamRef = useRef();
     const mountedOnceRef = useRef(false); // Pretty much for React's Strict dev mode double mounting.
@@ -3409,6 +3410,10 @@ function ChatGPT(props) {
     const userColour = stringToColor(userName);
     const maxMessageIndex = messages.length - 1;
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+    const handleInputChange = (value) => {
+        setPrompt(value);
+        hasConversationRef.current = value.length > 0;
+    };
     const submit = async () => {
         abortStream();
         setError(null);
@@ -3450,6 +3455,7 @@ function ChatGPT(props) {
             return;
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
+        hasConversationRef.current = true;
         await submit();
     };
     const api = {
@@ -3480,6 +3486,9 @@ function ChatGPT(props) {
             return () => abortStream();
         }
     }, []);
+    useImperativeHandle(ref, () => ({
+        hasConversation: () => hasConversationRef.current
+    }));
     return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [jsx(OpenAI$2, {}), jsx(Typography, { variant: "h6", children: "Generative AI Assistant" })] }), jsx(Box, { sx: {
                                     mx: 'auto',
                                     display: 'grid',
@@ -3504,7 +3513,7 @@ function ChatGPT(props) {
                     bgcolor: 'background.paper',
                     boxShadow: 1,
                     ...sxs?.form
-                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Send a message", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
+                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Send a message", value: prompt, onChange: (e) => handleInputChange(e.target.value), onKeyDown: (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit(e);
@@ -3512,12 +3521,13 @@ function ChatGPT(props) {
                     }, multiline: true, maxRows: 4, InputProps: {
                         endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })) }))
                     } }) })] }));
-}
+});
 
 function ChatGPTPopover(props) {
     const theme = useTheme();
     const dialogsState = useSelector((state) => state.dialogs);
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
+    const chatGptRef = useRef(null);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     // In case the Edit form is opened, make sure the chat is minimized
     useEffect(() => {
@@ -3525,13 +3535,16 @@ function ChatGPTPopover(props) {
             onMinimize?.();
         }
     }, [dialogsState, onMinimize, open]);
-    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
-                    invisible: false,
-                    sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-                    onClick: (event) => {
-                        event.stopPropagation();
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e) => {
+                    if (chatGptRef.current?.hasConversation()) {
                         setOpenAlertDialog(true);
                     }
+                    else {
+                        onClose(e, null);
+                    }
+                }, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
+                    invisible: false,
+                    sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
                 }, ...popoverProps, sx: {
                     zIndex: theme.zIndex.modal + 1,
                     [`> .${paperClasses.root}`]: {
@@ -3543,7 +3556,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }

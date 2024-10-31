@@ -1,6 +1,6 @@
 import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
 import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
@@ -36,6 +36,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     ...popoverProps
   } = props;
 
+  const chatGptRef = useRef<{ hasConversation: () => boolean }>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
   // In case the Edit form is opened, make sure the chat is minimized
@@ -49,18 +50,20 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     <>
       <Popover
         open={open && !isMinimized}
-        onClose={() => setOpenAlertDialog(true)}
+        onClose={(e) => {
+          if (chatGptRef.current?.hasConversation()) {
+            setOpenAlertDialog(true);
+          } else {
+            onClose(e, null);
+          }
+        }}
         keepMounted={isMinimized}
         anchorReference="none"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         anchorPosition={{ top: 100, left: 100 }}
         BackdropProps={{
           invisible: false,
-          sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-          onClick: (event) => {
-            event.stopPropagation();
-            setOpenAlertDialog(true);
-          }
+          sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
         }}
         {...popoverProps}
         sx={{
@@ -82,7 +85,11 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
           onMinimizeButtonClick={() => onMinimize?.()}
           onCloseButtonClick={(e) => onClose(e, null)}
         />
-        <ChatGPT {...chatGPTProps} sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }} />
+        <ChatGPT
+          {...chatGPTProps}
+          ref={chatGptRef}
+          sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }}
+        />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
       <AlertDialog

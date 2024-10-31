@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import {
   Alert,
   Avatar,
@@ -86,8 +86,8 @@ function createSrcDoc(html: string, theme: Theme) {
   <style>
   * { box-sizing: border-box }
   html, body {
-    margin: 0; 
-    padding: 0; 
+    margin: 0;
+    padding: 0;
     background-color: transparent!important;
     font-family: ${theme.typography.fontFamily};
     font-size: ${theme.typography.fontSize}px;
@@ -168,7 +168,7 @@ export interface ChatGPTProps {
   aiAvatarColour?: string;
 }
 
-function ChatGPT(props: ChatGPTProps) {
+const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
   // region const { ... } = props;
   const {
     sxs,
@@ -239,6 +239,7 @@ function ChatGPT(props: ChatGPTProps) {
         //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
       ]
   );
+  const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
   const mountedOnceRef = useRef<boolean>(false); // Pretty much for React's Strict dev mode double mounting.
@@ -248,6 +249,11 @@ function ChatGPT(props: ChatGPTProps) {
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+
+  const handleInputChange = (value: string) => {
+    setPrompt(value);
+    hasConversationRef.current = value.length > 0;
+  };
 
   const submit = async () => {
     abortStream();
@@ -290,6 +296,7 @@ function ChatGPT(props: ChatGPTProps) {
     if (!prompt) return;
     setPrompt('');
     messagesRef.current.push({ role: 'user', content: prompt });
+    hasConversationRef.current = true;
     await submit();
   };
 
@@ -322,6 +329,10 @@ function ChatGPT(props: ChatGPTProps) {
       return () => abortStream();
     }
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    hasConversation: () => hasConversationRef.current
+  }));
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
@@ -449,7 +460,7 @@ function ChatGPT(props: ChatGPTProps) {
           disabled={streaming}
           label="Send a message"
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -487,6 +498,6 @@ function ChatGPT(props: ChatGPTProps) {
       </Box>
     </Box>
   );
-}
+});
 
 export default ChatGPT;
