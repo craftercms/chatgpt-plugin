@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
 const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses } = craftercms.libs.MaterialUI;
-const { useState, useRef, useEffect, useCallback } = craftercms.libs.React;
+const { useState, useRef, useEffect } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
@@ -3519,15 +3519,12 @@ function ChatGPTPopover(props) {
     const dialogsState = useSelector((state) => state.dialogs);
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    const handleMinimize = useCallback(() => {
-        onMinimize?.();
-    }, [onMinimize]);
     // In case the Edit form is opened, make sure the chat is minimized
     useEffect(() => {
         if (open && dialogsState.edit.open && !dialogsState.edit.isMinimized) {
-            handleMinimize();
+            onMinimize?.();
         }
-    }, [dialogsState, handleMinimize, open]);
+    }, [dialogsState, onMinimize, open]);
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: () => setOpenAlertDialog(true), keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
@@ -3546,7 +3543,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: handleMinimize, onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null) }), jsx(ChatGPT, { ...chatGPTProps, sxs: { root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }
@@ -3555,7 +3552,7 @@ function ChatGPTPopover(props) {
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton, { onClick: () => {
                                 setOpenAlertDialog(false);
-                                handleMinimize();
+                                onMinimize?.();
                             }, fullWidth: true, size: "large", children: "Minimize" }), jsx(SecondaryButton, { onClick: () => setOpenAlertDialog(false), fullWidth: true, size: "large", children: "Cancel" })] }) })] }));
 }
 

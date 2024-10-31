@@ -1,6 +1,6 @@
 import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
 import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
@@ -38,16 +38,12 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
 
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
-  const handleMinimize = useCallback(() => {
-    onMinimize?.();
-  }, [onMinimize]);
-
   // In case the Edit form is opened, make sure the chat is minimized
   useEffect(() => {
     if (open && dialogsState.edit.open && !dialogsState.edit.isMinimized) {
-      handleMinimize();
+      onMinimize?.();
     }
-  }, [dialogsState, handleMinimize, open]);
+  }, [dialogsState, onMinimize, open]);
 
   return (
     <>
@@ -83,7 +79,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         <DialogHeader
           title={appBarTitle}
           sxs={{ root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }}
-          onMinimizeButtonClick={handleMinimize}
+          onMinimizeButtonClick={() => onMinimize?.()}
           onCloseButtonClick={(e) => onClose(e, null)}
         />
         <ChatGPT {...chatGPTProps} sxs={{ root: { height: 'calc(100% - 56px)' }, ...chatGPTProps?.sxs }} />
@@ -116,7 +112,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             <SecondaryButton
               onClick={() => {
                 setOpenAlertDialog(false);
-                handleMinimize();
+                onMinimize?.();
               }}
               fullWidth
               size="large"
