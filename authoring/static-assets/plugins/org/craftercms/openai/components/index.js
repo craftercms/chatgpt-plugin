@@ -3412,7 +3412,6 @@ const ChatGPT = forwardRef((props, ref) => {
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
     const handleInputChange = (value) => {
         setPrompt(value);
-        hasConversationRef.current = value.length > 0;
     };
     const submit = async () => {
         abortStream();
@@ -3455,7 +3454,6 @@ const ChatGPT = forwardRef((props, ref) => {
             return;
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
-        hasConversationRef.current = true;
         await submit();
     };
     const api = {
@@ -3486,6 +3484,9 @@ const ChatGPT = forwardRef((props, ref) => {
             return () => abortStream();
         }
     }, []);
+    useEffect(() => {
+        hasConversationRef.current = messages.length > (initialMessages?.length ?? 0) || (prompt.length > 0);
+    }, [messages, initialMessages, prompt]);
     useImperativeHandle(ref, () => ({
         hasConversation: () => hasConversationRef.current
     }));
@@ -3535,12 +3536,12 @@ function ChatGPTPopover(props) {
             onMinimize?.();
         }
     }, [dialogsState, onMinimize, open]);
-    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e) => {
+    return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e, reason) => {
                     if (chatGptRef.current?.hasConversation()) {
                         setOpenAlertDialog(true);
                     }
                     else {
-                        onClose(e, null);
+                        onClose(e, reason);
                     }
                 }, keepMounted: isMinimized, anchorReference: "none", anchorOrigin: { vertical: 'bottom', horizontal: 'right' }, anchorPosition: { top: 100, left: 100 }, BackdropProps: {
                     invisible: false,

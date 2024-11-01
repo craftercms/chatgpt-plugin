@@ -1,5 +1,5 @@
 import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
-import ChatGPT, { ChatGPTProps } from './ChatGPT.tsx';
+import ChatGPT, { ChatGPTProps, ChatGPTRef } from './ChatGPT.tsx';
 import React, { useEffect, useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
@@ -36,7 +36,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     ...popoverProps
   } = props;
 
-  const chatGptRef = useRef<{ hasConversation: () => boolean }>(null);
+  const chatGptRef = useRef<ChatGPTRef>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
 
   // In case the Edit form is opened, make sure the chat is minimized
@@ -50,11 +50,11 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     <>
       <Popover
         open={open && !isMinimized}
-        onClose={(e) => {
+        onClose={(e, reason) => {
           if (chatGptRef.current?.hasConversation()) {
             setOpenAlertDialog(true);
           } else {
-            onClose(e, null);
+            onClose(e, reason);
           }
         }}
         keepMounted={isMinimized}

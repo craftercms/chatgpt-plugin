@@ -168,7 +168,11 @@ export interface ChatGPTProps {
   aiAvatarColour?: string;
 }
 
-const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
+export interface ChatGPTRef {
+  hasConversation: () => boolean;
+}
+
+const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   // region const { ... } = props;
   const {
     sxs,
@@ -250,11 +254,6 @@ const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
 
-  const handleInputChange = (value: string) => {
-    setPrompt(value);
-    hasConversationRef.current = value.length > 0;
-  };
-
   const submit = async () => {
     abortStream();
     setError(null);
@@ -296,7 +295,6 @@ const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
     if (!prompt) return;
     setPrompt('');
     messagesRef.current.push({ role: 'user', content: prompt });
-    hasConversationRef.current = true;
     await submit();
   };
 
@@ -329,6 +327,10 @@ const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
       return () => abortStream();
     }
   }, []);
+
+  useEffect(() => {
+    hasConversationRef.current = messages.length > (initialMessages?.length ?? 0) || prompt.length > 0;
+  }, [messages, initialMessages, prompt]);
 
   useImperativeHandle(ref, () => ({
     hasConversation: () => hasConversationRef.current
@@ -460,7 +462,7 @@ const ChatGPT = forwardRef((props: ChatGPTProps, ref) => {
           disabled={streaming}
           label="Send a message"
           value={prompt}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
