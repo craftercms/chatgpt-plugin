@@ -1,13 +1,11 @@
 import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps, ChatGPTRef } from './ChatGPT.tsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
 import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
-import { useSelector } from 'react-redux';
-import { GlobalState } from '@craftercms/studio-ui';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
   appBarTitle?: string;
@@ -22,7 +20,6 @@ export interface ChatGPTPopoverProps extends PopoverProps {
 
 function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   const theme = useTheme();
-  const dialogsState = useSelector((state: GlobalState) => state.dialogs);
   const {
     open,
     onClose,
@@ -38,13 +35,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
 
   const chatGptRef = useRef<ChatGPTRef>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
-
-  // In case the Edit form is opened, make sure the chat is minimized
-  useEffect(() => {
-    if (open && dialogsState.edit.open && !dialogsState.edit.isMinimized) {
-      onMinimize?.();
-    }
-  }, [dialogsState, onMinimize, open]);
 
   return (
     <>
