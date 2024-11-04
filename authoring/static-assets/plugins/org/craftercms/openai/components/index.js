@@ -10,8 +10,8 @@ const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasO
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
 const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
-const { useSelector } = craftercms.libs.ReactRedux;
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
+const { useSelector } = craftercms.libs.ReactRedux;
 const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
 const { merge } = craftercms.libs.rxjs;
 
@@ -3410,9 +3410,6 @@ const ChatGPT = forwardRef((props, ref) => {
     const userColour = stringToColor(userName);
     const maxMessageIndex = messages.length - 1;
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
-    const handleInputChange = (value) => {
-        setPrompt(value);
-    };
     const submit = async () => {
         abortStream();
         setError(null);
@@ -3485,7 +3482,7 @@ const ChatGPT = forwardRef((props, ref) => {
         }
     }, []);
     useEffect(() => {
-        hasConversationRef.current = messages.length > (initialMessages?.length ?? 0) || (prompt.length > 0);
+        hasConversationRef.current = messages.length > (initialMessages?.length ?? 0) || prompt.length > 0;
     }, [messages, initialMessages, prompt]);
     useImperativeHandle(ref, () => ({
         hasConversation: () => hasConversationRef.current
@@ -3514,7 +3511,7 @@ const ChatGPT = forwardRef((props, ref) => {
                     bgcolor: 'background.paper',
                     boxShadow: 1,
                     ...sxs?.form
-                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Send a message", value: prompt, onChange: (e) => handleInputChange(e.target.value), onKeyDown: (e) => {
+                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Send a message", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit(e);
@@ -3526,16 +3523,9 @@ const ChatGPT = forwardRef((props, ref) => {
 
 function ChatGPTPopover(props) {
     const theme = useTheme();
-    const dialogsState = useSelector((state) => state.dialogs);
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 450, height = 500, ...popoverProps } = props;
     const chatGptRef = useRef(null);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
-    // In case the Edit form is opened, make sure the chat is minimized
-    useEffect(() => {
-        if (open && dialogsState.edit.open && !dialogsState.edit.isMinimized) {
-            onMinimize?.();
-        }
-    }, [dialogsState, onMinimize, open]);
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e, reason) => {
                     if (chatGptRef.current?.hasConversation()) {
                         setOpenAlertDialog(true);
