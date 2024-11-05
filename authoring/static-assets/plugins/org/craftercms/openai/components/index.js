@@ -3259,14 +3259,14 @@ async function listChatModels() {
     try {
         const response = await getOpenAiInstance().models.list();
         return response.data
-            .filter(model => !model.id.includes('realtime') &&
+            .filter((model) => !model.id.includes('realtime') &&
             !model.id.includes('audio') &&
             !model.id.includes('turbo-instruct') &&
             (model.id.includes('gpt-3.5') || model.id.includes('gpt-4')))
             .sort((a, b) => a.id.localeCompare(b.id));
     }
     catch (error) {
-        console.error("Error fetching models:", error);
+        console.error('Error fetching models:', error);
         return [];
     }
 }
@@ -3552,10 +3552,10 @@ const ChatGPT = forwardRef((props, ref) => {
                     } }) })] }));
 });
 
-function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
+function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, theme }) {
     const [models, setModels] = useState([]);
     useEffect(() => {
-        listChatModels().then(modelList => {
+        listChatModels().then((modelList) => {
             setModels(modelList);
         });
     }, []);
@@ -3565,10 +3565,10 @@ function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuA
                     borderRadius: 1,
                     minWidth: 0
                 }, endIcon: enableCustomModel ? jsx(ExpandMoreRounded, {}) : null, children: selectedModel }), enableCustomModel && (jsx(Menu, { id: "model-select-menu", anchorEl: modelMenuAnchorEl, open: Boolean(modelMenuAnchorEl), onClose: handleClose, MenuListProps: {
-                    'aria-labelledby': 'model-select-button',
+                    'aria-labelledby': 'model-select-button'
                 }, sx: {
-                    zIndex: 1400
-                }, children: models && models.length > 0 ? (models.map(model => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
+                    zIndex: theme.zIndex.modal + 1
+                }, children: models && models.length > 0 ? (models.map((model) => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
 }
 function ChatGPTPopover(props) {
     const theme = useTheme();
@@ -3608,7 +3608,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }) }), jsx(ChatGPT, { ...chatGPTProps, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, theme: theme }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }

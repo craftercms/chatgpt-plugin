@@ -9,6 +9,7 @@ import {
   Popover,
   PopoverProps,
   Radio,
+  Theme,
   useTheme
 } from '@mui/material';
 import ChatGPT, { ChatGPTProps, ChatGPTRef } from './ChatGPT.tsx';
@@ -29,6 +30,7 @@ interface ChatGPTModelSelectProps {
   selectedModel: string;
   handleModelSelect: (modelId: string) => void;
   handleClose: () => void;
+  theme?: Theme;
 }
 
 function ChatGPTModelSelect({
@@ -37,11 +39,12 @@ function ChatGPTModelSelect({
   modelMenuAnchorEl,
   selectedModel,
   handleModelSelect,
-  handleClose
+  handleClose,
+  theme
 }: Readonly<ChatGPTModelSelectProps>) {
   const [models, setModels] = useState<Array<{ id: string }>>([]);
   useEffect(() => {
-    listChatModels().then(modelList => {
+    listChatModels().then((modelList) => {
       setModels(modelList);
     });
   }, []);
@@ -72,19 +75,16 @@ function ChatGPTModelSelect({
           open={Boolean(modelMenuAnchorEl)}
           onClose={handleClose}
           MenuListProps={{
-            'aria-labelledby': 'model-select-button',
+            'aria-labelledby': 'model-select-button'
           }}
           sx={{
-            zIndex: 1400
+            zIndex: theme.zIndex.modal + 1
           }}
         >
           {models && models.length > 0 ? (
-            models.map(model => (
+            models.map((model) => (
               <MenuItem key={model.id} onClick={() => handleModelSelect(model.id)}>
-                <FormControlLabel
-                  control={<Radio checked={selectedModel === model.id} />}
-                  label={model.id}
-                />
+                <FormControlLabel control={<Radio checked={selectedModel === model.id} />} label={model.id} />
               </MenuItem>
             ))
           ) : (
@@ -95,7 +95,7 @@ function ChatGPTModelSelect({
         </Menu>
       )}
     </>
-  )
+  );
 }
 
 export interface ChatGPTPopoverProps extends PopoverProps {
@@ -190,13 +190,15 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             selectedModel={selectedModel}
             handleModelSelect={handleModelSelect}
             handleClose={handleClose}
+            theme={theme}
           />
         </DialogHeader>
         <ChatGPT
           {...chatGPTProps}
+          ref={chatGptRef}
           model={selectedModel}
           sxs={{ root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs }}
-          />
+        />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
       <AlertDialog
