@@ -204,7 +204,7 @@ function Internal(
       </Box>
       {response && (
         <Box sx={{ p: 2, pt: 0, maxWidth: 500 }}>
-          <Typography sx={{ pb: 1 }}>{response}</Typography>
+          <Typography sx={{ pb: 1 }} children={response} />
           <Button
             disabled={streaming}
             onClick={() => {
