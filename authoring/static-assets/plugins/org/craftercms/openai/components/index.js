@@ -5,6 +5,7 @@ const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
+const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
 const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
 const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
@@ -3436,6 +3437,7 @@ const ChatGPT = forwardRef((props, ref) => {
     const streamRef = useRef();
     const mountedOnceRef = useRef(false); // Pretty much for React's Strict dev mode double mounting.
     const inputRef = useRef();
+    const recognitionRef = useRef(null);
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const userColour = stringToColor(userName);
@@ -3475,7 +3477,10 @@ const ChatGPT = forwardRef((props, ref) => {
             inputRef.current?.focus();
         }, 10);
     };
-    const abortStream = () => streamRef.current?.controller.abort('Cancelled');
+    const abortStream = () => {
+        stopVoiceInput();
+        streamRef.current?.controller.abort('Cancelled');
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!prompt)
@@ -3518,6 +3523,36 @@ const ChatGPT = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         hasConversation: () => hasConversationRef.current
     }));
+    const startVoiceInput = () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert('Speech recognition not supported in this browser.');
+            return;
+        }
+        const recognition = new window.webkitSpeechRecognition();
+        recognitionRef.current = recognition;
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onstart = () => {
+            setStreaming(true);
+        };
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setPrompt(transcript);
+        };
+        recognition.onend = () => {
+            setStreaming(false);
+        };
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            setStreaming(false);
+        };
+        recognition.start();
+    };
+    const stopVoiceInput = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+        }
+    };
     return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [jsx(OpenAI$2, {}), jsx(Typography, { variant: "h6", children: "Generative AI Assistant" })] }), jsx(Box, { sx: {
                                     mx: 'auto',
                                     display: 'grid',
@@ -3542,13 +3577,13 @@ const ChatGPT = forwardRef((props, ref) => {
                     bgcolor: 'background.paper',
                     boxShadow: 1,
                     ...sxs?.form
-                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Send a message", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
+                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Type or click the mic to talk", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit(e);
                         }
                     }, multiline: true, maxRows: 4, InputProps: {
-                        endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })) }))
+                        endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onTouchStart: startVoiceInput, children: jsx(MicRounded, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
                     } }) })] }));
 });
 

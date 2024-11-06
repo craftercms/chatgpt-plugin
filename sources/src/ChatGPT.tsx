@@ -24,6 +24,7 @@ import { SxProps } from '@mui/system/styleFunctionSx';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
 import ContentPasteRounded from '@mui/icons-material/ContentPasteRounded';
 import StopRounded from '@mui/icons-material/StopRounded';
+import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
 import { createChatCompletion } from './util';
@@ -150,6 +151,10 @@ export interface EmptyStateOption {
   prompt?: string;
 }
 
+export interface SpeechRecognitionWindow extends Window {
+  webkitSpeechRecognition: typeof SpeechRecognition;
+}
+
 export interface ChatGPTProps {
   userName: string;
   model?: ChatCompletionCreateParamsBase['model'];
@@ -247,6 +252,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
   const mountedOnceRef = useRef<boolean>(false); // Pretty much for React's Strict dev mode double mounting.
   const inputRef = useRef<HTMLInputElement>();
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const userColour = stringToColor(userName);
@@ -287,7 +293,10 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     }, 10);
   };
 
-  const abortStream = () => streamRef.current?.controller.abort('Cancelled');
+  const abortStream = () => {
+    stopVoiceInput();
+    streamRef.current?.controller.abort('Cancelled');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -334,6 +343,45 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   useImperativeHandle(ref, () => ({
     hasConversation: () => hasConversationRef.current
   }));
+
+  const startVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser.');
+      return;
+    }
+
+    const recognition = new (window as SpeechRecognitionWindow).webkitSpeechRecognition();
+    recognitionRef.current = recognition;
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setStreaming(true);
+    };
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+      setPrompt(transcript);
+    };
+
+    recognition.onend = () => {
+      setStreaming(false);
+    };
+
+    recognition.onerror = (event: SpeechRecognitionError) => {
+      console.error('Speech recognition error:', event.error);
+      setStreaming(false);
+    };
+
+    recognition.start();
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
@@ -459,7 +507,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           fullWidth
           inputRef={inputRef}
           disabled={streaming}
-          label="Send a message"
+          label="Type or click the mic to talk"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
@@ -480,11 +528,22 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                     </IconButton>
                   </Tooltip>
                 ) : (
-                  <Tooltip title="Send message">
+                  <>
+                    <Tooltip title="Click to talk">
+                      <IconButton
+                        size="small"
+                        onMouseDown={startVoiceInput}
+                        onTouchStart={startVoiceInput}
+                      >
+                        <MicRounded fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Send message">
                     <IconButton type="submit" disabled={streaming} onClick={handleSubmit}>
                       <SendIcon />
                     </IconButton>
                   </Tooltip>
+                  </>
                 )}
               </InputAdornment>
             )
