@@ -9,6 +9,8 @@ import {
   CardHeader,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   Paper,
   styled,
   TextField,
@@ -29,6 +31,7 @@ import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
 import { createChatCompletion } from './util';
 import { defaultModel } from './consts';
+import SelectLanguageDialog from './SelectLanguageDialog';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -234,7 +237,11 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     }
   } = props;
   // endregion
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
+  const [settingMenuAnchorEl, setSettingMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en-US');
   const [streaming, setStreaming] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [error, setError] = useState<Error>();
   const [messages, setMessages] = useState<Array<ChatCompletionMessageParam>>(
@@ -258,6 +265,31 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSettingMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingMenuClose = () => {
+    setSettingMenuAnchorEl(null);
+  };
+
+  const handleLanguageDialogOpen = () => {
+    setLanguageDialogOpen(true);
+    handleSettingMenuClose();
+  };
+
+  const handleLanguageChange = (languageCode: string) => {
+    setSelectedLanguage(languageCode);
+    handleSettingMenuClose();
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = languageCode;
+    }
+  };
+
+  const handleLanguageDialogClose = () => {
+    setLanguageDialogOpen(false);
+  };
 
   const submit = async () => {
     abortStream();
@@ -294,7 +326,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   };
 
   const abortStream = () => {
-    stopVoiceInput();
     streamRef.current?.controller.abort('Cancelled');
   };
 
@@ -350,28 +381,34 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       return;
     }
 
+    let recordingScript = '';
+
     const recognition = new (window as SpeechRecognitionWindow).webkitSpeechRecognition();
     recognitionRef.current = recognition;
 
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
+    recognition.lang = selectedLanguage;
 
     recognition.onstart = () => {
-      setStreaming(true);
+      setRecording(true);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript;
-      setPrompt(transcript);
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        recordingScript += result[0].transcript + ' ';
+      }
     };
 
     recognition.onend = () => {
-      setStreaming(false);
+      setRecording(false);
+      setPrompt(recordingScript);
     };
 
     recognition.onerror = (event: SpeechRecognitionError) => {
       console.error('Speech recognition error:', event.error);
-      setStreaming(false);
+      setRecording(false);
     };
 
     recognition.start();
@@ -507,7 +544,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           fullWidth
           inputRef={inputRef}
           disabled={streaming}
-          label="Type or click the mic to talk"
+          label="Type or click and hold the mic to talk"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
@@ -529,32 +566,47 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                   </Tooltip>
                 ) : (
                   <>
-                    <Tooltip title="Click to talk">
+                    <Tooltip title="Click and hold to talk">
                       <IconButton
                         size="small"
                         onMouseDown={startVoiceInput}
+                        onMouseUp={stopVoiceInput}
                         onTouchStart={startVoiceInput}
+                        onTouchEnd={stopVoiceInput}
                       >
-                        <MicRounded fontSize="small" />
+                        <MicRounded fontSize="small" style={{ color: recording ? 'red' : 'inherit' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Send message">
-                    <IconButton type="submit" disabled={streaming} onClick={handleSubmit}>
-                      <SendIcon />
-                    </IconButton>
-                  </Tooltip>
+                      <IconButton type="submit" disabled={streaming} onClick={handleSubmit}>
+                        <SendIcon />
+                      </IconButton>
+                    </Tooltip>
                   </>
                 )}
               </InputAdornment>
             )
           }}
         />
-        {/*
-        TODO: Add menu for settings, etc.
-        <IconButton sx={{ ml: 1 }}>
+        <IconButton sx={{ ml: 1 }} onClick={handleMenuClick}>
           <MoreVertRounded />
         </IconButton>
-        */}
+        <Menu
+          anchorEl={settingMenuAnchorEl}
+          open={Boolean(settingMenuAnchorEl)}
+          onClose={handleSettingMenuClose}
+          sx={{
+            zIndex: theme.zIndex.modal + 1
+          }}
+        >
+          <MenuItem onClick={handleLanguageDialogOpen}>Set Speech to Text Language</MenuItem>
+        </Menu>
+        <SelectLanguageDialog
+          open={languageDialogOpen}
+          language={selectedLanguage}
+          onClose={handleLanguageDialogClose}
+          onLanguageChange={handleLanguageChange}
+        />
       </Box>
     </Box>
   );

@@ -1,11 +1,13 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Button, Alert, TextField, InputAdornment, Popover, paperClasses, Menu, MenuItem, FormControlLabel, Radio, CircularProgress } = craftercms.libs.MaterialUI;
+const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Alert, TextField, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio, CircularProgress } = craftercms.libs.MaterialUI;
 const { forwardRef, useState, useRef, useEffect, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
+const MoreVertRounded = craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
 const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
+const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
 const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
 const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
@@ -3281,6 +3283,83 @@ const chatGptResultMessageId = 'craftercms.openai.ChatGPTResult';
 const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
 // default ChatGPT model
 const defaultModel = 'gpt-4o';
+// lanaguge codes for speech to text
+const languageCodes = [
+    { code: 'en-US', label: 'English (United States)' },
+    { code: 'en-GB', label: 'English (United Kingdom)' },
+    { code: 'en-CA', label: 'English (Canada)' },
+    { code: 'en-AU', label: 'English (Australia)' },
+    { code: 'fr-FR', label: 'French (France)' },
+    { code: 'fr-CA', label: 'French (Canada)' },
+    { code: 'fr-BE', label: 'French (Belgium)' },
+    { code: 'fr-CH', label: 'French (Switzerland)' },
+    { code: 'es-ES', label: 'Spanish (Spain)' },
+    { code: 'es-MX', label: 'Spanish (Mexico)' },
+    { code: 'es-AR', label: 'Spanish (Argentina)' },
+    { code: 'es-CO', label: 'Spanish (Colombia)' },
+    { code: 'de-DE', label: 'German (Germany)' },
+    { code: 'de-AT', label: 'German (Austria)' },
+    { code: 'de-CH', label: 'German (Switzerland)' },
+    { code: 'pt-PT', label: 'Portuguese (Portugal)' },
+    { code: 'pt-BR', label: 'Portuguese (Brazil)' },
+    { code: 'zh-CN', label: 'Chinese (Simplified, China)' },
+    { code: 'zh-TW', label: 'Chinese (Traditional, Taiwan)' },
+    { code: 'zh-HK', label: 'Chinese (Traditional, Hong Kong)' },
+    { code: 'ja-JP', label: 'Japanese (Japan)' },
+    { code: 'ko-KR', label: 'Korean (South Korea)' },
+    { code: 'ru-RU', label: 'Russian (Russia)' },
+    { code: 'ar-SA', label: 'Arabic (Saudi Arabia)' },
+    { code: 'ar-AE', label: 'Arabic (United Arab Emirates)' },
+    { code: 'it-IT', label: 'Italian (Italy)' },
+    { code: 'it-CH', label: 'Italian (Switzerland)' },
+    { code: 'nl-NL', label: 'Dutch (Netherlands)' },
+    { code: 'nl-BE', label: 'Dutch (Belgium)' },
+    { code: 'sv-SE', label: 'Swedish (Sweden)' },
+    { code: 'sv-FI', label: 'Swedish (Finland)' },
+    { code: 'no-NO', label: 'Norwegian (Norway)' },
+    { code: 'da-DK', label: 'Danish (Denmark)' },
+    { code: 'fi-FI', label: 'Finnish (Finland)' },
+    { code: 'pl-PL', label: 'Polish (Poland)' },
+    { code: 'cs-CZ', label: 'Czech (Czech Republic)' },
+    { code: 'sk-SK', label: 'Slovak (Slovakia)' },
+    { code: 'hu-HU', label: 'Hungarian (Hungary)' },
+    { code: 'el-GR', label: 'Greek (Greece)' },
+    { code: 'he-IL', label: 'Hebrew (Israel)' },
+    { code: 'tr-TR', label: 'Turkish (Turkey)' },
+    { code: 'th-TH', label: 'Thai (Thailand)' },
+    { code: 'vi-VN', label: 'Vietnamese (Vietnam)' },
+    { code: 'id-ID', label: 'Indonesian (Indonesia)' },
+    { code: 'ms-MY', label: 'Malay (Malaysia)' },
+    { code: 'hi-IN', label: 'Hindi (India)' },
+    { code: 'ta-IN', label: 'Tamil (India)' },
+    { code: 'te-IN', label: 'Telugu (India)' },
+    { code: 'ur-PK', label: 'Urdu (Pakistan)' },
+    { code: 'fa-IR', label: 'Persian (Iran)' },
+    { code: 'uk-UA', label: 'Ukrainian (Ukraine)' },
+    { code: 'ro-RO', label: 'Romanian (Romania)' },
+    { code: 'bg-BG', label: 'Bulgarian (Bulgaria)' },
+    { code: 'hr-HR', label: 'Croatian (Croatia)' },
+    { code: 'sr-RS', label: 'Serbian (Serbia)' },
+    { code: 'sl-SI', label: 'Slovenian (Slovenia)' },
+    { code: 'lv-LV', label: 'Latvian (Latvia)' },
+    { code: 'lt-LT', label: 'Lithuanian (Lithuania)' },
+    { code: 'et-EE', label: 'Estonian (Estonia)' }
+];
+
+function SelectLanguageDialog(props) {
+    const { open, language, onClose, onLanguageChange } = props;
+    const theme = useTheme();
+    return (jsxs(Dialog, { open: open, onClose: onClose, sx: {
+            zIndex: theme.zIndex.modal + 1
+        }, children: [jsx(DialogTitle, { children: "Speech to Text Language" }), jsx(DialogContent, { children: languageCodes.map((lc) => (jsxs(MenuItem, { onClick: () => {
+                        onLanguageChange(lc.code);
+                        onClose();
+                    }, style: {
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }, children: [lc.label, language === lc.code && (jsx(ListItemIcon, { children: jsx(CheckRounded, { fontSize: "small" }) }))] }, lc.code))) }), jsx(DialogActions, { children: jsx(Button, { onClick: onClose, color: "inherit", children: "Cancel" }) })] }));
+}
 
 const StyledBox = styled(Box)(
 // language=CSS
@@ -3421,7 +3500,11 @@ const ChatGPT = forwardRef((props, ref) => {
         }
     } } = props;
     // endregion
+    const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
+    const [settingMenuAnchorEl, setSettingMenuAnchorEl] = useState(null);
+    const [selectedLanguage, setSelectedLanguage] = useState('en-US');
     const [streaming, setStreaming] = useState(false);
+    const [recording, setRecording] = useState(false);
     const [prompt, setPrompt] = useState('');
     const [error, setError] = useState();
     const [messages, setMessages] = useState(initialMessages ??
@@ -3443,6 +3526,26 @@ const ChatGPT = forwardRef((props, ref) => {
     const userColour = stringToColor(userName);
     const maxMessageIndex = messages.length - 1;
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+    const handleMenuClick = (event) => {
+        setSettingMenuAnchorEl(event.currentTarget);
+    };
+    const handleSettingMenuClose = () => {
+        setSettingMenuAnchorEl(null);
+    };
+    const handleLanguageDialogOpen = () => {
+        setLanguageDialogOpen(true);
+        handleSettingMenuClose();
+    };
+    const handleLanguageChange = (languageCode) => {
+        setSelectedLanguage(languageCode);
+        handleSettingMenuClose();
+        if (recognitionRef.current) {
+            recognitionRef.current.lang = languageCode;
+        }
+    };
+    const handleLanguageDialogClose = () => {
+        setLanguageDialogOpen(false);
+    };
     const submit = async () => {
         abortStream();
         setError(null);
@@ -3478,7 +3581,6 @@ const ChatGPT = forwardRef((props, ref) => {
         }, 10);
     };
     const abortStream = () => {
-        stopVoiceInput();
         streamRef.current?.controller.abort('Cancelled');
     };
     const handleSubmit = async (e) => {
@@ -3528,23 +3630,28 @@ const ChatGPT = forwardRef((props, ref) => {
             alert('Speech recognition not supported in this browser.');
             return;
         }
+        let recordingScript = '';
         const recognition = new window.webkitSpeechRecognition();
         recognitionRef.current = recognition;
-        recognition.continuous = false;
+        recognition.continuous = true;
         recognition.interimResults = false;
+        recognition.lang = selectedLanguage;
         recognition.onstart = () => {
-            setStreaming(true);
+            setRecording(true);
         };
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            setPrompt(transcript);
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                recordingScript += result[0].transcript + ' ';
+            }
         };
         recognition.onend = () => {
-            setStreaming(false);
+            setRecording(false);
+            setPrompt(recordingScript);
         };
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            setStreaming(false);
+            setRecording(false);
         };
         recognition.start();
     };
@@ -3567,7 +3674,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                                 node.contentWindow.document.body.innerHTML = content;
                                                 node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
                                             }
-                                        } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => copyToClipboard(content), children: jsx(ContentPasteRounded, { fontSize: "small" }) }) })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] }), jsx(Box, { component: "form", onSubmit: handleSubmit, sx: {
+                                        } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => copyToClipboard(content), children: jsx(ContentPasteRounded, { fontSize: "small" }) }) })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
                     p: 2,
                     pr: 1,
                     display: 'flex',
@@ -3577,14 +3684,16 @@ const ChatGPT = forwardRef((props, ref) => {
                     bgcolor: 'background.paper',
                     boxShadow: 1,
                     ...sxs?.form
-                }, children: jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Type or click the mic to talk", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSubmit(e);
-                        }
-                    }, multiline: true, maxRows: 4, InputProps: {
-                        endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onTouchStart: startVoiceInput, children: jsx(MicRounded, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
-                    } }) })] }));
+                }, children: [jsx(TextField, { id: "chat-gpt-input", autoFocus: true, fullWidth: true, inputRef: inputRef, disabled: streaming, label: "Type or click and hold the mic to talk", value: prompt, onChange: (e) => setPrompt(e.target.value), onKeyDown: (e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmit(e);
+                            }
+                        }, multiline: true, maxRows: 4, InputProps: {
+                            endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
+                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, sx: {
+                            zIndex: theme.zIndex.modal + 1
+                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange })] })] }));
 });
 
 function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, theme }) {
