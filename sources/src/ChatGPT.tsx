@@ -7,6 +7,8 @@ import {
   Card,
   CardActionArea,
   CardHeader,
+  CircularProgress,
+  Dialog,
   IconButton,
   InputAdornment,
   Menu,
@@ -25,13 +27,19 @@ import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resource
 import { SxProps } from '@mui/system/styleFunctionSx';
 import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
 import ContentPasteRounded from '@mui/icons-material/ContentPasteRounded';
+import DownloadRouned from '@mui/icons-material/DownloadRounded';
+import SaveRounded from '@mui/icons-material/SaveRounded';
 import StopRounded from '@mui/icons-material/StopRounded';
 import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
-import { createChatCompletion } from './util';
+import { copyImageToClipboard, createChatCompletion, createImageGeneration, saveImage } from './util';
 import { defaultModel } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
+import { DialogBody, DialogFooter, DialogHeader } from '@craftercms/studio-ui/components';
+import PathSelector from '@craftercms/studio-ui/components/SiteSearchPathSelector';
+import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton';
+import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -110,8 +118,8 @@ function createSrcDoc(html: string, theme: Theme) {
   </html>`;
 }
 
-function copyToClipboard(textToCopy: string): Promise<void> {
-  // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
+function copyTextToClipboard(textToCopy: string): Promise<void> {
+  // Copy text to clipboard if no image is found
   return (
     navigator.clipboard?.writeText(textToCopy) ??
     Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.'))
@@ -254,6 +262,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
       ]
   );
+  const [imageUrl, setImageUrl] = useState('');
+  const [isCopying, setIsCopying] = useState(false);
+  const [isSavingImage, setIsSavingImage] = useState(false);
   const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
@@ -291,6 +302,17 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     setLanguageDialogOpen(false);
   };
 
+  const handleCopyImage = async (imageUrl: string) => {
+    setIsCopying(true);
+    try {
+      await copyImageToClipboard(imageUrl);
+    } catch (error) {
+      console.error('Failed to copy image:', error);
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
   const submit = async () => {
     abortStream();
     setError(null);
@@ -298,20 +320,46 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     setMessages([...messagesRef.current, { role: 'assistant', content: '...' }]);
     const chunks = [];
     try {
-      const stream = (streamRef.current = await createChatCompletion({
-        model,
-        messages: messagesRef.current,
-        stream: true
-      }));
-      const reply: ChatCompletionMessageParam = { role: 'assistant', content: '' };
-      messagesRef.current.push(reply);
-      setMessages([...messagesRef.current]);
-      for await (const part of stream) {
-        const content = part.choices[0]?.delta?.content;
-        if (content) {
-          reply.content += content;
+      let stream;
+      if (prompt.startsWith('/image') || model?.indexOf('dall-e') >= 0) {
+        const imagePrompt = prompt.replace('/image', '').trim();
+        stream = streamRef.current = await createImageGeneration({
+          model,
+          prompt: imagePrompt,
+          n: 1,
+          size: '1024x1024'
+        });
+
+        // Handle the image response
+        const imageResponse = await stream; // Await the image generation response
+        const imageUrl = imageResponse.data[0]?.url; // Extract the image URL
+
+        if (imageUrl) {
+          const reply: ChatCompletionMessageParam = {
+            role: 'assistant',
+            content: `<img src="${imageUrl}" class="gen-img" alt="Generated Image" style="max-width: 100%; height: auto;" />`
+          };
+          messagesRef.current.push(reply);
           setMessages([...messagesRef.current]);
-          chunks.push(content);
+        }
+      } else {
+        stream = streamRef.current = await createChatCompletion({
+          model,
+          messages: messagesRef.current,
+          stream: true
+        });
+
+        const reply: ChatCompletionMessageParam = { role: 'assistant', content: '' };
+        messagesRef.current.push(reply);
+        setMessages([...messagesRef.current]);
+
+        for await (const part of stream) {
+          const content = part.choices[0]?.delta?.content;
+          if (content) {
+            reply.content += content;
+            setMessages([...messagesRef.current]);
+            chunks.push(content);
+          }
         }
       }
     } catch (e) {
@@ -326,12 +374,16 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   };
 
   const abortStream = () => {
-    streamRef.current?.controller.abort('Cancelled');
+    streamRef.current?.controller?.abort('Cancelled');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt) return;
+
+    const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
+    setInputName(formattedName);
+
     setPrompt('');
     messagesRef.current.push({ role: 'user', content: prompt });
     await submit();
@@ -420,6 +472,26 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     }
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [inputName, setInputName] = useState('');
+  const [selectedPath, setSelectedPath] = useState('/static-assets');
+
+  const handleSave = async () => {
+    setIsSavingImage(true);
+    try {
+      await saveImage({ path: selectedPath, name: inputName, url: imageUrl });
+    } catch (error) {
+      console.error('Failed to save image:', error);
+    } finally {
+      setIsSavingImage(false);
+      setDialogOpen(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setDialogOpen(false);
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
       <Box sx={{ overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }}>
@@ -473,12 +545,17 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                 </StyledAvatar>
                 {role === 'assistant' ? (
                   <StyledIframe
+                    className="message-iframe"
                     style={{ height: 30 }}
                     srcDoc={srcDoc}
                     ref={(node) => {
                       if (node?.contentWindow?.document?.documentElement) {
                         node.contentWindow.document.body.innerHTML = content;
-                        node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
+                        if (content.startsWith('<img')) {
+                          node.style.height = '300px';
+                        } else {
+                          node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
+                        }
                       }
                     }}
                   />
@@ -494,11 +571,57 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                         </IconButton>
                       </Tooltip>
                     ) : (
-                      <Tooltip title="Copy to clipboard">
-                        <IconButton size="small" onClick={() => copyToClipboard(content)}>
-                          <ContentPasteRounded fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <Box display="inline-grid" alignItems="center">
+                        <Tooltip title="Copy to clipboard">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                              const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+                              if (imageUrl) {
+                                handleCopyImage(imageUrl);
+                              } else {
+                                copyTextToClipboard(content);
+                              }
+                            }}
+                          >
+                            {isCopying ? <CircularProgress size={20} /> : <ContentPasteRounded fontSize="small" />}
+                          </IconButton>
+                        </Tooltip>
+                        {content.startsWith('<img') && (
+                          <>
+                            <Tooltip title="Download Image">
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+                                  if (imageUrl) {
+                                    window.open(imageUrl, '_blank');
+                                  }
+                                }}
+                              >
+                                <DownloadRouned fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Save Image">
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                  const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                  if (url) {
+                                    setImageUrl(url);
+                                    setDialogOpen(true);
+                                  }
+                                }}
+                              >
+                                <SaveRounded fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </Box>
                     )}
                   </Box>
                 )}
@@ -607,6 +730,40 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           onClose={handleLanguageDialogClose}
           onLanguageChange={handleLanguageChange}
         />
+        <>
+          {dialogOpen && (
+            <Dialog
+              open={dialogOpen}
+              onClose={handleCancel}
+              sx={
+                {
+                  // zIndex: theme.zIndex.modal + 1
+                }
+              }
+            >
+              <DialogHeader title="Save Image" />
+              <DialogBody>
+                <TextField
+                  label="Image name"
+                  value={inputName}
+                  onChange={(e) => setInputName(e.target.value)}
+                  fullWidth
+                />
+                <PathSelector
+                  rootPath="/static-assets"
+                  value={selectedPath}
+                  onPathSelected={(path) => setSelectedPath(path)}
+                />
+              </DialogBody>
+              <DialogFooter>
+                <SecondaryButton onClick={handleCancel}>Cancel</SecondaryButton>
+                <PrimaryButton loading={isSavingImage} loadingPosition="start" onClick={handleSave}>
+                  Save
+                </PrimaryButton>
+              </DialogFooter>
+            </Dialog>
+          )}
+        </>
       </Box>
     </Box>
   );

@@ -1,18 +1,24 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, Alert, TextField, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio, CircularProgress } = craftercms.libs.MaterialUI;
+const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, CircularProgress, Alert, TextField, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
 const { forwardRef, useState, useRef, useEffect, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const MoreVertRounded = craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded');
 const ContentPasteRounded = craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ContentPasteRounded');
+const DownloadRouned = craftercms.utils.constants.components.get('@mui/icons-material/DownloadRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/DownloadRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/DownloadRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/DownloadRounded');
+const SaveRounded = craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
 const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
-const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
-const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
-const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
-const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
+const { DialogHeader, DialogBody, DialogFooter } = craftercms.components;
+const PathSelector = craftercms.components.SiteSearchPathSelector && Object.prototype.hasOwnProperty.call(craftercms.components.SiteSearchPathSelector, 'default') ? craftercms.components.SiteSearchPathSelector['default'] : craftercms.components.SiteSearchPathSelector;
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
+const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
+const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
+const DialogHeader$1 = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
+const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
+const PrimaryButton$1 = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
+const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
 const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
@@ -3249,6 +3255,15 @@ function createChatCompletion(body, options) {
         }
     });
 }
+function createImageGeneration(body, options) {
+    return getOpenAiInstance().images.generate(body, {
+        ...options,
+        headers: {
+            ...options?.headers,
+            Accept: 'application/json'
+        }
+    });
+}
 function createUsername(user) {
     const { firstName, lastName, username } = user;
     return `${firstName} ${lastName}`.trim() || username;
@@ -3265,13 +3280,54 @@ async function listChatModels() {
             .filter((model) => !model.id.includes('realtime') &&
             !model.id.includes('audio') &&
             !model.id.includes('turbo-instruct') &&
-            (model.id.includes('gpt-3.5') || model.id.includes('gpt-4')))
+            (model.id.includes('gpt-3.5') || model.id.includes('gpt-4') || model.id.includes('dall-e')))
             .sort((a, b) => a.id.localeCompare(b.id));
     }
     catch (error) {
         console.error('Error fetching models:', error);
         return [];
     }
+}
+/**
+ * Get the image stream
+ * @param url the url of the image
+ */
+async function copyImageToClipboard(url) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`, {
+        headers
+    });
+    if (response.ok) {
+        const blob = await response.blob();
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        return true;
+    }
+    else {
+        throw new Error('Failed to fetch image');
+    }
+}
+/**
+ * Save an image to the CMS
+ * @param request instance of SaveImageRequest
+ */
+async function saveImage(request) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
+        method: 'PUT',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+    });
+    return true;
 }
 
 const helperWidgetId = 'craftercms.components.openai.Helper';
@@ -3429,8 +3485,8 @@ function createSrcDoc(html, theme) {
   <body>${html}</body>
   </html>`;
 }
-function copyToClipboard(textToCopy) {
-    // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
+function copyTextToClipboard(textToCopy) {
+    // Copy text to clipboard if no image is found
     return (navigator.clipboard?.writeText(textToCopy) ??
         Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.')));
 }
@@ -3515,6 +3571,9 @@ const ChatGPT = forwardRef((props, ref) => {
         //   { role: 'user', content: 'What\'s the best time to drink coffee?' },
         //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
         ]);
+    const [imageUrl, setImageUrl] = useState('');
+    const [isCopying, setIsCopying] = useState(false);
+    const [isSavingImage, setIsSavingImage] = useState(false);
     const hasConversationRef = useRef(false);
     const messagesRef = useRef(messages);
     const streamRef = useRef();
@@ -3546,6 +3605,18 @@ const ChatGPT = forwardRef((props, ref) => {
     const handleLanguageDialogClose = () => {
         setLanguageDialogOpen(false);
     };
+    const handleCopyImage = async (imageUrl) => {
+        setIsCopying(true);
+        try {
+            await copyImageToClipboard(imageUrl);
+        }
+        catch (error) {
+            console.error('Failed to copy image:', error);
+        }
+        finally {
+            setIsCopying(false);
+        }
+    };
     const submit = async () => {
         abortStream();
         setError(null);
@@ -3553,20 +3624,43 @@ const ChatGPT = forwardRef((props, ref) => {
         setMessages([...messagesRef.current, { role: 'assistant', content: '...' }]);
         const chunks = [];
         try {
-            const stream = (streamRef.current = await createChatCompletion({
-                model,
-                messages: messagesRef.current,
-                stream: true
-            }));
-            const reply = { role: 'assistant', content: '' };
-            messagesRef.current.push(reply);
-            setMessages([...messagesRef.current]);
-            for await (const part of stream) {
-                const content = part.choices[0]?.delta?.content;
-                if (content) {
-                    reply.content += content;
+            let stream;
+            if (prompt.startsWith('/image') || model?.indexOf('dall-e') >= 0) {
+                const imagePrompt = prompt.replace('/image', '').trim();
+                stream = streamRef.current = await createImageGeneration({
+                    model,
+                    prompt: imagePrompt,
+                    n: 1,
+                    size: '1024x1024'
+                });
+                // Handle the image response
+                const imageResponse = await stream; // Await the image generation response
+                const imageUrl = imageResponse.data[0]?.url; // Extract the image URL
+                if (imageUrl) {
+                    const reply = {
+                        role: 'assistant',
+                        content: `<img src="${imageUrl}" class="gen-img" alt="Generated Image" style="max-width: 100%; height: auto;" />`
+                    };
+                    messagesRef.current.push(reply);
                     setMessages([...messagesRef.current]);
-                    chunks.push(content);
+                }
+            }
+            else {
+                stream = streamRef.current = await createChatCompletion({
+                    model,
+                    messages: messagesRef.current,
+                    stream: true
+                });
+                const reply = { role: 'assistant', content: '' };
+                messagesRef.current.push(reply);
+                setMessages([...messagesRef.current]);
+                for await (const part of stream) {
+                    const content = part.choices[0]?.delta?.content;
+                    if (content) {
+                        reply.content += content;
+                        setMessages([...messagesRef.current]);
+                        chunks.push(content);
+                    }
                 }
             }
         }
@@ -3581,12 +3675,14 @@ const ChatGPT = forwardRef((props, ref) => {
         }, 10);
     };
     const abortStream = () => {
-        streamRef.current?.controller.abort('Cancelled');
+        streamRef.current?.controller?.abort('Cancelled');
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!prompt)
             return;
+        const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
+        setInputName(formattedName);
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
         await submit();
@@ -3660,6 +3756,25 @@ const ChatGPT = forwardRef((props, ref) => {
             recognitionRef.current.stop();
         }
     };
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [inputName, setInputName] = useState('');
+    const [selectedPath, setSelectedPath] = useState('/static-assets');
+    const handleSave = async () => {
+        setIsSavingImage(true);
+        try {
+            await saveImage({ path: selectedPath, name: inputName, url: imageUrl });
+        }
+        catch (error) {
+            console.error('Failed to save image:', error);
+        }
+        finally {
+            setIsSavingImage(false);
+            setDialogOpen(false);
+        }
+    };
+    const handleCancel = () => {
+        setDialogOpen(false);
+    };
     return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [jsx(OpenAI$2, {}), jsx(Typography, { variant: "h6", children: "Generative AI Assistant" })] }), jsx(Box, { sx: {
                                     mx: 'auto',
                                     display: 'grid',
@@ -3669,12 +3784,39 @@ const ChatGPT = forwardRef((props, ref) => {
                                     rowGap: '16px'
                                 }, children: emptyStateOptions.map((option) => (jsx(Card, { children: jsx(CardActionArea, { onClick: (e) => onEmptyStateOptionClick(e, option, api), children: jsx(CardHeader, { title: option.title, subheader: option.subheader, titleTypographyProps: { variant: 'body1' }, subheaderTypographyProps: { variant: 'body2' } }) }) }, option.id))) })] })), messages.map(({ role, content }, index) => role === 'system' ? null : (jsxs(Box, { sx: { bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }, children: [jsxs(StyledBox, { children: [jsx(StyledAvatar, { variant: "rounded", sx: role === 'assistant'
                                             ? { backgroundColor: aiAvatarColour, color: theme.palette.getContrastText(aiAvatarColour) }
-                                            : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }, children: role === 'assistant' ? jsx(OpenAI$2, {}) : nameToInitials(userName) }), role === 'assistant' ? (jsx(StyledIframe, { style: { height: 30 }, srcDoc: srcDoc, ref: (node) => {
+                                            : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }, children: role === 'assistant' ? jsx(OpenAI$2, {}) : nameToInitials(userName) }), role === 'assistant' ? (jsx(StyledIframe, { className: "message-iframe", style: { height: 30 }, srcDoc: srcDoc, ref: (node) => {
                                             if (node?.contentWindow?.document?.documentElement) {
                                                 node.contentWindow.document.body.innerHTML = content;
-                                                node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
+                                                if (content.startsWith('<img')) {
+                                                    node.style.height = '300px';
+                                                }
+                                                else {
+                                                    node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
+                                                }
                                             }
-                                        } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => copyToClipboard(content), children: jsx(ContentPasteRounded, { fontSize: "small" }) }) })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
+                                        } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Box, { display: "inline-grid", alignItems: "center", children: [jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                            const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                                            const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+                                                            if (imageUrl) {
+                                                                handleCopyImage(imageUrl);
+                                                            }
+                                                            else {
+                                                                copyTextToClipboard(content);
+                                                            }
+                                                        }, children: isCopying ? jsx(CircularProgress, { size: 20 }) : jsx(ContentPasteRounded, { fontSize: "small" }) }) }), content.startsWith('<img') && (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Download Image", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                                    const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                                                    const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+                                                                    if (imageUrl) {
+                                                                        window.open(imageUrl, '_blank');
+                                                                    }
+                                                                }, children: jsx(DownloadRouned, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Save Image", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                                    const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                                                    const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                                                    if (url) {
+                                                                        setImageUrl(url);
+                                                                        setDialogOpen(true);
+                                                                    }
+                                                                }, children: jsx(SaveRounded, { fontSize: "small" }) }) })] }))] })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
                     p: 2,
                     pr: 1,
                     display: 'flex',
@@ -3693,7 +3835,9 @@ const ChatGPT = forwardRef((props, ref) => {
                             endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
                         } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, sx: {
                             zIndex: theme.zIndex.modal + 1
-                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange })] })] }));
+                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(Fragment, { children: dialogOpen && (jsxs(Dialog, { open: dialogOpen, onClose: handleCancel, sx: {
+                            // zIndex: theme.zIndex.modal + 1
+                            }, children: [jsx(DialogHeader, { title: "Save Image" }), jsxs(DialogBody, { children: [jsx(TextField, { label: "Image name", value: inputName, onChange: (e) => setInputName(e.target.value), fullWidth: true }), jsx(PathSelector, { rootPath: '/static-assets', value: selectedPath, onPathSelected: (path) => setSelectedPath(path) })] }), jsxs(DialogFooter, { children: [jsx(SecondaryButton, { onClick: handleCancel, children: "Cancel" }), jsx(PrimaryButton, { loading: isSavingImage, loadingPosition: "start", onClick: handleSave, children: "Save" })] })] })) })] })] }));
 });
 
 function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, theme }) {
@@ -3742,7 +3886,7 @@ function ChatGPTPopover(props) {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
                 }, ...popoverProps, sx: {
-                    zIndex: theme.zIndex.modal + 1,
+                    // zIndex: theme.zIndex.modal + 1,
                     [`> .${paperClasses.root}`]: {
                         width,
                         height,
@@ -3752,17 +3896,17 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, theme: theme }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
+                }, children: [jsx(DialogHeader$1, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, theme: theme }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
                     root: {
                         zIndex: theme.zIndex.modal + 2
                     }
-                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton, { onClick: (e) => {
+                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
-                            }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton, { onClick: () => {
+                            }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {
                                 setOpenAlertDialog(false);
                                 onMinimize?.();
-                            }, fullWidth: true, size: "large", children: "Minimize" }), jsx(SecondaryButton, { onClick: () => setOpenAlertDialog(false), fullWidth: true, size: "large", children: "Cancel" })] }) })] }));
+                            }, fullWidth: true, size: "large", children: "Minimize" }), jsx(SecondaryButton$1, { onClick: () => setOpenAlertDialog(false), fullWidth: true, size: "large", children: "Cancel" })] }) })] }));
 }
 
 /*

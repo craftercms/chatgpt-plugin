@@ -7,6 +7,7 @@ import {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming
 } from 'openai/src/resources/chat/completions';
+import { ImageCreateParams } from 'openai/src/resources/images';
 import * as Core from 'openai/src/core';
 import { APIPromise } from 'openai/src/core';
 import { Stream } from 'openai/src/streaming';
@@ -83,6 +84,19 @@ export function createChatCompletion(body: ChatCompletionCreateParamsBase, optio
   });
 }
 
+export function createImageGeneration(
+  body: ImageCreateParams,
+  options?: Core.RequestOptions
+): APIPromise<ChatCompletion> {
+  return getOpenAiInstance().images.generate(body, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Accept: 'application/json'
+    }
+  });
+}
+
 export function createUsername(user: User) {
   const { firstName, lastName, username } = user;
   return `${firstName} ${lastName}`.trim() || username;
@@ -102,11 +116,64 @@ export async function listChatModels() {
           !model.id.includes('realtime') &&
           !model.id.includes('audio') &&
           !model.id.includes('turbo-instruct') &&
-          (model.id.includes('gpt-3.5') || model.id.includes('gpt-4'))
+          (model.id.includes('gpt-3.5') || model.id.includes('gpt-4') || model.id.includes('dall-e'))
       )
       .sort((a, b) => a.id.localeCompare(b.id));
   } catch (error) {
     console.error('Error fetching models:', error);
     return [];
   }
+}
+
+export interface SaveImageRequest {
+  url: string;
+  path: string;
+  name: string;
+}
+
+/**
+ * Get the image stream
+ * @param url the url of the image
+ */
+export async function copyImageToClipboard(url: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(
+    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`,
+    {
+      headers
+    }
+  );
+
+  if (response.ok) {
+    const blob = await response.blob();
+    const item = new ClipboardItem({ 'image/png': blob });
+    await navigator.clipboard.write([item]);
+    return true;
+  } else {
+    throw new Error('Failed to fetch image');
+  }
+}
+
+/**
+ * Save an image to the CMS
+ * @param request instance of SaveImageRequest
+ */
+export async function saveImage(request: SaveImageRequest) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
+    method: 'PUT',
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(request)
+  });
+
+  return true;
 }

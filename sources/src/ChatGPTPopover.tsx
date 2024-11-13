@@ -165,7 +165,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         }}
         {...popoverProps}
         sx={{
-          zIndex: theme.zIndex.modal + 1,
+          // zIndex: theme.zIndex.modal + 1,
           [`> .${paperClasses.root}`]: {
             width,
             height,
