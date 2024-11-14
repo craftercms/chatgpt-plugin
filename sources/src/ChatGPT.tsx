@@ -8,7 +8,6 @@ import {
   CardActionArea,
   CardHeader,
   CircularProgress,
-  Dialog,
   IconButton,
   InputAdornment,
   Menu,
@@ -33,13 +32,10 @@ import StopRounded from '@mui/icons-material/StopRounded';
 import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
-import { copyImageToClipboard, createChatCompletion, createImageGeneration, saveImage } from './util';
+import { copyImageToClipboard, createChatCompletion, createImageGeneration } from './util';
 import { defaultModel } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
-import { DialogBody, DialogFooter, DialogHeader } from '@craftercms/studio-ui/components';
-import PathSelector from '@craftercms/studio-ui/components/SiteSearchPathSelector';
-import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton';
-import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton';
+import SaveImageDialog from './SaveImageDialog';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -264,7 +260,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   );
   const [imageUrl, setImageUrl] = useState('');
   const [isCopying, setIsCopying] = useState(false);
-  const [isSavingImage, setIsSavingImage] = useState(false);
+  const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
+  const [suggestName, setSuggestName] = useState('');
   const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
@@ -330,10 +327,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           size: '1024x1024'
         });
 
-        // Handle the image response
-        const imageResponse = await stream; // Await the image generation response
-        const imageUrl = imageResponse.data[0]?.url; // Extract the image URL
+        const imageResponse = await stream;
 
+        const imageUrl = imageResponse.data[0]?.url;
         if (imageUrl) {
           const reply: ChatCompletionMessageParam = {
             role: 'assistant',
@@ -382,7 +378,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     if (!prompt) return;
 
     const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
-    setInputName(formattedName);
+    setSuggestName(formattedName);
 
     setPrompt('');
     messagesRef.current.push({ role: 'user', content: prompt });
@@ -472,26 +468,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     }
   };
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [inputName, setInputName] = useState('');
-  const [selectedPath, setSelectedPath] = useState('/static-assets');
-
-  const handleSave = async () => {
-    setIsSavingImage(true);
-    try {
-      await saveImage({ path: selectedPath, name: inputName, url: imageUrl });
-    } catch (error) {
-      console.error('Failed to save image:', error);
-    } finally {
-      setIsSavingImage(false);
-      setDialogOpen(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setDialogOpen(false);
-  };
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
       <Box sx={{ overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }}>
@@ -577,9 +553,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                             size="small"
                             onClick={() => {
                               const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                              const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-                              if (imageUrl) {
-                                handleCopyImage(imageUrl);
+                              const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                              if (url) {
+                                handleCopyImage(url);
                               } else {
                                 copyTextToClipboard(content);
                               }
@@ -595,9 +571,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                                 size="small"
                                 onClick={() => {
                                   const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                                  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-                                  if (imageUrl) {
-                                    window.open(imageUrl, '_blank');
+                                  const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                  if (url) {
+                                    window.open(url, '_blank');
                                   }
                                 }}
                               >
@@ -612,7 +588,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                                   const url = imageUrlMatch ? imageUrlMatch[1] : null;
                                   if (url) {
                                     setImageUrl(url);
-                                    setDialogOpen(true);
+                                    setSaveImageDialogOpen(true);
                                   }
                                 }}
                               >
@@ -730,40 +706,12 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           onClose={handleLanguageDialogClose}
           onLanguageChange={handleLanguageChange}
         />
-        <>
-          {dialogOpen && (
-            <Dialog
-              open={dialogOpen}
-              onClose={handleCancel}
-              sx={
-                {
-                  // zIndex: theme.zIndex.modal + 1
-                }
-              }
-            >
-              <DialogHeader title="Save Image" />
-              <DialogBody>
-                <TextField
-                  label="Image name"
-                  value={inputName}
-                  onChange={(e) => setInputName(e.target.value)}
-                  fullWidth
-                />
-                <PathSelector
-                  rootPath="/static-assets"
-                  value={selectedPath}
-                  onPathSelected={(path) => setSelectedPath(path)}
-                />
-              </DialogBody>
-              <DialogFooter>
-                <SecondaryButton onClick={handleCancel}>Cancel</SecondaryButton>
-                <PrimaryButton loading={isSavingImage} loadingPosition="start" onClick={handleSave}>
-                  Save
-                </PrimaryButton>
-              </DialogFooter>
-            </Dialog>
-          )}
-        </>
+        <SaveImageDialog
+          open={saveImageDialogOpen}
+          onClose={() => setSaveImageDialogOpen(false)}
+          url={imageUrl}
+          suggestName={suggestName}
+        />
       </Box>
     </Box>
   );

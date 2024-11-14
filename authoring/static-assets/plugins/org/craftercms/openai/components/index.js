@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, CircularProgress, Alert, TextField, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
-const { forwardRef, useState, useRef, useEffect, useImperativeHandle } = craftercms.libs.React;
+const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, TextField, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, CircularProgress, Alert, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
+const { useState, useEffect, forwardRef, useRef, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const MoreVertRounded = craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded');
@@ -3269,7 +3269,7 @@ function createUsername(user) {
     return `${firstName} ${lastName}`.trim() || username;
 }
 /**
- * Fetches the list of chat models from OpenAI.
+ * Fetches the list of chat or image generation models from OpenAI.
  * https://platform.openai.com/docs/models/model-endpoint-compatibility
  * @returns The list of models.
  */
@@ -3415,6 +3415,32 @@ function SelectLanguageDialog(props) {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }, children: [lc.label, language === lc.code && (jsx(ListItemIcon, { children: jsx(CheckRounded, { fontSize: "small" }) }))] }, lc.code))) }), jsx(DialogActions, { children: jsx(Button, { onClick: onClose, color: "inherit", children: "Cancel" }) })] }));
+}
+
+function SaveImageDialog(props) {
+    const { open, onClose, url, suggestName } = props;
+    const [name, setName] = useState('');
+    const [path, setPath] = useState('/static-assets');
+    const [processing, setProcessing] = useState(false);
+    useEffect(() => {
+        if (suggestName) {
+            setName(suggestName);
+        }
+    }, [suggestName]);
+    const handleSave = async () => {
+        setProcessing(true);
+        try {
+            await saveImage({ path, name, url });
+        }
+        catch (error) {
+            console.error('Failed to save image:', error);
+        }
+        finally {
+            setProcessing(false);
+            onClose?.();
+        }
+    };
+    return (jsxs(Dialog, { open: open, onClose: onClose, children: [jsx(DialogHeader, { title: "Save Image" }), jsxs(DialogBody, { children: [jsx(TextField, { label: "Image name", value: name, onChange: (e) => setName(e.target.value), fullWidth: true }), jsx(PathSelector, { rootPath: "/static-assets", value: path, onPathSelected: (path) => setPath(path) })] }), jsxs(DialogFooter, { children: [jsx(SecondaryButton, { onClick: onClose, children: "Cancel" }), jsx(PrimaryButton, { loading: processing, loadingPosition: "start", onClick: handleSave, children: "Save" })] })] }));
 }
 
 const StyledBox = styled(Box)(
@@ -3573,7 +3599,8 @@ const ChatGPT = forwardRef((props, ref) => {
         ]);
     const [imageUrl, setImageUrl] = useState('');
     const [isCopying, setIsCopying] = useState(false);
-    const [isSavingImage, setIsSavingImage] = useState(false);
+    const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
+    const [suggestName, setSuggestName] = useState('');
     const hasConversationRef = useRef(false);
     const messagesRef = useRef(messages);
     const streamRef = useRef();
@@ -3633,9 +3660,8 @@ const ChatGPT = forwardRef((props, ref) => {
                     n: 1,
                     size: '1024x1024'
                 });
-                // Handle the image response
-                const imageResponse = await stream; // Await the image generation response
-                const imageUrl = imageResponse.data[0]?.url; // Extract the image URL
+                const imageResponse = await stream;
+                const imageUrl = imageResponse.data[0]?.url;
                 if (imageUrl) {
                     const reply = {
                         role: 'assistant',
@@ -3682,7 +3708,7 @@ const ChatGPT = forwardRef((props, ref) => {
         if (!prompt)
             return;
         const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
-        setInputName(formattedName);
+        setSuggestName(formattedName);
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
         await submit();
@@ -3756,25 +3782,6 @@ const ChatGPT = forwardRef((props, ref) => {
             recognitionRef.current.stop();
         }
     };
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [inputName, setInputName] = useState('');
-    const [selectedPath, setSelectedPath] = useState('/static-assets');
-    const handleSave = async () => {
-        setIsSavingImage(true);
-        try {
-            await saveImage({ path: selectedPath, name: inputName, url: imageUrl });
-        }
-        catch (error) {
-            console.error('Failed to save image:', error);
-        }
-        finally {
-            setIsSavingImage(false);
-            setDialogOpen(false);
-        }
-    };
-    const handleCancel = () => {
-        setDialogOpen(false);
-    };
     return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [jsx(OpenAI$2, {}), jsx(Typography, { variant: "h6", children: "Generative AI Assistant" })] }), jsx(Box, { sx: {
                                     mx: 'auto',
                                     display: 'grid',
@@ -3796,25 +3803,25 @@ const ChatGPT = forwardRef((props, ref) => {
                                             }
                                         } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Box, { display: "inline-grid", alignItems: "center", children: [jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => {
                                                             const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                                                            const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-                                                            if (imageUrl) {
-                                                                handleCopyImage(imageUrl);
+                                                            const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                                            if (url) {
+                                                                handleCopyImage(url);
                                                             }
                                                             else {
                                                                 copyTextToClipboard(content);
                                                             }
                                                         }, children: isCopying ? jsx(CircularProgress, { size: 20 }) : jsx(ContentPasteRounded, { fontSize: "small" }) }) }), content.startsWith('<img') && (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Download Image", children: jsx(IconButton, { size: "small", onClick: () => {
                                                                     const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                                                                    const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-                                                                    if (imageUrl) {
-                                                                        window.open(imageUrl, '_blank');
+                                                                    const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                                                    if (url) {
+                                                                        window.open(url, '_blank');
                                                                     }
                                                                 }, children: jsx(DownloadRouned, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Save Image", children: jsx(IconButton, { size: "small", onClick: () => {
                                                                     const imageUrlMatch = /src="([^"]+)"/.exec(content);
                                                                     const url = imageUrlMatch ? imageUrlMatch[1] : null;
                                                                     if (url) {
                                                                         setImageUrl(url);
-                                                                        setDialogOpen(true);
+                                                                        setSaveImageDialogOpen(true);
                                                                     }
                                                                 }, children: jsx(SaveRounded, { fontSize: "small" }) }) })] }))] })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
                     p: 2,
@@ -3835,9 +3842,7 @@ const ChatGPT = forwardRef((props, ref) => {
                             endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
                         } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, sx: {
                             zIndex: theme.zIndex.modal + 1
-                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(Fragment, { children: dialogOpen && (jsxs(Dialog, { open: dialogOpen, onClose: handleCancel, sx: {
-                            // zIndex: theme.zIndex.modal + 1
-                            }, children: [jsx(DialogHeader, { title: "Save Image" }), jsxs(DialogBody, { children: [jsx(TextField, { label: "Image name", value: inputName, onChange: (e) => setInputName(e.target.value), fullWidth: true }), jsx(PathSelector, { rootPath: '/static-assets', value: selectedPath, onPathSelected: (path) => setSelectedPath(path) })] }), jsxs(DialogFooter, { children: [jsx(SecondaryButton, { onClick: handleCancel, children: "Cancel" }), jsx(PrimaryButton, { loading: isSavingImage, loadingPosition: "start", onClick: handleSave, children: "Save" })] })] })) })] })] }));
+                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl, suggestName: suggestName })] })] }));
 });
 
 function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, theme }) {

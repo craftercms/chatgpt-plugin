@@ -103,7 +103,7 @@ export function createUsername(user: User) {
 }
 
 /**
- * Fetches the list of chat models from OpenAI.
+ * Fetches the list of chat or image generation models from OpenAI.
  * https://platform.openai.com/docs/models/model-endpoint-compatibility
  * @returns The list of models.
  */
