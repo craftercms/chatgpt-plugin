@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import {
   Dialog,
   TextField
@@ -55,7 +54,7 @@ export default function SaveImageDialog(props: SaveImageDialogProps) {
       <DialogHeader title="Save Image" />
       <DialogBody>
         <TextField
-          label="Image name"
+          label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           fullWidth

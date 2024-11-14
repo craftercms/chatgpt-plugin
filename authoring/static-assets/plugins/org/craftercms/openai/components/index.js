@@ -1,5 +1,5 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { useTheme, Dialog, DialogTitle, DialogContent, MenuItem, ListItemIcon, DialogActions, Button, TextField, styled, Box, Avatar, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, CircularProgress, Alert, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
+const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Paper, Typography, Card, CardActionArea, CardHeader, Tooltip, IconButton, CircularProgress, Button, Alert, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
 const { useState, useEffect, forwardRef, useRef, useImperativeHandle } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
@@ -10,12 +10,15 @@ const SaveRounded = craftercms.utils.constants.components.get('@mui/icons-materi
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
 const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
-const { DialogHeader, DialogBody, DialogFooter } = craftercms.components;
-const PathSelector = craftercms.components.SiteSearchPathSelector && Object.prototype.hasOwnProperty.call(craftercms.components.SiteSearchPathSelector, 'default') ? craftercms.components.SiteSearchPathSelector['default'] : craftercms.components.SiteSearchPathSelector;
+const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
+const DialogBody = craftercms.components.DialogBody && Object.prototype.hasOwnProperty.call(craftercms.components.DialogBody, 'default') ? craftercms.components.DialogBody['default'] : craftercms.components.DialogBody;
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
+const DialogFooter = craftercms.components.DialogFooter && Object.prototype.hasOwnProperty.call(craftercms.components.DialogFooter, 'default') ? craftercms.components.DialogFooter['default'] : craftercms.components.DialogFooter;
+const { DialogHeader: DialogHeader$1, DialogBody: DialogBody$1, DialogFooter: DialogFooter$1 } = craftercms.components;
+const PathSelector = craftercms.components.SiteSearchPathSelector && Object.prototype.hasOwnProperty.call(craftercms.components.SiteSearchPathSelector, 'default') ? craftercms.components.SiteSearchPathSelector['default'] : craftercms.components.SiteSearchPathSelector;
 const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
-const DialogHeader$1 = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
+const DialogHeader$2 = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
 const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwnProperty.call(craftercms.components.AlertDialog, 'default') ? craftercms.components.AlertDialog['default'] : craftercms.components.AlertDialog;
 const PrimaryButton$1 = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
@@ -3404,17 +3407,14 @@ const languageCodes = [
 
 function SelectLanguageDialog(props) {
     const { open, language, onClose, onLanguageChange } = props;
-    const theme = useTheme();
-    return (jsxs(Dialog, { open: open, onClose: onClose, sx: {
-            zIndex: theme.zIndex.modal + 1
-        }, children: [jsx(DialogTitle, { children: "Speech to Text Language" }), jsx(DialogContent, { children: languageCodes.map((lc) => (jsxs(MenuItem, { onClick: () => {
+    return (jsxs(Dialog, { open: open, onClose: onClose, children: [jsx(DialogHeader, { title: "Speech to Text Language" }), jsx(DialogBody, { children: languageCodes.map((lc) => (jsxs(MenuItem, { onClick: () => {
                         onLanguageChange(lc.code);
                         onClose();
                     }, style: {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
-                    }, children: [lc.label, language === lc.code && (jsx(ListItemIcon, { children: jsx(CheckRounded, { fontSize: "small" }) }))] }, lc.code))) }), jsx(DialogActions, { children: jsx(Button, { onClick: onClose, color: "inherit", children: "Cancel" }) })] }));
+                    }, children: [lc.label, language === lc.code && (jsx(ListItemIcon, { children: jsx(CheckRounded, { fontSize: "small" }) }))] }, lc.code))) }), jsx(DialogFooter, { children: jsx(SecondaryButton, { onClick: onClose, children: "Cancel" }) })] }));
 }
 
 function SaveImageDialog(props) {
@@ -3440,7 +3440,7 @@ function SaveImageDialog(props) {
             onClose?.();
         }
     };
-    return (jsxs(Dialog, { open: open, onClose: onClose, children: [jsx(DialogHeader, { title: "Save Image" }), jsxs(DialogBody, { children: [jsx(TextField, { label: "Image name", value: name, onChange: (e) => setName(e.target.value), fullWidth: true }), jsx(PathSelector, { rootPath: "/static-assets", value: path, onPathSelected: (path) => setPath(path) })] }), jsxs(DialogFooter, { children: [jsx(SecondaryButton, { onClick: onClose, children: "Cancel" }), jsx(PrimaryButton, { loading: processing, loadingPosition: "start", onClick: handleSave, children: "Save" })] })] }));
+    return (jsxs(Dialog, { open: open, onClose: onClose, children: [jsx(DialogHeader$1, { title: "Save Image" }), jsxs(DialogBody$1, { children: [jsx(TextField, { label: "Name", value: name, onChange: (e) => setName(e.target.value), fullWidth: true }), jsx(PathSelector, { rootPath: "/static-assets", value: path, onPathSelected: (path) => setPath(path) })] }), jsxs(DialogFooter$1, { children: [jsx(SecondaryButton, { onClick: onClose, children: "Cancel" }), jsx(PrimaryButton, { loading: processing, loadingPosition: "start", onClick: handleSave, children: "Save" })] })] }));
 }
 
 const StyledBox = styled(Box)(
@@ -3707,7 +3707,7 @@ const ChatGPT = forwardRef((props, ref) => {
         e.preventDefault();
         if (!prompt)
             return;
-        const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
+        const formattedName = prompt.trim().replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
         setSuggestName(formattedName);
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
@@ -3840,9 +3840,7 @@ const ChatGPT = forwardRef((props, ref) => {
                             }
                         }, multiline: true, maxRows: 4, InputProps: {
                             endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
-                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, sx: {
-                            zIndex: theme.zIndex.modal + 1
-                        }, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl, suggestName: suggestName })] })] }));
+                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl, suggestName: suggestName })] })] }));
 });
 
 function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, theme }) {
@@ -3859,8 +3857,6 @@ function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuA
                     minWidth: 0
                 }, endIcon: enableCustomModel ? jsx(ExpandMoreRounded, {}) : null, children: selectedModel }), enableCustomModel && (jsx(Menu, { id: "model-select-menu", anchorEl: modelMenuAnchorEl, open: Boolean(modelMenuAnchorEl), onClose: handleClose, MenuListProps: {
                     'aria-labelledby': 'model-select-button'
-                }, sx: {
-                    zIndex: theme.zIndex.modal + 1
                 }, children: models && models.length > 0 ? (models.map((model) => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
 }
 function ChatGPTPopover(props) {
@@ -3891,7 +3887,6 @@ function ChatGPTPopover(props) {
                     invisible: false,
                     sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' }
                 }, ...popoverProps, sx: {
-                    // zIndex: theme.zIndex.modal + 1,
                     [`> .${paperClasses.root}`]: {
                         width,
                         height,
@@ -3901,11 +3896,7 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader$1, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, theme: theme }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { sxs: {
-                    root: {
-                        zIndex: theme.zIndex.modal + 2
-                    }
-                }, disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
+                }, children: [jsx(DialogHeader$2, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, theme: theme }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: { root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {

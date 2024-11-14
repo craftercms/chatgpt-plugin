@@ -377,7 +377,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     e.preventDefault();
     if (!prompt) return;
 
-    const formattedName = prompt.replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
+    const formattedName = prompt.trim().replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
     setSuggestName(formattedName);
 
     setPrompt('');
@@ -694,9 +694,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           anchorEl={settingMenuAnchorEl}
           open={Boolean(settingMenuAnchorEl)}
           onClose={handleSettingMenuClose}
-          sx={{
-            zIndex: theme.zIndex.modal + 1
-          }}
         >
           <MenuItem onClick={handleLanguageDialogOpen}>Set Speech to Text Language</MenuItem>
         </Menu>

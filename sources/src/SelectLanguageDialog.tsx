@@ -1,15 +1,14 @@
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import {
-  Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
   ListItemIcon,
-  MenuItem,
-  DialogActions,
-  useTheme
+  MenuItem
 } from '@mui/material';
 import { languageCodes } from './consts';
+import DialogHeader from '@craftercms/studio-ui/components/DialogHeader';
+import DialogBody from '@craftercms/studio-ui/components/DialogBody';
+import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton';
+import DialogFooter from '@craftercms/studio-ui/components/DialogFooter';
 
 export interface SelectLanguageDialogProps {
   open: boolean;
@@ -20,17 +19,13 @@ export interface SelectLanguageDialogProps {
 
 export default function SelectLanguageDialog(props: Readonly<SelectLanguageDialogProps>) {
   const { open, language, onClose, onLanguageChange } = props;
-  const theme = useTheme();
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      sx={{
-        zIndex: theme.zIndex.modal + 1
-      }}
     >
-      <DialogTitle>Speech to Text Language</DialogTitle>
-      <DialogContent>
+      <DialogHeader title="Speech to Text Language" />
+      <DialogBody>
         {languageCodes.map((lc) => (
           <MenuItem
             key={lc.code}
@@ -52,12 +47,10 @@ export default function SelectLanguageDialog(props: Readonly<SelectLanguageDialo
             )}
           </MenuItem>
         ))}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-      </DialogActions>
+      </DialogBody>
+      <DialogFooter>
+        <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
+      </DialogFooter>
     </Dialog>
   );
 }

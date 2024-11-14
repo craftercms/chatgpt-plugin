@@ -77,9 +77,6 @@ function ChatGPTModelSelect({
           MenuListProps={{
             'aria-labelledby': 'model-select-button'
           }}
-          sx={{
-            zIndex: theme.zIndex.modal + 1
-          }}
         >
           {models && models.length > 0 ? (
             models.map((model) => (
@@ -165,7 +162,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         }}
         {...popoverProps}
         sx={{
-          // zIndex: theme.zIndex.modal + 1,
           [`> .${paperClasses.root}`]: {
             width,
             height,
@@ -202,11 +198,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
       <AlertDialog
-        sxs={{
-          root: {
-            zIndex: theme.zIndex.modal + 2
-          }
-        }}
         disableBackdropClick
         disableEscapeKeyDown
         open={openAlertDialog}
