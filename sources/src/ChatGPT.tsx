@@ -717,6 +717,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                         size="small"
                         onMouseDown={startVoiceInput}
                         onMouseUp={stopVoiceInput}
+                        onMouseLeave={stopVoiceInput}
                         onTouchStart={startVoiceInput}
                         onTouchEnd={stopVoiceInput}
                       >
