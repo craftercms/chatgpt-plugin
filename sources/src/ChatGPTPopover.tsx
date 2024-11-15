@@ -9,10 +9,9 @@ import {
   Popover,
   PopoverProps,
   Radio,
-  Theme,
   useTheme
 } from '@mui/material';
-import ChatGPT, { ChatGPTProps, ChatGPTRef } from './ChatGPT.tsx';
+import ChatGPT, { ChatGPTProps, ChatGPTRef, ChatMode } from './ChatGPT.tsx';
 import React, { useEffect, useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
@@ -21,7 +20,7 @@ import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/Primar
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
 import { listChatModels } from './util.ts';
-import { defaultModel } from './consts.ts';
+import { defaultChatModel, defaultImageModel } from './consts.ts';
 
 interface ChatGPTModelSelectProps {
   enableCustomModel: boolean;
@@ -30,7 +29,7 @@ interface ChatGPTModelSelectProps {
   selectedModel: string;
   handleModelSelect: (modelId: string) => void;
   handleClose: () => void;
-  theme?: Theme;
+  mode?: ChatMode;
 }
 
 function ChatGPTModelSelect({
@@ -40,14 +39,23 @@ function ChatGPTModelSelect({
   selectedModel,
   handleModelSelect,
   handleClose,
-  theme
+  mode = 'chat'
 }: Readonly<ChatGPTModelSelectProps>) {
   const [models, setModels] = useState<Array<{ id: string }>>([]);
   useEffect(() => {
     listChatModels().then((modelList) => {
-      setModels(modelList);
+      const filteredModels = modelList.filter(model => {
+        if (mode === 'chat') {
+          return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
+        } else if (mode === 'image') {
+          return model.id.includes('dall-e');
+        }
+        return false;
+      });
+
+      setModels(filteredModels);
     });
-  }, []);
+  }, [mode]);
   return (
     <>
       <Button
@@ -117,8 +125,8 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     onMinimize,
     onMaximize,
     appBarTitle = 'AI Assistant',
-    width = 450,
-    height = 544,
+    width = 492,
+    height = 595,
     enableCustomModel = true,
     ...popoverProps
   } = props;
@@ -126,7 +134,25 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   const chatGptRef = useRef<ChatGPTRef>(null);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
+  const [selectedModel, setSelectedModel] = useState(defaultChatModel);
+  const [selectedMode, setSelectedMode] = useState<ChatMode>('chat');
+
+  const onModeSelected = (mode: ChatMode) => {
+    setSelectedMode(mode);
+    if (mode === 'chat') {
+      setSelectedModel(defaultChatModel);
+    } else if (mode === 'image') {
+      setSelectedModel(defaultImageModel);
+    }
+  };
+
+  useEffect(() => {
+    const currentMode = chatGptRef.current?.mode();
+    if (currentMode) {
+      const newModel = currentMode === 'image' ? defaultImageModel : defaultChatModel;
+      setSelectedModel(newModel);
+    }
+  }, [chatGptRef.current?.mode()])
 
   const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
     setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
@@ -186,14 +212,19 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             selectedModel={selectedModel}
             handleModelSelect={handleModelSelect}
             handleClose={handleClose}
-            theme={theme}
+            mode={selectedMode}
           />
         </DialogHeader>
         <ChatGPT
           {...chatGPTProps}
           ref={chatGptRef}
           model={selectedModel}
-          sxs={{ root: { height: 'calc(100% - 112px)' }, ...chatGPTProps?.sxs }}
+          sxs={{
+            root: { height: 'calc(100% - 113px)' },
+            chat: { height: 'calc(100% - 97px)' },
+            ...chatGPTProps?.sxs
+          }}
+          onModeSelected={onModeSelected}
         />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />

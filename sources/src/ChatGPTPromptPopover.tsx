@@ -21,7 +21,7 @@ import { ChatCompletionChunk, ChatCompletionMessageParam } from 'openai/resource
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions';
 import OpenAILogo from './OpenAI.tsx';
 import { Stream } from 'openai/streaming';
-import { defaultModel } from './consts.ts';
+import { defaultChatModel } from './consts.ts';
 
 export interface ChatGPTPromptPopoverProps extends PopoverProps {
   context?: string;
@@ -57,7 +57,7 @@ function Internal(
   }
 ) {
   const {
-    model = defaultModel,
+    model = defaultChatModel,
     print,
     context,
     inputRef,

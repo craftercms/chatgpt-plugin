@@ -8,6 +8,7 @@ import {
   CardActionArea,
   CardHeader,
   CircularProgress,
+  Drawer,
   IconButton,
   InputAdornment,
   Menu,
@@ -33,9 +34,10 @@ import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
 import { copyImageToClipboard, createChatCompletion, createImageGeneration } from './util';
-import { defaultModel } from './consts';
+import { defaultChatModel } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
+import ImageRounded from '@mui/icons-material/ImageRounded';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -144,6 +146,8 @@ function nameToInitials(name: string) {
   return initials.join('');
 }
 
+export type ChatMode = 'chat' | 'image';
+
 export interface ClickApi {
   focusInput(start?: number, end?: number): void;
   setPrompt(prompt: string): void;
@@ -165,7 +169,7 @@ export interface SpeechRecognitionWindow extends Window {
 export interface ChatGPTProps {
   userName: string;
   model?: ChatCompletionCreateParamsBase['model'];
-  sxs?: Partial<Record<'root' | 'messages' | 'form', SxProps<Theme>>>;
+  sxs?: Partial<Record<'root' | 'messages' | 'form' | 'chat', SxProps<Theme>>>;
   scrollToReply?: boolean;
   emptyStateOptions?: Array<EmptyStateOption>;
   onEmptyStateOptionClick?: (e: React.MouseEvent, option: EmptyStateOption, api: ClickApi) => void;
@@ -177,17 +181,19 @@ export interface ChatGPTProps {
   onExtraActionClick?: (e: React.MouseEvent, id: string, content: string, api: ClickApi) => void;
   initialMessages?: Array<ChatCompletionMessageParam>;
   aiAvatarColour?: string;
+  onModeSelected: (mode: ChatMode) => void;
 }
 
 export interface ChatGPTRef {
   hasConversation: () => boolean;
+  mode: () => ChatMode;
 }
 
 const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   // region const { ... } = props;
   const {
     sxs,
-    model = defaultModel,
+    model = defaultChatModel,
     userName,
     scrollToReply = true,
     initialMessages,
@@ -238,7 +244,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       } else if (option?.messages) {
         api.pushMessages(option.messages);
       }
-    }
+    },
+    onModeSelected
   } = props;
   // endregion
   const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
@@ -258,10 +265,12 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
       ]
   );
+  const [mode, setMode] = useState<ChatMode>('chat');
   const [imageUrl, setImageUrl] = useState('');
-  const [isCopying, setIsCopying] = useState(false);
+  const [copyingIndex, setCopyingIndex] = useState<number | null>(null);
   const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
   const [suggestName, setSuggestName] = useState('');
+  const chatModeRef = useRef<ChatMode>('chat');
   const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
@@ -299,14 +308,14 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     setLanguageDialogOpen(false);
   };
 
-  const handleCopyImage = async (imageUrl: string) => {
-    setIsCopying(true);
+  const handleCopyImage = async (imageUrl: string, index: number) => {
+    setCopyingIndex(index);
     try {
       await copyImageToClipboard(imageUrl);
     } catch (error) {
       console.error('Failed to copy image:', error);
     } finally {
-      setIsCopying(false);
+      setCopyingIndex(null);
     }
   };
 
@@ -318,11 +327,10 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     const chunks = [];
     try {
       let stream;
-      if (prompt.startsWith('/image') || model?.indexOf('dall-e') >= 0) {
-        const imagePrompt = prompt.replace('/image', '').trim();
+      if (mode === 'image') {
         stream = streamRef.current = await createImageGeneration({
           model,
-          prompt: imagePrompt,
+          prompt,
           n: 1,
           size: '1024x1024'
         });
@@ -420,7 +428,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   }, [messages, initialMessages, prompt]);
 
   useImperativeHandle(ref, () => ({
-    hasConversation: () => hasConversationRef.current
+    hasConversation: () => hasConversationRef.current,
+    mode: () => chatModeRef.current
   }));
 
   const startVoiceInput = () => {
@@ -470,157 +479,195 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
-      <Box sx={{ overflow: 'auto', flex: '1', '*': { boxSizing: 'border-box' }, ...sxs?.messages }}>
-        {messages.filter((msg) => msg.role !== 'system').length === 0 && (
-          <Box sx={{ width: '100%', p: 2 }}>
-            <Paper
-              sx={{ maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }}
-              elevation={0}
-            >
-              <OpenAILogo />
-              <Typography variant="h6">Generative AI Assistant</Typography>
-            </Paper>
-            <Box
-              sx={{
-                mx: 'auto',
-                display: 'grid',
-                maxWidth: '700px',
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                columnGap: '16px',
-                rowGap: '16px'
-              }}
-            >
-              {emptyStateOptions.map((option) => (
-                <Card key={option.id}>
-                  <CardActionArea onClick={(e) => onEmptyStateOptionClick(e, option, api)}>
-                    <CardHeader
-                      title={option.title}
-                      subheader={option.subheader}
-                      titleTypographyProps={{ variant: 'body1' }}
-                      subheaderTypographyProps={{ variant: 'body2' }}
-                    />
-                  </CardActionArea>
-                </Card>
-              ))}
-            </Box>
-          </Box>
-        )}
-        {messages.map(({ role, content }, index) =>
-          role === 'system' ? null : (
-            <Box sx={{ bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }} key={index}>
-              <StyledBox>
-                <StyledAvatar
-                  variant="rounded"
-                  sx={
-                    role === 'assistant'
-                      ? { backgroundColor: aiAvatarColour, color: theme.palette.getContrastText(aiAvatarColour) }
-                      : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }
-                  }
-                >
-                  {role === 'assistant' ? <OpenAILogo /> : nameToInitials(userName)}
-                </StyledAvatar>
-                {role === 'assistant' ? (
-                  <StyledIframe
-                    className="message-iframe"
-                    style={{ height: 30 }}
-                    srcDoc={srcDoc}
-                    ref={(node) => {
-                      if (node?.contentWindow?.document?.documentElement) {
-                        node.contentWindow.document.body.innerHTML = content;
-                        if (content.startsWith('<img')) {
-                          node.style.height = '300px';
-                        } else {
-                          node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
-                        }
-                      }
-                    }}
-                  />
+      <Box sx={{ display: 'flex', ...sxs?.chat }}>
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: 42,
+            marginTop: '-1px',
+            [`& .MuiDrawer-paper`]: {
+              width: 42,
+              position: 'relative'
+            }
+          }}
+        >
+          <div>
+            <IconButton onClick={() => {
+              setMode('chat');
+              onModeSelected?.('chat');
+            }}>
+              <Tooltip title="Chat Completion" arrow>
+                <OpenAILogo />
+              </Tooltip>
+            </IconButton>
+            <IconButton onClick={() => {
+              setMode('image');
+              onModeSelected?.('image');
+            }}>
+              <Tooltip title="Image Generation" arrow>
+                <ImageRounded />
+              </Tooltip>
+            </IconButton>
+          </div>
+        </Drawer>
+        <Box sx={{ overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }}>
+          {messages.filter((msg) => msg.role !== 'system').length === 0 && (
+            <Box sx={{ width: '100%', p: 2 }}>
+              <Paper
+                sx={{ maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }}
+                elevation={0}
+              >
+                {mode === 'image' ? (
+                  <ImageRounded />
                 ) : (
-                  <StyledPre>{content}</StyledPre>
+                  <OpenAILogo />
                 )}
-                {role === 'assistant' && (
-                  <Box>
-                    {streaming && index === maxMessageIndex ? (
-                      <Tooltip title="Stop/abort">
-                        <IconButton size="small" onClick={abortStream}>
-                          <StopRounded fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    ) : (
-                      <Box display="inline-grid" alignItems="center">
-                        <Tooltip title="Copy to clipboard">
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                              const url = imageUrlMatch ? imageUrlMatch[1] : null;
-                              if (url) {
-                                handleCopyImage(url);
-                              } else {
-                                copyTextToClipboard(content);
-                              }
-                            }}
-                          >
-                            {isCopying ? <CircularProgress size={20} /> : <ContentPasteRounded fontSize="small" />}
+                <Typography variant="h6">
+                  {mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant'}
+                </Typography>
+              </Paper>
+              <Box
+                sx={{
+                  mx: 'auto',
+                  display: 'grid',
+                  maxWidth: '700px',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  columnGap: '16px',
+                  rowGap: '16px'
+                }}
+              >
+                {emptyStateOptions.map((option) => (
+                  <Card key={option.id}>
+                    <CardActionArea onClick={(e) => onEmptyStateOptionClick(e, option, api)}>
+                      <CardHeader
+                        title={option.title}
+                        subheader={option.subheader}
+                        titleTypographyProps={{ variant: 'body1' }}
+                        subheaderTypographyProps={{ variant: 'body2' }}
+                      />
+                    </CardActionArea>
+                  </Card>
+                ))}
+              </Box>
+            </Box>
+          )}
+          {messages.map(({ role, content }, index) =>
+            role === 'system' ? null : (
+              <Box sx={{ bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }} key={index}>
+                <StyledBox>
+                  <StyledAvatar
+                    variant="rounded"
+                    sx={
+                      role === 'assistant'
+                        ? { backgroundColor: aiAvatarColour, color: theme.palette.getContrastText(aiAvatarColour) }
+                        : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }
+                    }
+                  >
+                    {role === 'assistant' ? <OpenAILogo /> : nameToInitials(userName)}
+                  </StyledAvatar>
+                  {role === 'assistant' ? (
+                    <StyledIframe
+                      className="message-iframe"
+                      style={{ height: 30 }}
+                      srcDoc={srcDoc}
+                      ref={(node) => {
+                        if (node?.contentWindow?.document?.documentElement) {
+                          node.contentWindow.document.body.innerHTML = content;
+                          if (content.startsWith('<img')) {
+                            node.style.height = '300px';
+                          } else {
+                            node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
+                          }
+                        }
+                      }}
+                    />
+                  ) : (
+                    <StyledPre>{content}</StyledPre>
+                  )}
+                  {role === 'assistant' && (
+                    <Box>
+                      {streaming && index === maxMessageIndex ? (
+                        <Tooltip title="Stop/abort">
+                          <IconButton size="small" onClick={abortStream}>
+                            <StopRounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        {content.startsWith('<img') && (
-                          <>
-                            <Tooltip title="Download Image">
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                                  const url = imageUrlMatch ? imageUrlMatch[1] : null;
-                                  if (url) {
-                                    window.open(url, '_blank');
-                                  }
-                                }}
-                              >
-                                <DownloadRouned fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Save Image">
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  const imageUrlMatch = /src="([^"]+)"/.exec(content);
-                                  const url = imageUrlMatch ? imageUrlMatch[1] : null;
-                                  if (url) {
-                                    setImageUrl(url);
-                                    setSaveImageDialogOpen(true);
-                                  }
-                                }}
-                              >
-                                <SaveRounded fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </>
-                        )}
-                      </Box>
-                    )}
+                      ) : (
+                        <Box display="inline-grid" alignItems="center">
+                          <Tooltip title="Copy to clipboard">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                if (url) {
+                                  handleCopyImage(url, index);
+                                } else {
+                                  copyTextToClipboard(content);
+                                }
+                              }}
+                            >
+                              {copyingIndex === index ? <CircularProgress size={20} /> : <ContentPasteRounded fontSize="small" />}
+                            </IconButton>
+                          </Tooltip>
+                          {content.startsWith('<img') && (
+                            <>
+                              <Tooltip title="Download Image">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                    const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                    if (url) {
+                                      window.open(url, '_blank');
+                                    }
+                                  }}
+                                >
+                                  <DownloadRouned fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Save Image">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    const imageUrlMatch = /src="([^"]+)"/.exec(content);
+                                    const url = imageUrlMatch ? imageUrlMatch[1] : null;
+                                    if (url) {
+                                      setImageUrl(url);
+                                      setSaveImageDialogOpen(true);
+                                    }
+                                  }}
+                                >
+                                  <SaveRounded fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          )}
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </StyledBox>
+                {!streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (
+                  <Box sx={{ px: 1, pb: 1, display: 'flex', justifyContent: 'right' }}>
+                    {extraActions.map(({ label, id }) => (
+                      <Button
+                        key={id}
+                        variant="text"
+                        size="small"
+                        onClick={(e) => onExtraActionClick?.(e, id, content, api)}
+                      >
+                        {label}
+                      </Button>
+                    ))}
                   </Box>
                 )}
-              </StyledBox>
-              {!streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (
-                <Box sx={{ px: 1, pb: 1, display: 'flex', justifyContent: 'right' }}>
-                  {extraActions.map(({ label, id }) => (
-                    <Button
-                      key={id}
-                      variant="text"
-                      size="small"
-                      onClick={(e) => onExtraActionClick?.(e, id, content, api)}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </Box>
-              )}
-            </Box>
-          )
-        )}
-        {error && <Alert severity="error">{error.message}</Alert>}
-        {scrollToReply && <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' })} />}
+              </Box>
+            )
+          )}
+          {error && <Alert severity="error">{error.message}</Alert>}
+          {scrollToReply && <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' })} />}
+        </Box>
       </Box>
       <Box
         component="form"
