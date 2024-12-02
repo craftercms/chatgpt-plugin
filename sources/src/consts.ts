@@ -72,3 +72,34 @@ export const languageCodes = [
   { code: 'lt-LT', label: 'Lithuanian (Lithuania)' },
   { code: 'et-EE', label: 'Estonian (Estonia)' }
 ];
+
+// List of function calls for ChatGPT
+export const functionTools = [
+  {
+    type: 'function',
+    function: {
+      name: 'publish_content',
+      description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'."
+          },
+          date: {
+            type: 'string',
+            description:
+              "The scheduled date and time to publish the content in ISO 8601 format. For example, '2025-12-12T00:00:00Z'."
+          },
+          publishingTarget: {
+            type: 'string',
+            description:
+              "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'"
+          }
+        },
+        required: ['path']
+      }
+    }
+  }
+];

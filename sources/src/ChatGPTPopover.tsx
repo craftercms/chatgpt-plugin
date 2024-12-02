@@ -44,7 +44,7 @@ function ChatGPTModelSelect({
   const [models, setModels] = useState<Array<{ id: string }>>([]);
   useEffect(() => {
     listChatModels().then((modelList) => {
-      const filteredModels = modelList.filter(model => {
+      const filteredModels = modelList.filter((model) => {
         if (mode === 'chat') {
           return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
         } else if (mode === 'image') {
@@ -152,7 +152,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
       const newModel = currentMode === 'image' ? defaultImageModel : defaultChatModel;
       setSelectedModel(newModel);
     }
-  }, [chatGptRef.current?.mode()])
+  }, [chatGptRef.current?.mode()]);
 
   const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
     setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);

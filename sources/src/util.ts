@@ -13,6 +13,7 @@ import { APIPromise } from 'openai/src/core';
 import { Stream } from 'openai/src/streaming';
 import { RequestInfo, Response } from 'openai/_shims';
 import { User } from '@craftercms/studio-ui';
+import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -169,11 +170,86 @@ export async function saveImage(request: SaveImageRequest) {
   await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
     method: 'PUT',
     headers: {
-      ...headers,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...headers
     },
     body: JSON.stringify(request)
   });
 
   return true;
+}
+
+/**
+ * Publish a content
+ * @param path the path to publish
+ * @param date the date to publish
+ * @param environment the environment to publish, default is 'live'
+ * @returns function call result
+ */
+export async function publishContent({
+  path,
+  date,
+  publishingTarget = 'live'
+}: {
+  path: string;
+  date: string;
+  publishingTarget: PublishingTargets;
+}) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const body: PublishingParams = {
+    publishingTarget,
+    items: [path],
+    sendEmailNotifications: false,
+    comment: `Publish content ${path} on ${date} with AI Assistant`
+  };
+  if (date) {
+    body.schedule = date;
+  }
+  const response = await fetch(`${authoringBase}/api/2/workflow/publish`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify({
+      siteId,
+      ...body
+    })
+  });
+  const succeed = response.status === 200;
+  const dateMessage = date ? `on ${date}` : 'now';
+  return {
+    succeed,
+    message: succeed
+      ? `Your content at path '${path}' has been scheduled to publish ${dateMessage} to the target '${publishingTarget}'.`
+      : 'Error publishing content. Please try again later or contact administration.'
+  };
+}
+
+export interface FunctionCallResult {
+  succeed: boolean;
+  message: string;
+}
+
+/**
+ * Call a function with ChatGPT
+ * @param name the function name
+ * @param params parameters in string
+ */
+export async function callFunction(name: string, params: string = '') {
+  const args = JSON.parse(params);
+  switch (name) {
+    case 'publish_content': {
+      if (!args?.path) {
+        break;
+      }
+      return await publishContent(args);
+    }
+
+    default:
+      throw new Error('No function found');
+  }
 }

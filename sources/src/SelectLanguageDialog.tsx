@@ -1,9 +1,5 @@
 import CheckRounded from '@mui/icons-material/CheckRounded';
-import {
-  Dialog,
-  ListItemIcon,
-  MenuItem
-} from '@mui/material';
+import { Dialog, ListItemIcon, MenuItem } from '@mui/material';
 import { languageCodes } from './consts';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader';
 import DialogBody from '@craftercms/studio-ui/components/DialogBody';
@@ -20,10 +16,7 @@ export interface SelectLanguageDialogProps {
 export default function SelectLanguageDialog(props: Readonly<SelectLanguageDialogProps>) {
   const { open, language, onClose, onLanguageChange } = props;
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-    >
+    <Dialog open={open} onClose={onClose}>
       <DialogHeader title="Speech to Text Language" />
       <DialogBody>
         {languageCodes.map((lc) => (

@@ -33,8 +33,8 @@ import StopRounded from '@mui/icons-material/StopRounded';
 import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
-import { copyImageToClipboard, createChatCompletion, createImageGeneration } from './util';
-import { defaultChatModel } from './consts';
+import { callFunction, copyImageToClipboard, createChatCompletion, createImageGeneration } from './util';
+import { defaultChatModel, functionTools } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
 import ImageRounded from '@mui/icons-material/ImageRounded';
@@ -256,14 +256,17 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const [prompt, setPrompt] = useState('');
   const [error, setError] = useState<Error>();
   const [messages, setMessages] = useState<Array<ChatCompletionMessageParam>>(
-    initialMessages ??
-      [
-        //   { role: 'user', content: 'Generate 1 paragraph of placeholder text.' }
-        //   { role: 'user', content: 'Greetings.' },
-        //   { role: 'assistant', content: 'Hi! How can I assist you today?' },
-        //   { role: 'user', content: 'What\'s the best time to drink coffee?' },
-        //   { role: 'assistant', content: 'The best time to drink coffee is typically in the morning between 9:30 am to 11:30 am when your cortisol levels are starting to drop. However, if you have it straight after waking up, your body\'s production of cortisol (a stress hormone and also a natural mechanism which helps you stay awake) could be hindered. Coffee can also be consumed in the early afternoon, around 1:00 pm to 2:00 pm. Keep in mind that this can vary depending on your own personal body clock. It\'s also important not to consume coffee too close to bedtime, as caffeine can interfere with your ability to fall asleep.' }
-      ]
+    initialMessages ?? [
+      {
+        role: 'system',
+        content:
+          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+      },
+      {
+        role: 'system',
+        content: "Use the 'publish_content' function when the user asks about publishing a content."
+      }
+    ]
   );
   const [mode, setMode] = useState<ChatMode>('chat');
   const [imageUrl, setImageUrl] = useState('');
@@ -324,7 +327,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     setError(null);
     setStreaming(true);
     setMessages([...messagesRef.current, { role: 'assistant', content: '...' }]);
-    const chunks = [];
     try {
       let stream;
       if (mode === 'image') {
@@ -350,20 +352,38 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         stream = streamRef.current = await createChatCompletion({
           model,
           messages: messagesRef.current,
-          stream: true
+          stream: true,
+          tools: functionTools
         });
 
         const reply: ChatCompletionMessageParam = { role: 'assistant', content: '' };
         messagesRef.current.push(reply);
         setMessages([...messagesRef.current]);
 
+        let funcName = '';
+        let funcArgs = '';
         for await (const part of stream) {
           const content = part.choices[0]?.delta?.content;
           if (content) {
             reply.content += content;
             setMessages([...messagesRef.current]);
-            chunks.push(content);
           }
+
+          const name = part.choices[0]?.delta?.tool_calls?.[0]?.function?.name;
+          if (name) {
+            funcName = name;
+          }
+
+          const argument = part.choices[0]?.delta?.tool_calls?.[0]?.function?.arguments;
+          if (argument) {
+            funcArgs += argument;
+          }
+        }
+
+        if (funcName) {
+          const result = await callFunction(funcName, funcArgs);
+          reply.content += result.message;
+          setMessages([...messagesRef.current]);
         }
       }
     } catch (e) {
@@ -492,18 +512,22 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           }}
         >
           <div>
-            <IconButton onClick={() => {
-              setMode('chat');
-              onModeSelected?.('chat');
-            }}>
+            <IconButton
+              onClick={() => {
+                setMode('chat');
+                onModeSelected?.('chat');
+              }}
+            >
               <Tooltip title="Chat Completion" arrow>
                 <OpenAILogo />
               </Tooltip>
             </IconButton>
-            <IconButton onClick={() => {
-              setMode('image');
-              onModeSelected?.('image');
-            }}>
+            <IconButton
+              onClick={() => {
+                setMode('image');
+                onModeSelected?.('image');
+              }}
+            >
               <Tooltip title="Image Generation" arrow>
                 <ImageRounded />
               </Tooltip>
@@ -517,11 +541,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                 sx={{ maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }}
                 elevation={0}
               >
-                {mode === 'image' ? (
-                  <ImageRounded />
-                ) : (
-                  <OpenAILogo />
-                )}
+                {mode === 'image' ? <ImageRounded /> : <OpenAILogo />}
                 <Typography variant="h6">
                   {mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant'}
                 </Typography>
@@ -607,7 +627,11 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                                 }
                               }}
                             >
-                              {copyingIndex === index ? <CircularProgress size={20} /> : <ContentPasteRounded fontSize="small" />}
+                              {copyingIndex === index ? (
+                                <CircularProgress size={20} />
+                              ) : (
+                                <ContentPasteRounded fontSize="small" />
+                              )}
                             </IconButton>
                           </Tooltip>
                           {content.startsWith('<img') && (
@@ -738,11 +762,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         <IconButton sx={{ ml: 1 }} onClick={handleMenuClick}>
           <MoreVertRounded />
         </IconButton>
-        <Menu
-          anchorEl={settingMenuAnchorEl}
-          open={Boolean(settingMenuAnchorEl)}
-          onClose={handleSettingMenuClose}
-        >
+        <Menu anchorEl={settingMenuAnchorEl} open={Boolean(settingMenuAnchorEl)} onClose={handleSettingMenuClose}>
           <MenuItem onClick={handleLanguageDialogOpen}>Set Speech to Text Language</MenuItem>
         </Menu>
         <SelectLanguageDialog
