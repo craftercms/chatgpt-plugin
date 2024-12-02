@@ -1,107 +1,14 @@
-import {
-  AppBarProps,
-  Button,
-  CircularProgress,
-  FormControlLabel,
-  Menu,
-  MenuItem,
-  paperClasses,
-  Popover,
-  PopoverProps,
-  Radio,
-  useTheme
-} from '@mui/material';
+import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps, ChatGPTRef, ChatMode } from './ChatGPT.tsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
 import DialogHeader from '@craftercms/studio-ui/components/DialogHeader/DialogHeader';
 import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
-import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
 import { listChatModels } from './util.ts';
 import { defaultChatModel, defaultImageModel } from './consts.ts';
-
-interface ChatGPTModelSelectProps {
-  enableCustomModel: boolean;
-  handleSettingsClick: (event: React.MouseEvent<HTMLElement>) => void;
-  modelMenuAnchorEl: null | HTMLElement;
-  selectedModel: string;
-  handleModelSelect: (modelId: string) => void;
-  handleClose: () => void;
-  mode?: ChatMode;
-}
-
-function ChatGPTModelSelect({
-  enableCustomModel,
-  handleSettingsClick,
-  modelMenuAnchorEl,
-  selectedModel,
-  handleModelSelect,
-  handleClose,
-  mode = 'chat'
-}: Readonly<ChatGPTModelSelectProps>) {
-  const [models, setModels] = useState<Array<{ id: string }>>([]);
-  useEffect(() => {
-    listChatModels().then((modelList) => {
-      const filteredModels = modelList.filter((model) => {
-        if (mode === 'chat') {
-          return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
-        } else if (mode === 'image') {
-          return model.id.includes('dall-e');
-        }
-        return false;
-      });
-
-      setModels(filteredModels);
-    });
-  }, [mode]);
-  return (
-    <>
-      <Button
-        id="model-select-button"
-        variant="text"
-        color="inherit"
-        onClick={enableCustomModel ? handleSettingsClick : undefined}
-        aria-controls={modelMenuAnchorEl ? 'model-select-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={Boolean(modelMenuAnchorEl)}
-        sx={{
-          typography: 'subtitle1',
-          textTransform: 'none',
-          borderRadius: 1,
-          minWidth: 0
-        }}
-        endIcon={enableCustomModel ? <ExpandMoreRounded /> : null}
-      >
-        {selectedModel}
-      </Button>
-      {enableCustomModel && (
-        <Menu
-          id="model-select-menu"
-          anchorEl={modelMenuAnchorEl}
-          open={Boolean(modelMenuAnchorEl)}
-          onClose={handleClose}
-          MenuListProps={{
-            'aria-labelledby': 'model-select-button'
-          }}
-        >
-          {models && models.length > 0 ? (
-            models.map((model) => (
-              <MenuItem key={model.id} onClick={() => handleModelSelect(model.id)}>
-                <FormControlLabel control={<Radio checked={selectedModel === model.id} />} label={model.id} />
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem>
-              <CircularProgress size={16} />
-            </MenuItem>
-          )}
-        </Menu>
-      )}
-    </>
-  );
-}
+import ChatGPTModelSelectMenu from './ChatGPTModelSelectMenu.tsx';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
   appBarTitle?: string;
@@ -136,15 +43,24 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedModel, setSelectedModel] = useState(defaultChatModel);
   const [selectedMode, setSelectedMode] = useState<ChatMode>('chat');
+  const [allModels, setAllModels] = useState<Array<{ id: string }>>([]);
 
-  const onModeSelected = (mode: ChatMode) => {
-    setSelectedMode(mode);
-    if (mode === 'chat') {
-      setSelectedModel(defaultChatModel);
-    } else if (mode === 'image') {
-      setSelectedModel(defaultImageModel);
-    }
-  };
+  useEffect(() => {
+    listChatModels().then((modelList) => {
+      setAllModels(modelList);
+    });
+  }, []);
+
+  const filteredModels = useMemo(() => {
+    return allModels.filter((model) => {
+      if (selectedMode === 'chat') {
+        return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
+      } else if (selectedMode === 'image') {
+        return model.id.includes('dall-e');
+      }
+      return false;
+    });
+  }, [allModels, selectedMode]);
 
   useEffect(() => {
     const currentMode = chatGptRef.current?.mode();
@@ -154,7 +70,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     }
   }, [chatGptRef.current?.mode()]);
 
-  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleModelMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
   };
 
@@ -205,14 +121,14 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
           onMinimizeButtonClick={() => onMinimize?.()}
           onCloseButtonClick={(e) => onClose(e, null)}
         >
-          <ChatGPTModelSelect
+          <ChatGPTModelSelectMenu
+            models={filteredModels}
             enableCustomModel={enableCustomModel}
-            handleSettingsClick={handleSettingsClick}
+            handleModelMenuClick={handleModelMenuClick}
             modelMenuAnchorEl={modelMenuAnchorEl}
             selectedModel={selectedModel}
             handleModelSelect={handleModelSelect}
             handleClose={handleClose}
-            mode={selectedMode}
           />
         </DialogHeader>
         <ChatGPT
@@ -224,7 +140,14 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             chat: { height: 'calc(100% - 97px)' },
             ...chatGPTProps?.sxs
           }}
-          onModeSelected={onModeSelected}
+          onModeSelected={(mode) => {
+            if (mode === 'chat') {
+              setSelectedModel(defaultChatModel);
+            } else if (mode === 'image') {
+              setSelectedModel(defaultImageModel);
+            }
+            setSelectedMode(mode);
+          }}
         />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />

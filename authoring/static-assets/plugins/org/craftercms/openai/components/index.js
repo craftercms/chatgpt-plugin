@@ -1,6 +1,6 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Drawer, IconButton, Tooltip, Paper, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, Popover, paperClasses, FormControlLabel, Radio } = craftercms.libs.MaterialUI;
-const { useState, useEffect, forwardRef, useRef, useImperativeHandle } = craftercms.libs.React;
+const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Drawer, IconButton, Tooltip, Paper, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, Popover, paperClasses } = craftercms.libs.MaterialUI;
+const { useState, useEffect, forwardRef, useRef, useImperativeHandle, useMemo } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const MoreVertRounded = craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded');
@@ -6095,23 +6095,8 @@ const ChatGPT = forwardRef((props, ref) => {
                         } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl, suggestName: suggestName })] })] }));
 });
 
-function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose, mode = 'chat' }) {
-    const [models, setModels] = useState([]);
-    useEffect(() => {
-        listChatModels().then((modelList) => {
-            const filteredModels = modelList.filter((model) => {
-                if (mode === 'chat') {
-                    return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
-                }
-                else if (mode === 'image') {
-                    return model.id.includes('dall-e');
-                }
-                return false;
-            });
-            setModels(filteredModels);
-        });
-    }, [mode]);
-    return (jsxs(Fragment, { children: [jsx(Button, { id: "model-select-button", variant: "text", color: "inherit", onClick: enableCustomModel ? handleSettingsClick : undefined, "aria-controls": modelMenuAnchorEl ? 'model-select-menu' : undefined, "aria-haspopup": "true", "aria-expanded": Boolean(modelMenuAnchorEl), sx: {
+function ChatGPTModelSelectMenu({ models, enableCustomModel, handleModelMenuClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
+    return (jsxs(Fragment, { children: [jsx(Button, { id: "model-select-button", variant: "text", color: "inherit", onClick: enableCustomModel ? handleModelMenuClick : undefined, "aria-controls": modelMenuAnchorEl ? 'model-select-menu' : undefined, "aria-haspopup": "true", "aria-expanded": Boolean(modelMenuAnchorEl), sx: {
                     typography: 'subtitle1',
                     textTransform: 'none',
                     borderRadius: 1,
@@ -6120,6 +6105,7 @@ function ChatGPTModelSelect({ enableCustomModel, handleSettingsClick, modelMenuA
                     'aria-labelledby': 'model-select-button'
                 }, children: models && models.length > 0 ? (models.map((model) => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
 }
+
 function ChatGPTPopover(props) {
     const theme = useTheme();
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 492, height = 595, enableCustomModel = true, ...popoverProps } = props;
@@ -6128,15 +6114,23 @@ function ChatGPTPopover(props) {
     const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState(null);
     const [selectedModel, setSelectedModel] = useState(defaultChatModel);
     const [selectedMode, setSelectedMode] = useState('chat');
-    const onModeSelected = (mode) => {
-        setSelectedMode(mode);
-        if (mode === 'chat') {
-            setSelectedModel(defaultChatModel);
-        }
-        else if (mode === 'image') {
-            setSelectedModel(defaultImageModel);
-        }
-    };
+    const [allModels, setAllModels] = useState([]);
+    useEffect(() => {
+        listChatModels().then((modelList) => {
+            setAllModels(modelList);
+        });
+    }, []);
+    const filteredModels = useMemo(() => {
+        return allModels.filter((model) => {
+            if (selectedMode === 'chat') {
+                return model.id.includes('gpt-3.5') || model.id.includes('gpt-4');
+            }
+            else if (selectedMode === 'image') {
+                return model.id.includes('dall-e');
+            }
+            return false;
+        });
+    }, [allModels, selectedMode]);
     useEffect(() => {
         const currentMode = chatGptRef.current?.mode();
         if (currentMode) {
@@ -6144,7 +6138,7 @@ function ChatGPTPopover(props) {
             setSelectedModel(newModel);
         }
     }, [chatGptRef.current?.mode()]);
-    const handleSettingsClick = (event) => {
+    const handleModelMenuClick = (event) => {
         setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
     };
     const handleModelSelect = (modelId) => {
@@ -6174,11 +6168,19 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader$2, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelect, { enableCustomModel: enableCustomModel, handleSettingsClick: handleSettingsClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose, mode: selectedMode }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: {
+                }, children: [jsx(DialogHeader$2, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: {
                             root: { height: 'calc(100% - 113px)' },
                             chat: { height: 'calc(100% - 97px)' },
                             ...chatGPTProps?.sxs
-                        }, onModeSelected: onModeSelected })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
+                        }, onModeSelected: (mode) => {
+                            if (mode === 'chat') {
+                                setSelectedModel(defaultChatModel);
+                            }
+                            else if (mode === 'image') {
+                                setSelectedModel(defaultImageModel);
+                            }
+                            setSelectedMode(mode);
+                        } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {
