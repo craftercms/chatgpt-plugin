@@ -180,6 +180,47 @@ export async function saveImage(request: SaveImageRequest) {
 }
 
 /**
+ * Fetch memory data from CMS
+ * @returns list of page items
+ */
+export async function fetchMemoryData() {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(
+    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    }
+  );
+
+  if (response.status !== 200) {
+    return {};
+  }
+
+  const data = await response.json();
+
+  return data.result?.items;
+}
+
+/**
+ * Resolve content path base on the internal name
+ * @params internalName the name of the content
+ * @returns content path
+ */
+export async function resolveContentPath(internalName: string) {
+  if (!internalName) {
+    return window.craftercms.getStore().getState().preview.guest.path;
+  }
+
+  return await fetchContentPath(internalName);
+}
+
+/**
  * Publish a content
  * @param path the path to publish
  * @param date the date to publish
@@ -229,6 +270,34 @@ export async function publishContent({
   };
 }
 
+/**
+ * Fetch the content path by name
+ * @param internalName internal-name of the content
+ * @returns the content path
+ */
+export async function fetchContentPath(internalName: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(
+    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    }
+  );
+
+  if (response.status !== 200) {
+    return '';
+  }
+
+  const data = await response.json();
+  return data.result?.path;
+}
+
 export interface FunctionCallResult {
   succeed: boolean;
   message: string;
@@ -239,13 +308,28 @@ export interface FunctionCallResult {
  * @param name the function name
  * @param params parameters in string
  */
-export async function callFunction(name: string, params: string = '') {
+export async function chatGPTFunctionCall(name: string, params: string = '') {
   const args = JSON.parse(params);
   switch (name) {
     case 'publish_content': {
-      if (!args?.path) {
+      if (!args.path && !args.currentContent && !args.internalName) {
         break;
       }
+
+      if (!args.path && args.currentContent) {
+        args.path = await resolveContentPath('');
+      } else if (!args.path && args.internalName) {
+        args.path = await resolveContentPath(args.internalName);
+      }
+
+      if (!args.path) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the path from current context. Could you please provide more detail the content you would like to publish?"
+        };
+      }
+
       return await publishContent(args);
     }
 

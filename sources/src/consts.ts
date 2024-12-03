@@ -79,13 +79,25 @@ export const functionTools = [
     type: 'function',
     function: {
       name: 'publish_content',
-      description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time.',
+      description:
+        'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time. If no currentContent or path or name parameters are available. Ask user what content to publish.',
       parameters: {
         type: 'object',
         properties: {
+          internalName: {
+            type: 'string',
+            description:
+              "Content identifier name. This usually is the page title, internal name. For example: 'Home', 'Categories', 'Search Results', or any specific names."
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the publishing path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+          },
           path: {
             type: 'string',
-            description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'."
+            description:
+              "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. If terms such as 'this content', 'current content', 'current page' are provided, try to resolve the current path with the function 'resolve_current_content_path' then continue the publish."
           },
           date: {
             type: 'string',
@@ -95,10 +107,10 @@ export const functionTools = [
           publishingTarget: {
             type: 'string',
             description:
-              "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'"
+              "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'."
           }
         },
-        required: ['path']
+        additionalProperties: false
       }
     }
   }

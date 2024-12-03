@@ -5466,6 +5466,38 @@ async function saveImage(request) {
     return true;
 }
 /**
+ * Fetch memory data from CMS
+ * @returns list of page items
+ */
+async function fetchMemoryData() {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers
+        }
+    });
+    if (response.status !== 200) {
+        return {};
+    }
+    const data = await response.json();
+    return data.result?.items;
+}
+/**
+ * Resolve content path base on the internal name
+ * @params internalName the name of the content
+ * @returns content path
+ */
+async function resolveContentPath(internalName) {
+    if (!internalName) {
+        return window.craftercms.getStore().getState().preview.guest.path;
+    }
+    return await fetchContentPath(internalName);
+}
+/**
  * Publish a content
  * @param path the path to publish
  * @param date the date to publish
@@ -5507,16 +5539,50 @@ async function publishContent({ path, date, publishingTarget = 'live' }) {
     };
 }
 /**
+ * Fetch the content path by name
+ * @param internalName internal-name of the content
+ * @returns the content path
+ */
+async function fetchContentPath(internalName) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers
+        }
+    });
+    if (response.status !== 200) {
+        return '';
+    }
+    const data = await response.json();
+    return data.result?.path;
+}
+/**
  * Call a function with ChatGPT
  * @param name the function name
  * @param params parameters in string
  */
-async function callFunction(name, params = '') {
+async function chatGPTFunctionCall(name, params = '') {
     const args = JSON.parse(params);
     switch (name) {
         case 'publish_content': {
-            if (!args?.path) {
+            if (!args.path && !args.currentContent && !args.internalName) {
                 break;
+            }
+            if (!args.path && args.currentContent) {
+                args.path = await resolveContentPath('');
+            }
+            else if (!args.path && args.internalName) {
+                args.path = await resolveContentPath(args.internalName);
+            }
+            if (!args.path) {
+                return {
+                    succeed: false,
+                    message: "I'm not able to resolve the path from current context. Could you please provide more detail the content you would like to publish?"
+                };
             }
             return await publishContent(args);
         }
@@ -5603,13 +5669,21 @@ const functionTools = [
         type: 'function',
         function: {
             name: 'publish_content',
-            description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time.',
+            description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time. If no currentContent or path or name parameters are available. Ask user what content to publish.',
             parameters: {
                 type: 'object',
                 properties: {
+                    internalName: {
+                        type: 'string',
+                        description: "Content identifier name. This usually is the page title, internal name. For example: 'Home', 'Categories', 'Search Results', or any specific names."
+                    },
+                    currentContent: {
+                        type: 'boolean',
+                        description: "A flag which is true if the publishing path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+                    },
                     path: {
                         type: 'string',
-                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'."
+                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. If terms such as 'this content', 'current content', 'current page' are provided, try to resolve the current path with the function 'resolve_current_content_path' then continue the publish."
                     },
                     date: {
                         type: 'string',
@@ -5617,10 +5691,10 @@ const functionTools = [
                     },
                     publishingTarget: {
                         type: 'string',
-                        description: "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'"
+                        description: "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'."
                     }
                 },
-                required: ['path']
+                additionalProperties: false
             }
         }
     }
@@ -5817,7 +5891,7 @@ const ChatGPT = forwardRef((props, ref) => {
         },
         {
             role: 'system',
-            content: "Use the 'publish_content' function when the user asks about publishing a content."
+            content: "Use the 'publish_content' function when the user asks about publishing a specific content providing a path, or publishing the current content. Ask the confirmation from user if the path is not provided and resolved by the current context or by querying the name."
         }
     ]);
     const [mode, setMode] = useState('chat');
@@ -5837,6 +5911,18 @@ const ChatGPT = forwardRef((props, ref) => {
     const userColour = stringToColor(userName);
     const maxMessageIndex = messages.length - 1;
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+    useEffect(() => {
+        fetchMemoryData().then(items => {
+            items.forEach(item => {
+                const newMessage = {
+                    role: 'system',
+                    content: `A CrafterCMS page in JSON format: ${JSON.stringify(item)}`
+                };
+                messagesRef.current.push(newMessage);
+                setMessages([...messagesRef.current]);
+            });
+        });
+    }, []);
     const handleMenuClick = (event) => {
         setSettingMenuAnchorEl(event.currentTarget);
     };
@@ -5922,7 +6008,7 @@ const ChatGPT = forwardRef((props, ref) => {
                     }
                 }
                 if (funcName) {
-                    const result = await callFunction(funcName, funcArgs);
+                    const result = await chatGPTFunctionCall(funcName, funcArgs);
                     reply.content += result.message;
                     setMessages([...messagesRef.current]);
                 }

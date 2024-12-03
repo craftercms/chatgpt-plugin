@@ -33,7 +33,13 @@ import StopRounded from '@mui/icons-material/StopRounded';
 import MicRounded from '@mui/icons-material/MicRounded';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionCreateParamsBase } from 'openai/src/resources/chat/completions.ts';
-import { callFunction, copyImageToClipboard, createChatCompletion, createImageGeneration } from './util';
+import {
+  chatGPTFunctionCall,
+  copyImageToClipboard,
+  createChatCompletion,
+  createImageGeneration,
+  fetchMemoryData
+} from './util';
 import { defaultChatModel, functionTools } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
@@ -264,7 +270,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       },
       {
         role: 'system',
-        content: "Use the 'publish_content' function when the user asks about publishing a content."
+        content:
+          "Use the 'publish_content' function when the user asks about publishing a specific content providing a path, or publishing the current content. Ask the confirmation from user if the path is not provided and resolved by the current context or by querying the name."
       }
     ]
   );
@@ -285,6 +292,19 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+
+  useEffect(() => {
+    fetchMemoryData().then((items) => {
+      items.forEach((item) => {
+        const newMessage: ChatCompletionMessageParam = {
+          role: 'system',
+          content: `A CrafterCMS page in JSON format: ${JSON.stringify(item)}`
+        };
+        messagesRef.current.push(newMessage);
+        setMessages([...messagesRef.current]);
+      });
+    });
+  }, []);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setSettingMenuAnchorEl(event.currentTarget);
@@ -381,7 +401,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         }
 
         if (funcName) {
-          const result = await callFunction(funcName, funcArgs);
+          const result = await chatGPTFunctionCall(funcName, funcArgs);
           reply.content += result.message;
           setMessages([...messagesRef.current]);
         }
