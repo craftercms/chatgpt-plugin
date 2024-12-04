@@ -96,8 +96,7 @@ export const functionTools = [
           },
           path: {
             type: 'string',
-            description:
-              "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. If terms such as 'this content', 'current content', 'current page' are provided, try to resolve the current path with the function 'resolve_current_content_path' then continue the publish."
+            description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'."
           },
           date: {
             type: 'string',
@@ -110,6 +109,40 @@ export const functionTools = [
               "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'."
           }
         },
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_template',
+      description:
+        'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the page.',
+      parameters: {
+        type: 'object',
+        properties: {
+          instructions: {
+            type: 'string',
+            description: 'Instructions for updating the template'
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the content path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+          },
+          templatePath: {
+            type: 'string',
+            description:
+              "The path in CrafterCMS where the template resides. For example, '/templates/web/pages/home.ftl'."
+          },
+          contentPath: {
+            type: 'string',
+            description:
+              "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. This path is used to resolve the template path using this function"
+          }
+        },
+        required: ['instructions'],
         additionalProperties: false
       }
     }

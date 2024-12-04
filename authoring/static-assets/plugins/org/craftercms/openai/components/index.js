@@ -5351,6 +5351,145 @@ OpenAI.BatchesPage = BatchesPage;
 OpenAI.Uploads = Uploads;
 var OpenAI$1 = OpenAI;
 
+const helperWidgetId = 'craftercms.components.openai.Helper';
+const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
+const chatWidgetId = 'craftercms.components.openai.ChatGPT';
+const popoverWidgetId = 'craftercms.components.openai.ChatGPTPopover';
+const openChatGptMessageId = 'craftercms.openai.OpenChatGPT';
+const chatGptResultMessageId = 'craftercms.openai.ChatGPTResult';
+const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
+// default ChatGPT model
+const defaultChatModel = 'gpt-4o';
+const defaultImageModel = 'dall-e-3';
+// lanaguge codes for speech to text
+const languageCodes = [
+    { code: 'en-US', label: 'English (United States)' },
+    { code: 'en-GB', label: 'English (United Kingdom)' },
+    { code: 'en-CA', label: 'English (Canada)' },
+    { code: 'en-AU', label: 'English (Australia)' },
+    { code: 'fr-FR', label: 'French (France)' },
+    { code: 'fr-CA', label: 'French (Canada)' },
+    { code: 'fr-BE', label: 'French (Belgium)' },
+    { code: 'fr-CH', label: 'French (Switzerland)' },
+    { code: 'es-ES', label: 'Spanish (Spain)' },
+    { code: 'es-MX', label: 'Spanish (Mexico)' },
+    { code: 'es-AR', label: 'Spanish (Argentina)' },
+    { code: 'es-CO', label: 'Spanish (Colombia)' },
+    { code: 'de-DE', label: 'German (Germany)' },
+    { code: 'de-AT', label: 'German (Austria)' },
+    { code: 'de-CH', label: 'German (Switzerland)' },
+    { code: 'pt-PT', label: 'Portuguese (Portugal)' },
+    { code: 'pt-BR', label: 'Portuguese (Brazil)' },
+    { code: 'zh-CN', label: 'Chinese (Simplified, China)' },
+    { code: 'zh-TW', label: 'Chinese (Traditional, Taiwan)' },
+    { code: 'zh-HK', label: 'Chinese (Traditional, Hong Kong)' },
+    { code: 'ja-JP', label: 'Japanese (Japan)' },
+    { code: 'ko-KR', label: 'Korean (South Korea)' },
+    { code: 'ru-RU', label: 'Russian (Russia)' },
+    { code: 'ar-SA', label: 'Arabic (Saudi Arabia)' },
+    { code: 'ar-AE', label: 'Arabic (United Arab Emirates)' },
+    { code: 'it-IT', label: 'Italian (Italy)' },
+    { code: 'it-CH', label: 'Italian (Switzerland)' },
+    { code: 'nl-NL', label: 'Dutch (Netherlands)' },
+    { code: 'nl-BE', label: 'Dutch (Belgium)' },
+    { code: 'sv-SE', label: 'Swedish (Sweden)' },
+    { code: 'sv-FI', label: 'Swedish (Finland)' },
+    { code: 'no-NO', label: 'Norwegian (Norway)' },
+    { code: 'da-DK', label: 'Danish (Denmark)' },
+    { code: 'fi-FI', label: 'Finnish (Finland)' },
+    { code: 'pl-PL', label: 'Polish (Poland)' },
+    { code: 'cs-CZ', label: 'Czech (Czech Republic)' },
+    { code: 'sk-SK', label: 'Slovak (Slovakia)' },
+    { code: 'hu-HU', label: 'Hungarian (Hungary)' },
+    { code: 'el-GR', label: 'Greek (Greece)' },
+    { code: 'he-IL', label: 'Hebrew (Israel)' },
+    { code: 'tr-TR', label: 'Turkish (Turkey)' },
+    { code: 'th-TH', label: 'Thai (Thailand)' },
+    { code: 'vi-VN', label: 'Vietnamese (Vietnam)' },
+    { code: 'id-ID', label: 'Indonesian (Indonesia)' },
+    { code: 'ms-MY', label: 'Malay (Malaysia)' },
+    { code: 'hi-IN', label: 'Hindi (India)' },
+    { code: 'ta-IN', label: 'Tamil (India)' },
+    { code: 'te-IN', label: 'Telugu (India)' },
+    { code: 'ur-PK', label: 'Urdu (Pakistan)' },
+    { code: 'fa-IR', label: 'Persian (Iran)' },
+    { code: 'uk-UA', label: 'Ukrainian (Ukraine)' },
+    { code: 'ro-RO', label: 'Romanian (Romania)' },
+    { code: 'bg-BG', label: 'Bulgarian (Bulgaria)' },
+    { code: 'hr-HR', label: 'Croatian (Croatia)' },
+    { code: 'sr-RS', label: 'Serbian (Serbia)' },
+    { code: 'sl-SI', label: 'Slovenian (Slovenia)' },
+    { code: 'lv-LV', label: 'Latvian (Latvia)' },
+    { code: 'lt-LT', label: 'Lithuanian (Lithuania)' },
+    { code: 'et-EE', label: 'Estonian (Estonia)' }
+];
+// List of function calls for ChatGPT
+const functionTools = [
+    {
+        type: 'function',
+        function: {
+            name: 'publish_content',
+            description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time. If no currentContent or path or name parameters are available. Ask user what content to publish.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    internalName: {
+                        type: 'string',
+                        description: "Content identifier name. This usually is the page title, internal name. For example: 'Home', 'Categories', 'Search Results', or any specific names."
+                    },
+                    currentContent: {
+                        type: 'boolean',
+                        description: "A flag which is true if the publishing path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+                    },
+                    path: {
+                        type: 'string',
+                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'."
+                    },
+                    date: {
+                        type: 'string',
+                        description: "The scheduled date and time to publish the content in ISO 8601 format. For example, '2025-12-12T00:00:00Z'."
+                    },
+                    publishingTarget: {
+                        type: 'string',
+                        description: "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'."
+                    }
+                },
+                additionalProperties: false
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'update_template',
+            description: 'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the page.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    instructions: {
+                        type: 'string',
+                        description: "Instructions for updating the template"
+                    },
+                    currentContent: {
+                        type: 'boolean',
+                        description: "A flag which is true if the content path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+                    },
+                    templatePath: {
+                        type: 'string',
+                        description: "The path in CrafterCMS where the template resides. For example, '/templates/web/pages/home.ftl'."
+                    },
+                    contentPath: {
+                        type: 'string',
+                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. This path is used to resolve the template path using this function"
+                    }
+                },
+                required: ["instructions"],
+                additionalProperties: false
+            }
+        }
+    }
+];
+
 let openai;
 const getOpenAiInstance = () => {
         if (openai) {
@@ -5487,6 +5626,35 @@ async function fetchMemoryData() {
     return data.result?.items;
 }
 /**
+ * Fetch sandbox item by path
+ * @param path the path to fetch
+ * @returns sandbox item
+ */
+async function fetchSandboxItemByPath(path) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const body = {
+        siteId,
+        paths: [path],
+        preferContent: true
+    };
+    const response = await fetch(`${authoringBase}/api/2/content/sandbox_items_by_path`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers
+        },
+        body: JSON.stringify(body)
+    });
+    if (response.status !== 200) {
+        return null;
+    }
+    const data = await response.json();
+    return data?.items?.[0];
+}
+/**
  * Resolve content path base on the internal name
  * @params internalName the name of the content
  * @returns content path
@@ -5496,6 +5664,23 @@ async function resolveContentPath(internalName) {
         return window.craftercms.getStore().getState().preview.guest.path;
     }
     return await fetchContentPath(internalName);
+}
+/**
+ * Resolve template path from content path
+ * @param contentPath the content path (page, component)
+ * @returns template path if available, empty otherwise
+ */
+async function resolveTemplatePath(contentPath) {
+    if (!contentPath) {
+        contentPath = window.craftercms.getStore().getState().preview.guest.path;
+    }
+    let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
+    if (!storedContent) {
+        storedContent = await fetchSandboxItemByPath(contentPath);
+    }
+    const contentTypeId = storedContent.contentTypeId;
+    const storedContentType = window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+    return storedContentType?.displayTemplate;
 }
 /**
  * Publish a content
@@ -5561,6 +5746,95 @@ async function fetchContentPath(internalName) {
     return data.result?.path;
 }
 /**
+ * Fetch content from CMS
+ * @param path the path to fetch content
+ * @returns content
+ */
+async function fetchContent(path) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const response = await fetch(`${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`, {
+        headers
+    });
+    if (response.status !== 200) {
+        return '';
+    }
+    const data = await response.json();
+    return data?.content;
+}
+/**
+ * Write a content to CMS
+ * @param path the path to write
+ * @param content the content to write
+ */
+async function writeContent(path, content) {
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const authoringBase = state.env.authoringBase;
+    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const fileName = path.substring(path.lastIndexOf('/') + 1);
+    const folderPath = path.substring(0, path.lastIndexOf('/'));
+    const response = await fetch(`${authoringBase}/api/1/services/api/1/content/write-content.json?site=${siteId}&path=${folderPath}&unlock=true&fileName=${fileName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain;charset=UTF-8',
+            ...headers
+        },
+        body: content
+    });
+    const succeed = response.status === 200;
+    return {
+        succeed,
+        message: succeed
+            ? `Your content at path '${path}' has been updated.`
+            : `Error updating content at path '${path}'. Please try again later or contact administration.`
+    };
+}
+/**
+ * Update a template with ChatGPT
+ * @param templatePath the template path to fetch it's content
+ * @param instruction the instruction to update template
+ */
+async function updateTemplate(templatePath, instructions) {
+    const templateContent = await fetchContent(templatePath);
+    const stream = await createChatCompletion({
+        model: defaultChatModel,
+        messages: [
+            {
+                role: "system",
+                content: "You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance."
+            },
+            {
+                role: "user",
+                content: `Here is the current template:\n\n${templateContent}`
+            },
+            {
+                role: "user",
+                content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
+            },
+        ],
+        stream: true
+    });
+    let updatedTemplate = '';
+    for await (const part of stream) {
+        const content = part.choices[0]?.delta?.content;
+        if (content) {
+            updatedTemplate += content;
+        }
+    }
+    console.log(updatedTemplate);
+    if (updatedTemplate) {
+        updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+        return await writeContent(templatePath, updatedTemplate);
+    }
+    return {
+        succeed: false,
+        message: `Error updating content at path '${templatePath}'. Please try again later or contact administration.`
+    };
+}
+/**
  * Call a function with ChatGPT
  * @param name the function name
  * @param params parameters in string
@@ -5586,119 +5860,31 @@ async function chatGPTFunctionCall(name, params = '') {
             }
             return await publishContent(args);
         }
+        case 'update_template': {
+            if (!args.instructions) {
+                break;
+            }
+            if (!args.currentContent && !args.templatePath && !args.contentPath) {
+                break;
+            }
+            if (!args.templatePath && args.currentContent) {
+                args.templatePath = await resolveTemplatePath('');
+            }
+            else if (!args.templatePath && args.contentPath) {
+                args.templatePath = await resolveTemplatePath(args.contentPath);
+            }
+            if (!args.templatePath) {
+                return {
+                    succeed: false,
+                    message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+                };
+            }
+            return await updateTemplate(args.templatePath, args.instructions);
+        }
         default:
             throw new Error('No function found');
     }
 }
-
-const helperWidgetId = 'craftercms.components.openai.Helper';
-const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
-const chatWidgetId = 'craftercms.components.openai.ChatGPT';
-const popoverWidgetId = 'craftercms.components.openai.ChatGPTPopover';
-const openChatGptMessageId = 'craftercms.openai.OpenChatGPT';
-const chatGptResultMessageId = 'craftercms.openai.ChatGPTResult';
-const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
-// default ChatGPT model
-const defaultChatModel = 'gpt-4o';
-const defaultImageModel = 'dall-e-3';
-// lanaguge codes for speech to text
-const languageCodes = [
-    { code: 'en-US', label: 'English (United States)' },
-    { code: 'en-GB', label: 'English (United Kingdom)' },
-    { code: 'en-CA', label: 'English (Canada)' },
-    { code: 'en-AU', label: 'English (Australia)' },
-    { code: 'fr-FR', label: 'French (France)' },
-    { code: 'fr-CA', label: 'French (Canada)' },
-    { code: 'fr-BE', label: 'French (Belgium)' },
-    { code: 'fr-CH', label: 'French (Switzerland)' },
-    { code: 'es-ES', label: 'Spanish (Spain)' },
-    { code: 'es-MX', label: 'Spanish (Mexico)' },
-    { code: 'es-AR', label: 'Spanish (Argentina)' },
-    { code: 'es-CO', label: 'Spanish (Colombia)' },
-    { code: 'de-DE', label: 'German (Germany)' },
-    { code: 'de-AT', label: 'German (Austria)' },
-    { code: 'de-CH', label: 'German (Switzerland)' },
-    { code: 'pt-PT', label: 'Portuguese (Portugal)' },
-    { code: 'pt-BR', label: 'Portuguese (Brazil)' },
-    { code: 'zh-CN', label: 'Chinese (Simplified, China)' },
-    { code: 'zh-TW', label: 'Chinese (Traditional, Taiwan)' },
-    { code: 'zh-HK', label: 'Chinese (Traditional, Hong Kong)' },
-    { code: 'ja-JP', label: 'Japanese (Japan)' },
-    { code: 'ko-KR', label: 'Korean (South Korea)' },
-    { code: 'ru-RU', label: 'Russian (Russia)' },
-    { code: 'ar-SA', label: 'Arabic (Saudi Arabia)' },
-    { code: 'ar-AE', label: 'Arabic (United Arab Emirates)' },
-    { code: 'it-IT', label: 'Italian (Italy)' },
-    { code: 'it-CH', label: 'Italian (Switzerland)' },
-    { code: 'nl-NL', label: 'Dutch (Netherlands)' },
-    { code: 'nl-BE', label: 'Dutch (Belgium)' },
-    { code: 'sv-SE', label: 'Swedish (Sweden)' },
-    { code: 'sv-FI', label: 'Swedish (Finland)' },
-    { code: 'no-NO', label: 'Norwegian (Norway)' },
-    { code: 'da-DK', label: 'Danish (Denmark)' },
-    { code: 'fi-FI', label: 'Finnish (Finland)' },
-    { code: 'pl-PL', label: 'Polish (Poland)' },
-    { code: 'cs-CZ', label: 'Czech (Czech Republic)' },
-    { code: 'sk-SK', label: 'Slovak (Slovakia)' },
-    { code: 'hu-HU', label: 'Hungarian (Hungary)' },
-    { code: 'el-GR', label: 'Greek (Greece)' },
-    { code: 'he-IL', label: 'Hebrew (Israel)' },
-    { code: 'tr-TR', label: 'Turkish (Turkey)' },
-    { code: 'th-TH', label: 'Thai (Thailand)' },
-    { code: 'vi-VN', label: 'Vietnamese (Vietnam)' },
-    { code: 'id-ID', label: 'Indonesian (Indonesia)' },
-    { code: 'ms-MY', label: 'Malay (Malaysia)' },
-    { code: 'hi-IN', label: 'Hindi (India)' },
-    { code: 'ta-IN', label: 'Tamil (India)' },
-    { code: 'te-IN', label: 'Telugu (India)' },
-    { code: 'ur-PK', label: 'Urdu (Pakistan)' },
-    { code: 'fa-IR', label: 'Persian (Iran)' },
-    { code: 'uk-UA', label: 'Ukrainian (Ukraine)' },
-    { code: 'ro-RO', label: 'Romanian (Romania)' },
-    { code: 'bg-BG', label: 'Bulgarian (Bulgaria)' },
-    { code: 'hr-HR', label: 'Croatian (Croatia)' },
-    { code: 'sr-RS', label: 'Serbian (Serbia)' },
-    { code: 'sl-SI', label: 'Slovenian (Slovenia)' },
-    { code: 'lv-LV', label: 'Latvian (Latvia)' },
-    { code: 'lt-LT', label: 'Lithuanian (Lithuania)' },
-    { code: 'et-EE', label: 'Estonian (Estonia)' }
-];
-// List of function calls for ChatGPT
-const functionTools = [
-    {
-        type: 'function',
-        function: {
-            name: 'publish_content',
-            description: 'Triggers a content publish action in CrafterCMS for a specific path at a specified date and time. If no currentContent or path or name parameters are available. Ask user what content to publish.',
-            parameters: {
-                type: 'object',
-                properties: {
-                    internalName: {
-                        type: 'string',
-                        description: "Content identifier name. This usually is the page title, internal name. For example: 'Home', 'Categories', 'Search Results', or any specific names."
-                    },
-                    currentContent: {
-                        type: 'boolean',
-                        description: "A flag which is true if the publishing path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
-                    },
-                    path: {
-                        type: 'string',
-                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. If terms such as 'this content', 'current content', 'current page' are provided, try to resolve the current path with the function 'resolve_current_content_path' then continue the publish."
-                    },
-                    date: {
-                        type: 'string',
-                        description: "The scheduled date and time to publish the content in ISO 8601 format. For example, '2025-12-12T00:00:00Z'."
-                    },
-                    publishingTarget: {
-                        type: 'string',
-                        description: "The publishing target or environment. Possible values are 'live' or 'staging'. Default if not specified is 'live'."
-                    }
-                },
-                additionalProperties: false
-            }
-        }
-    }
-];
 
 function SelectLanguageDialog(props) {
     const { open, language, onClose, onLanguageChange } = props;
@@ -5912,8 +6098,8 @@ const ChatGPT = forwardRef((props, ref) => {
     const maxMessageIndex = messages.length - 1;
     const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
     useEffect(() => {
-        fetchMemoryData().then(items => {
-            items.forEach(item => {
+        fetchMemoryData().then((items) => {
+            items.forEach((item) => {
                 const newMessage = {
                     role: 'system',
                     content: `A CrafterCMS page in JSON format: ${JSON.stringify(item)}`

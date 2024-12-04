@@ -14,6 +14,7 @@ import { Stream } from 'openai/src/streaming';
 import { RequestInfo, Response } from 'openai/_shims';
 import { User } from '@craftercms/studio-ui';
 import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
+import { defaultChatModel } from './consts';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -208,6 +209,37 @@ export async function fetchMemoryData() {
 }
 
 /**
+ * Fetch sandbox item by path
+ * @param path the path to fetch
+ * @returns sandbox item
+ */
+export async function fetchSandboxItemByPath(path: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const body = {
+    siteId,
+    paths: [path],
+    preferContent: true
+  };
+  const response = await fetch(`${authoringBase}/api/2/content/sandbox_items_by_path`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify(body)
+  });
+  if (response.status !== 200) {
+    return null;
+  }
+
+  const data = await response.json();
+  return data?.items?.[0];
+}
+
+/**
  * Resolve content path base on the internal name
  * @params internalName the name of the content
  * @returns content path
@@ -218,6 +250,27 @@ export async function resolveContentPath(internalName: string) {
   }
 
   return await fetchContentPath(internalName);
+}
+
+/**
+ * Resolve template path from content path
+ * @param contentPath the content path (page, component)
+ * @returns template path if available, empty otherwise
+ */
+export async function resolveTemplatePath(contentPath: string) {
+  if (!contentPath) {
+    contentPath = window.craftercms.getStore().getState().preview.guest.path;
+  }
+
+  let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
+  if (!storedContent) {
+    storedContent = await fetchSandboxItemByPath(contentPath);
+  }
+
+  const contentTypeId = storedContent.contentTypeId;
+  const storedContentType = window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+
+  return storedContentType?.displayTemplate;
 }
 
 /**
@@ -298,6 +351,111 @@ export async function fetchContentPath(internalName: string) {
   return data.result?.path;
 }
 
+/**
+ * Fetch content from CMS
+ * @param path the path to fetch content
+ * @returns content
+ */
+export async function fetchContent(path: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(
+    `${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`,
+    {
+      headers
+    }
+  );
+  if (response.status !== 200) {
+    return '';
+  }
+
+  const data = await response.json();
+  return data?.content;
+}
+
+/**
+ * Write a content to CMS
+ * @param path the path to write
+ * @param content the content to write
+ */
+export async function writeContent(path: string, content: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const fileName = path.substring(path.lastIndexOf('/') + 1);
+  const folderPath = path.substring(0, path.lastIndexOf('/'));
+  const response = await fetch(
+    `${authoringBase}/api/1/services/api/1/content/write-content.json?site=${siteId}&path=${folderPath}&unlock=true&fileName=${fileName}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=UTF-8',
+        ...headers
+      },
+      body: content
+    }
+  );
+  const succeed = response.status === 200;
+
+  return {
+    succeed,
+    message: succeed
+      ? `Your content at path '${path}' has been updated.`
+      : `Error updating content at path '${path}'. Please try again later or contact administration.`
+  };
+}
+
+/**
+ * Update a template with ChatGPT
+ * @param templatePath the template path to fetch it's content
+ * @param instruction the instruction to update template
+ */
+export async function updateTemplate(templatePath: string, instructions: string) {
+  const templateContent = await fetchContent(templatePath);
+  const stream = await createChatCompletion({
+    model: defaultChatModel,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+      },
+      {
+        role: 'user',
+        content: `Here is the current template:\n\n${templateContent}`
+      },
+      {
+        role: 'user',
+        content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
+      }
+    ],
+    stream: true
+  });
+
+  let updatedTemplate = '';
+  for await (const part of stream) {
+    const content = part.choices[0]?.delta?.content;
+    if (content) {
+      updatedTemplate += content;
+    }
+  }
+
+  console.log(updatedTemplate);
+
+  if (updatedTemplate) {
+    updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+    return await writeContent(templatePath, updatedTemplate);
+  }
+
+  return {
+    succeed: false,
+    message: `Error updating content at path '${templatePath}'. Please try again later or contact administration.`
+  };
+}
+
 export interface FunctionCallResult {
   succeed: boolean;
   message: string;
@@ -331,6 +489,32 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       }
 
       return await publishContent(args);
+    }
+
+    case 'update_template': {
+      if (!args.instructions) {
+        break;
+      }
+
+      if (!args.currentContent && !args.templatePath && !args.contentPath) {
+        break;
+      }
+
+      if (!args.templatePath && args.currentContent) {
+        args.templatePath = await resolveTemplatePath('');
+      } else if (!args.templatePath && args.contentPath) {
+        args.templatePath = await resolveTemplatePath(args.contentPath);
+      }
+
+      if (!args.templatePath) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+        };
+      }
+
+      return await updateTemplate(args.templatePath, args.instructions);
     }
 
     default:
