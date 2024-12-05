@@ -146,5 +146,33 @@ export const functionTools = [
         additionalProperties: false
       }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_content',
+      description:
+        "Update page or component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
+      parameters: {
+        type: 'object',
+        properties: {
+          instructions: {
+            type: 'string',
+            description: 'Instructions for updating the content'
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+          },
+          contentPath: {
+            type: 'string',
+            description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'"
+          }
+        },
+        required: ['instructions'],
+        additionalProperties: false
+      }
+    }
   }
 ];

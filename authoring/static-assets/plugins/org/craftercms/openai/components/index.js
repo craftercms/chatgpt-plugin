@@ -5488,6 +5488,32 @@ const functionTools = [
                 additionalProperties: false
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'update_content',
+            description: "Update page or component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
+            parameters: {
+                type: 'object',
+                properties: {
+                    instructions: {
+                        type: 'string',
+                        description: 'Instructions for updating the content'
+                    },
+                    currentContent: {
+                        type: 'boolean',
+                        description: "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+                    },
+                    contentPath: {
+                        type: 'string',
+                        description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'"
+                    }
+                },
+                required: ['instructions'],
+                additionalProperties: false
+            }
+        }
     }
 ];
 
@@ -5688,11 +5714,11 @@ async function resolveContentPath(internalName) {
     return await fetchContentPath(internalName);
 }
 /**
- * Resolve template path from content path
- * @param contentPath the content path (page, component)
- * @returns template path if available, empty otherwise
+ * Get content type description
+ * @param contentPath the conten path
+ * @returns content type description in JSON
  */
-async function resolveTemplatePath(contentPath) {
+async function getContentTypeDescription(contentPath) {
     if (!contentPath) {
         contentPath = window.craftercms.getStore().getState().preview.guest.path;
     }
@@ -5701,7 +5727,15 @@ async function resolveTemplatePath(contentPath) {
         storedContent = await fetchSandboxItemByPath(contentPath);
     }
     const contentTypeId = storedContent.contentTypeId;
-    const storedContentType = window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+    return window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+}
+/**
+ * Resolve template path from content path
+ * @param contentPath the content path (page, component)
+ * @returns template path if available, empty otherwise
+ */
+async function resolveTemplatePath(contentPath) {
+    const storedContentType = await getContentTypeDescription(contentPath);
     return storedContentType?.displayTemplate;
 }
 /**
@@ -5815,12 +5849,53 @@ async function writeContent(path, content) {
     };
 }
 /**
+ * Update a page or component
+ * @param contentPath the content path
+ * @param instructions the instructions
+ * @param currentContent indicate if the content is the current previewing page
+ */
+async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
+    const content = await fetchContent(contentPath);
+    const contentTypeDescription = await getContentTypeDescription(contentPath);
+    const completion = await createChatCompletion({
+        model: defaultChatModel,
+        messages: [
+            {
+                role: 'system',
+                content: 'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+            },
+            {
+                role: 'user',
+                content: `Here is the current content:\n\n${content}\n\nHere is the current content model: ${JSON.stringify(contentTypeDescription)}`
+            },
+            {
+                role: 'user',
+                content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange. The response should only contains the updated content in XML.`
+            }
+        ],
+        stream: false
+    });
+    const message = completion.choices[0]?.message?.content;
+    if (message) {
+        const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+        const result = await writeContent(contentPath, newContent);
+        if (result.succeed && currentContent) {
+            reloadPreview();
+        }
+        return result;
+    }
+    return {
+        succeed: false,
+        message: `Error updating content at path '${contentPath}'. Please try again later or contact administration.`
+    };
+}
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
  * @param currentContent indicate the template is of the current content
  */
-async function updateTemplate(templatePath, instructions, currentContent) {
+async function chatGPTUpdateTemplate(templatePath, instructions, currentContent) {
     const templateContent = await fetchContent(templatePath);
     const completion = await createChatCompletion({
         model: defaultChatModel,
@@ -5907,7 +5982,25 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
                 };
             }
-            return await updateTemplate(args.templatePath, args.instructions, args.currentContent);
+            return await chatGPTUpdateTemplate(args.templatePath, args.instructions, args.currentContent);
+        }
+        case 'update_content': {
+            if (!args.instructions) {
+                break;
+            }
+            if (!args.currentContent && !args.contentPath) {
+                break;
+            }
+            if (!args.contentPath && args.currentContent) {
+                args.contentPath = await resolveContentPath('');
+            }
+            if (!args.contentPath) {
+                return {
+                    succeed: false,
+                    message: "I'm not able to resolve the content path from current context. Could you please provide more detail the content you would like to update?"
+                };
+            }
+            return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
         }
         default:
             throw new Error('No function found');

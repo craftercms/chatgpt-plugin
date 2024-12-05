@@ -255,11 +255,11 @@ export async function resolveContentPath(internalName: string) {
 }
 
 /**
- * Resolve template path from content path
- * @param contentPath the content path (page, component)
- * @returns template path if available, empty otherwise
+ * Get content type description
+ * @param contentPath the conten path
+ * @returns content type description in JSON
  */
-export async function resolveTemplatePath(contentPath: string) {
+export async function getContentTypeDescription(contentPath: string) {
   if (!contentPath) {
     contentPath = window.craftercms.getStore().getState().preview.guest.path;
   }
@@ -270,8 +270,16 @@ export async function resolveTemplatePath(contentPath: string) {
   }
 
   const contentTypeId = storedContent.contentTypeId;
-  const storedContentType = window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+  return window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
+}
 
+/**
+ * Resolve template path from content path
+ * @param contentPath the content path (page, component)
+ * @returns template path if available, empty otherwise
+ */
+export async function resolveTemplatePath(contentPath: string) {
+  const storedContentType = await getContentTypeDescription(contentPath);
   return storedContentType?.displayTemplate;
 }
 
@@ -411,12 +419,57 @@ export async function writeContent(path: string, content: string) {
 }
 
 /**
+ * Update a page or component
+ * @param contentPath the content path
+ * @param instructions the instructions
+ * @param currentContent indicate if the content is the current previewing page
+ */
+export async function chatGPTUpdateContent(contentPath: string, instructions: string, currentContent: boolean) {
+  const content = await fetchContent(contentPath);
+  const contentTypeDescription = await getContentTypeDescription(contentPath);
+  const completion = await createChatCompletion({
+    model: defaultChatModel,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+      },
+      {
+        role: 'user',
+        content: `Here is the current content:\n\n${content}\n\nHere is the current content model: ${JSON.stringify(contentTypeDescription)}`
+      },
+      {
+        role: 'user',
+        content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange. The response should only contains the updated content in XML.`
+      }
+    ],
+    stream: false
+  });
+
+  const message = completion.choices[0]?.message?.content;
+  if (message) {
+    const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+    const result = await writeContent(contentPath, newContent);
+    if (result.succeed && currentContent) {
+      reloadPreview();
+    }
+    return result;
+  }
+
+  return {
+    succeed: false,
+    message: `Error updating content at path '${contentPath}'. Please try again later or contact administration.`
+  };
+}
+
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
  * @param currentContent indicate the template is of the current content
  */
-export async function updateTemplate(templatePath: string, instructions: string, currentContent: boolean) {
+export async function chatGPTUpdateTemplate(templatePath: string, instructions: string, currentContent: boolean) {
   const templateContent = await fetchContent(templatePath);
   const completion = await createChatCompletion({
     model: defaultChatModel,
@@ -442,7 +495,7 @@ export async function updateTemplate(templatePath: string, instructions: string,
   if (message) {
     const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
     const result = await writeContent(templatePath, newTemplate);
-    if (result.succeed && currentContent ) {
+    if (result.succeed && currentContent) {
       reloadPreview();
     }
     return result;
@@ -521,7 +574,31 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await updateTemplate(args.templatePath, args.instructions, args.currentContent);
+      return await chatGPTUpdateTemplate(args.templatePath, args.instructions, args.currentContent);
+    }
+
+    case 'update_content': {
+      if (!args.instructions) {
+        break;
+      }
+
+      if (!args.currentContent && !args.contentPath) {
+        break;
+      }
+
+      if (!args.contentPath && args.currentContent) {
+        args.contentPath = await resolveContentPath('');
+      }
+
+      if (!args.contentPath) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the content path from current context. Could you please provide more detail the content you would like to update?"
+        };
+      }
+
+      return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
     }
 
     default:
