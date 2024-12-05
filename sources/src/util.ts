@@ -414,10 +414,11 @@ export async function writeContent(path: string, content: string) {
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
+ * @param currentContent indicate the template is of the current content
  */
-export async function updateTemplate(templatePath: string, instructions: string) {
+export async function updateTemplate(templatePath: string, instructions: string, currentContent: boolean) {
   const templateContent = await fetchContent(templatePath);
-  const stream = await createChatCompletion({
+  const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
       {
@@ -434,21 +435,14 @@ export async function updateTemplate(templatePath: string, instructions: string)
         content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
       }
     ],
-    stream: true
+    stream: false
   });
 
-  let updatedTemplate = '';
-  for await (const part of stream) {
-    const content = part.choices[0]?.delta?.content;
-    if (content) {
-      updatedTemplate += content;
-    }
-  }
-
-  if (updatedTemplate) {
-    updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-    const result = await writeContent(templatePath, updatedTemplate);
-    if (result.succeed) {
+  const message = completion.choices[0]?.message?.content;
+  if (message) {
+    const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+    const result = await writeContent(templatePath, newTemplate);
+    if (result.succeed && currentContent ) {
       reloadPreview();
     }
     return result;
@@ -527,7 +521,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await updateTemplate(args.templatePath, args.instructions);
+      return await updateTemplate(args.templatePath, args.instructions, args.currentContent);
     }
 
     default:

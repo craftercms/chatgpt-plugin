@@ -118,18 +118,18 @@ export const functionTools = [
     function: {
       name: 'update_template',
       description:
-        'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the page.',
+        'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path or the current previewing page. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the current page.',
       parameters: {
         type: 'object',
         properties: {
           instructions: {
             type: 'string',
-            description: 'Instructions for updating the template'
+            description: 'Instructions for updating the template of a page or a component'
           },
           currentContent: {
             type: 'boolean',
             description:
-              "A flag which is true if the content path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+              "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
           },
           templatePath: {
             type: 'string',

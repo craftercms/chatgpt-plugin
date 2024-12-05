@@ -5463,17 +5463,17 @@ const functionTools = [
         type: 'function',
         function: {
             name: 'update_template',
-            description: 'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the page.',
+            description: 'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path or the current previewing page. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the current page.',
             parameters: {
                 type: 'object',
                 properties: {
                     instructions: {
                         type: 'string',
-                        description: 'Instructions for updating the template'
+                        description: 'Instructions for updating the template of a page or a component'
                     },
                     currentContent: {
                         type: 'boolean',
-                        description: "A flag which is true if the content path is the 'current previewing page', 'current content', or terms such as 'this content', 'this component'."
+                        description: "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
                     },
                     templatePath: {
                         type: 'string',
@@ -5818,10 +5818,11 @@ async function writeContent(path, content) {
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
+ * @param currentContent indicate the template is of the current content
  */
-async function updateTemplate(templatePath, instructions) {
+async function updateTemplate(templatePath, instructions, currentContent) {
     const templateContent = await fetchContent(templatePath);
-    const stream = await createChatCompletion({
+    const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
             {
@@ -5837,19 +5838,13 @@ async function updateTemplate(templatePath, instructions) {
                 content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
             }
         ],
-        stream: true
+        stream: false
     });
-    let updatedTemplate = '';
-    for await (const part of stream) {
-        const content = part.choices[0]?.delta?.content;
-        if (content) {
-            updatedTemplate += content;
-        }
-    }
-    if (updatedTemplate) {
-        updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-        const result = await writeContent(templatePath, updatedTemplate);
-        if (result.succeed) {
+    const message = completion.choices[0]?.message?.content;
+    if (message) {
+        const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+        const result = await writeContent(templatePath, newTemplate);
+        if (result.succeed && currentContent) {
             reloadPreview();
         }
         return result;
@@ -5912,7 +5907,7 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
                 };
             }
-            return await updateTemplate(args.templatePath, args.instructions);
+            return await updateTemplate(args.templatePath, args.instructions, args.currentContent);
         }
         default:
             throw new Error('No function found');
