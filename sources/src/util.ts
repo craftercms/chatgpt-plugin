@@ -15,6 +15,8 @@ import { RequestInfo, Response } from 'openai/_shims';
 import { User } from '@craftercms/studio-ui';
 import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
 import { defaultChatModel } from './consts';
+import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils/subjects';
+import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -443,17 +445,28 @@ export async function updateTemplate(templatePath: string, instructions: string)
     }
   }
 
-  console.log(updatedTemplate);
-
   if (updatedTemplate) {
     updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-    return await writeContent(templatePath, updatedTemplate);
+    const result = await writeContent(templatePath, updatedTemplate);
+    if (result.succeed) {
+      reloadPreview();
+    }
+    return result;
   }
 
   return {
     succeed: false,
     message: `Error updating content at path '${templatePath}'. Please try again later or contact administration.`
   };
+}
+
+/**
+ * Reload current preview
+ */
+export function reloadPreview() {
+  const action = reloadRequest();
+  getHostToGuestBus().next(action);
+  getHostToHostBus().next(action);
 }
 
 export interface FunctionCallResult {

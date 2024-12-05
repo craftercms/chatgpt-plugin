@@ -9,6 +9,8 @@ const DownloadRouned = craftercms.utils.constants.components.get('@mui/icons-mat
 const SaveRounded = craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SaveRounded');
 const StopRounded = craftercms.utils.constants.components.get('@mui/icons-material/StopRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/StopRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/StopRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/StopRounded');
 const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
+const { getHostToGuestBus, getHostToHostBus, getGuestToHostBus } = craftercms.utils.subjects;
+const { createAction } = craftercms.libs.ReduxToolkit;
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
 const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
 const DialogBody = craftercms.components.DialogBody && Object.prototype.hasOwnProperty.call(craftercms.components.DialogBody, 'default') ? craftercms.components.DialogBody['default'] : craftercms.components.DialogBody;
@@ -26,7 +28,6 @@ const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.protot
 const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
-const { getGuestToHostBus, getHostToHostBus, getHostToGuestBus } = craftercms.utils.subjects;
 const { merge } = craftercms.libs.rxjs;
 
 var OpenAI$2 = createSvgIcon(jsx("path", { d: "M21.9706 9.87533C22.233 9.08708 22.3241 8.25193 22.2376 7.42569C22.1511 6.59945 21.8892 5.80122 21.4692 5.08441C20.8468 4.00021 19.8959 3.14181 18.7539 2.63307C17.6119 2.12433 16.3378 1.99156 15.1154 2.25391C14.564 1.63256 13.8864 1.13614 13.1276 0.797891C12.3689 0.459646 11.5467 0.28737 10.716 0.292596C9.4662 0.28958 8.24776 0.683523 7.23631 1.41764C6.22486 2.15174 5.47268 3.18809 5.08819 4.37725C4.27404 4.54391 3.50487 4.88257 2.83219 5.37056C2.15951 5.85855 1.59885 6.4846 1.18772 7.20682C0.560251 8.28805 0.292411 9.54056 0.422827 10.7839C0.553243 12.0271 1.07517 13.1968 1.91334 14.1243C1.6509 14.9125 1.55986 15.7477 1.64631 16.5739C1.73277 17.4002 1.99472 18.1984 2.41463 18.9152C3.03719 19.9994 3.98806 20.8577 5.13005 21.3664C6.27204 21.8752 7.54615 22.008 8.76851 21.7457C9.31986 22.367 9.9976 22.8634 10.7563 23.2017C11.515 23.5399 12.3372 23.7122 13.1679 23.707C14.4183 23.7103 15.6374 23.3162 16.6492 22.5816C17.6611 21.847 18.4134 20.8099 18.7976 19.62C19.6117 19.4534 20.3809 19.1147 21.0536 18.6267C21.7262 18.1388 22.2869 17.5127 22.698 16.7904C23.3247 15.7093 23.592 14.4571 23.4612 13.2143C23.3305 11.9715 22.8085 10.8024 21.9706 9.87533ZM13.1698 22.1763C12.1434 22.1778 11.1492 21.8183 10.361 21.1608C10.3965 21.1415 10.4589 21.1073 10.4995 21.0824L15.1616 18.3894C15.2786 18.3229 15.3758 18.2263 15.4431 18.1097C15.5105 17.9931 15.5455 17.8607 15.5447 17.7261V11.1535L17.5153 12.2913C17.5256 12.2965 17.5345 12.3041 17.5412 12.3135C17.5479 12.3229 17.5521 12.3339 17.5536 12.3453V17.7884C17.5521 18.951 17.0899 20.0656 16.2682 20.8881C15.4465 21.7106 14.3324 22.1738 13.1698 22.1763ZM3.74219 18.1499C3.22806 17.2615 3.04276 16.2207 3.21873 15.2095C3.25335 15.2303 3.31382 15.2672 3.35721 15.2921L8.0193 17.985C8.13549 18.0529 8.26767 18.0888 8.40224 18.0888C8.53676 18.0888 8.66894 18.0529 8.78513 17.985L14.4771 14.6985V16.9742C14.4777 16.9858 14.4755 16.9974 14.4706 17.008C14.4656 17.0185 14.4582 17.0277 14.4489 17.0346L9.736 19.7557C8.72794 20.3363 7.53069 20.4933 6.40702 20.1922C5.28333 19.8912 4.32496 19.1567 3.74219 18.1499ZM2.51573 7.97213C3.02762 7.08261 3.83615 6.40159 4.7997 6.04821C4.7997 6.08836 4.79739 6.15949 4.79739 6.20883V11.5947C4.79657 11.7292 4.83159 11.8615 4.89885 11.9781C4.9661 12.0946 5.06316 12.191 5.18006 12.2576L10.872 15.5437L8.90144 16.6815C8.89173 16.6879 8.88055 16.6918 8.86896 16.6929C8.85737 16.6939 8.84566 16.6921 8.83495 16.6875L4.12161 13.9641C3.11531 13.3813 2.38115 12.4233 2.08011 11.3001C1.77907 10.1769 1.93573 8.98007 2.51573 7.97213ZM18.7057 11.7397L13.0138 8.45312L14.9843 7.31576C14.994 7.30938 15.0052 7.30546 15.0168 7.3044C15.0284 7.30335 15.0401 7.30522 15.0508 7.30979L19.7641 10.0309C20.4862 10.448 21.0745 11.0622 21.4602 11.8015C21.8459 12.5409 22.0129 13.3748 21.9418 14.2057C21.8706 15.0366 21.5642 15.83 21.0585 16.493C20.5527 17.1561 19.8686 17.6613 19.086 17.9495C19.086 17.9089 19.086 17.8378 19.086 17.7884V12.4025C19.0872 12.2682 19.0525 12.1361 18.9857 12.0196C18.9188 11.9031 18.8222 11.8065 18.7057 11.7397ZM20.667 8.78778C20.6324 8.76653 20.5719 8.73006 20.5286 8.70518L15.8664 6.01221C15.7502 5.94442 15.6181 5.90866 15.4835 5.90866C15.349 5.90866 15.2168 5.94442 15.1006 6.01221L9.40872 9.2988V7.02313C9.40808 7.01149 9.4103 6.9999 9.41522 6.98936C9.42014 6.97882 9.42757 6.96963 9.43688 6.96267L14.1498 4.24385C14.8718 3.82752 15.6974 3.62541 16.5301 3.66116C17.3628 3.6969 18.168 3.96903 18.8517 4.4457C19.5354 4.92237 20.0692 5.58387 20.3907 6.35283C20.7121 7.12177 20.808 7.96633 20.667 8.78778ZM8.33738 12.8438L6.36634 11.706C6.35604 11.7009 6.34708 11.6932 6.34041 11.6838C6.33374 11.6744 6.32946 11.6634 6.32806 11.652V6.20883C6.32858 5.37518 6.56659 4.55891 7.01416 3.85558C7.46179 3.15225 8.10049 2.59097 8.85549 2.23744C9.6105 1.88391 10.4506 1.75276 11.2774 1.85933C12.1043 1.9659 12.8836 2.30579 13.5243 2.83921C13.4888 2.8586 13.4269 2.89276 13.3858 2.91769L8.72373 5.61063C8.60671 5.67713 8.5096 5.77359 8.44222 5.8901C8.37491 6.00659 8.33984 6.13894 8.3406 6.27346L8.33738 12.8438ZM9.40778 10.5359L11.9429 9.07168L14.4779 10.5349V13.4623L11.9429 14.9256L9.40778 13.4623V10.5359Z" }), 'OpenAI');
@@ -5468,7 +5469,7 @@ const functionTools = [
                 properties: {
                     instructions: {
                         type: 'string',
-                        description: "Instructions for updating the template"
+                        description: 'Instructions for updating the template'
                     },
                     currentContent: {
                         type: 'boolean',
@@ -5483,12 +5484,33 @@ const functionTools = [
                         description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. This path is used to resolve the template path using this function"
                     }
                 },
-                required: ["instructions"],
+                required: ['instructions'],
                 additionalProperties: false
             }
         }
     }
 ];
+
+/*
+ * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 3 as published by
+ * the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const reloadRequest = /*#__PURE__*/ createAction('RELOAD_REQUEST');
+const contentTypeDropTargetsResponse = /*#__PURE__*/ createAction('CONTENT_TYPE_DROP_TARGETS_RESPONSE');
+/*#__PURE__*/ createAction(contentTypeDropTargetsResponse.type);
+// endregion
 
 let openai;
 const getOpenAiInstance = () => {
@@ -5803,17 +5825,17 @@ async function updateTemplate(templatePath, instructions) {
         model: defaultChatModel,
         messages: [
             {
-                role: "system",
-                content: "You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance."
+                role: 'system',
+                content: 'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
             },
             {
-                role: "user",
+                role: 'user',
                 content: `Here is the current template:\n\n${templateContent}`
             },
             {
-                role: "user",
+                role: 'user',
                 content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
-            },
+            }
         ],
         stream: true
     });
@@ -5824,15 +5846,26 @@ async function updateTemplate(templatePath, instructions) {
             updatedTemplate += content;
         }
     }
-    console.log(updatedTemplate);
     if (updatedTemplate) {
         updatedTemplate = updatedTemplate.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-        return await writeContent(templatePath, updatedTemplate);
+        const result = await writeContent(templatePath, updatedTemplate);
+        if (result.succeed) {
+            reloadPreview();
+        }
+        return result;
     }
     return {
         succeed: false,
         message: `Error updating content at path '${templatePath}'. Please try again later or contact administration.`
     };
+}
+/**
+ * Reload current preview
+ */
+function reloadPreview() {
+    const action = reloadRequest();
+    getHostToGuestBus().next(action);
+    getHostToHostBus().next(action);
 }
 /**
  * Call a function with ChatGPT
