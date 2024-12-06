@@ -251,7 +251,7 @@ export async function fetchSandboxItemByPath(path: string) {
  */
 export async function resolveContentPath(internalName: string) {
   if (!internalName) {
-    return window.craftercms.getStore().getState().preview.guest.path;
+    return window.craftercms.getStore().getState().preview.guest?.path;
   }
 
   return await fetchContentPath(internalName);
@@ -262,7 +262,11 @@ export async function resolveContentPath(internalName: string) {
  * @returns content type id
  */
 export async function resolveCurrentContentModel() {
-  const currentPath = window.craftercms.getStore().getState().preview.guest.path;
+  const currentPath = window.craftercms.getStore().getState().preview.guest?.path;
+  if (!currentPath) {
+    return '';
+  }
+
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[currentPath];
   if (!storedContent) {
     storedContent = await fetchSandboxItemByPath(currentPath);
@@ -278,7 +282,11 @@ export async function resolveCurrentContentModel() {
  */
 export async function fetchContentTypeDescription(contentPath: string) {
   if (!contentPath) {
-    contentPath = window.craftercms.getStore().getState().preview.guest.path;
+    contentPath = window.craftercms.getStore().getState().preview.guest?.path;
+  }
+
+  if (!contentPath) {
+    return {};
   }
 
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
@@ -300,7 +308,11 @@ export async function fetchContentTypeDescription(contentPath: string) {
  */
 export async function resolveTemplatePath(contentPath: string) {
   if (!contentPath) {
-    contentPath = window.craftercms.getStore().getState().preview.guest.path;
+    contentPath = window.craftercms.getStore().getState().preview.guest?.path;
+  }
+
+  if (!contentPath) {
+    return '';
   }
 
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
