@@ -152,7 +152,7 @@ export const functionTools = [
     function: {
       name: 'update_content',
       description:
-        "Update page or component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
+        "Update a page or component. Pages are top-level container types. Pages hold content, and optionally components. Content within pages is made up of various types, for example content can be a date, an image, or a rich text field. Components only differ from pages in that they can't render by themselves, instead, they must render within a container page or another component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
       parameters: {
         type: 'object',
         properties: {
@@ -168,6 +168,34 @@ export const functionTools = [
           contentPath: {
             type: 'string',
             description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'"
+          }
+        },
+        required: ['instructions'],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_content_type',
+      description:
+        "Every content object in CrafterCMS is an object associated with a Content Model. Content Models allow you to add structure to your content and facilitate consumption via various visual representations or via APIs. Content Types are limited to two core types: Pages and Components. The content model is the content pieces that will be captured from the content authors for the page or component. Content type model is defined using the file 'form-definition.xml'. For example, the content model definition file for the content type '/page/home' is located at '/config/studio/content-types/page/home/form-definition.xml'. This function triggers an update to a content model definition to includes new fields, modify existing fields.",
+      parameters: {
+        type: 'object',
+        properties: {
+          instructions: {
+            type: 'string',
+            description: 'Instructions for updating the content model'
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+          },
+          contentType: {
+            type: 'string',
+            description: "The content type to be updated the model definition. The content type is a string start with either '/page' or '/component'. For example, updating the content type '/page/home' would result in updating the file '/config/studio/content-types/page/home/form-definition.xml'"
           }
         },
         required: ['instructions'],

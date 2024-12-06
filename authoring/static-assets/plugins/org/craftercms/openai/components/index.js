@@ -11,6 +11,9 @@ const StopRounded = craftercms.utils.constants.components.get('@mui/icons-materi
 const MicRounded = craftercms.utils.constants.components.get('@mui/icons-material/MicRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MicRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MicRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MicRounded');
 const { getHostToGuestBus, getHostToHostBus, getGuestToHostBus } = craftercms.utils.subjects;
 const { createAction } = craftercms.libs.ReduxToolkit;
+const { stripDuplicateSlashes } = craftercms.utils.path;
+const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
+const { firstValueFrom, merge } = craftercms.libs.rxjs;
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
 const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
 const DialogBody = craftercms.components.DialogBody && Object.prototype.hasOwnProperty.call(craftercms.components.DialogBody, 'default') ? craftercms.components.DialogBody['default'] : craftercms.components.DialogBody;
@@ -28,7 +31,6 @@ const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.protot
 const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
-const { merge } = craftercms.libs.rxjs;
 
 var OpenAI$2 = createSvgIcon(jsx("path", { d: "M21.9706 9.87533C22.233 9.08708 22.3241 8.25193 22.2376 7.42569C22.1511 6.59945 21.8892 5.80122 21.4692 5.08441C20.8468 4.00021 19.8959 3.14181 18.7539 2.63307C17.6119 2.12433 16.3378 1.99156 15.1154 2.25391C14.564 1.63256 13.8864 1.13614 13.1276 0.797891C12.3689 0.459646 11.5467 0.28737 10.716 0.292596C9.4662 0.28958 8.24776 0.683523 7.23631 1.41764C6.22486 2.15174 5.47268 3.18809 5.08819 4.37725C4.27404 4.54391 3.50487 4.88257 2.83219 5.37056C2.15951 5.85855 1.59885 6.4846 1.18772 7.20682C0.560251 8.28805 0.292411 9.54056 0.422827 10.7839C0.553243 12.0271 1.07517 13.1968 1.91334 14.1243C1.6509 14.9125 1.55986 15.7477 1.64631 16.5739C1.73277 17.4002 1.99472 18.1984 2.41463 18.9152C3.03719 19.9994 3.98806 20.8577 5.13005 21.3664C6.27204 21.8752 7.54615 22.008 8.76851 21.7457C9.31986 22.367 9.9976 22.8634 10.7563 23.2017C11.515 23.5399 12.3372 23.7122 13.1679 23.707C14.4183 23.7103 15.6374 23.3162 16.6492 22.5816C17.6611 21.847 18.4134 20.8099 18.7976 19.62C19.6117 19.4534 20.3809 19.1147 21.0536 18.6267C21.7262 18.1388 22.2869 17.5127 22.698 16.7904C23.3247 15.7093 23.592 14.4571 23.4612 13.2143C23.3305 11.9715 22.8085 10.8024 21.9706 9.87533ZM13.1698 22.1763C12.1434 22.1778 11.1492 21.8183 10.361 21.1608C10.3965 21.1415 10.4589 21.1073 10.4995 21.0824L15.1616 18.3894C15.2786 18.3229 15.3758 18.2263 15.4431 18.1097C15.5105 17.9931 15.5455 17.8607 15.5447 17.7261V11.1535L17.5153 12.2913C17.5256 12.2965 17.5345 12.3041 17.5412 12.3135C17.5479 12.3229 17.5521 12.3339 17.5536 12.3453V17.7884C17.5521 18.951 17.0899 20.0656 16.2682 20.8881C15.4465 21.7106 14.3324 22.1738 13.1698 22.1763ZM3.74219 18.1499C3.22806 17.2615 3.04276 16.2207 3.21873 15.2095C3.25335 15.2303 3.31382 15.2672 3.35721 15.2921L8.0193 17.985C8.13549 18.0529 8.26767 18.0888 8.40224 18.0888C8.53676 18.0888 8.66894 18.0529 8.78513 17.985L14.4771 14.6985V16.9742C14.4777 16.9858 14.4755 16.9974 14.4706 17.008C14.4656 17.0185 14.4582 17.0277 14.4489 17.0346L9.736 19.7557C8.72794 20.3363 7.53069 20.4933 6.40702 20.1922C5.28333 19.8912 4.32496 19.1567 3.74219 18.1499ZM2.51573 7.97213C3.02762 7.08261 3.83615 6.40159 4.7997 6.04821C4.7997 6.08836 4.79739 6.15949 4.79739 6.20883V11.5947C4.79657 11.7292 4.83159 11.8615 4.89885 11.9781C4.9661 12.0946 5.06316 12.191 5.18006 12.2576L10.872 15.5437L8.90144 16.6815C8.89173 16.6879 8.88055 16.6918 8.86896 16.6929C8.85737 16.6939 8.84566 16.6921 8.83495 16.6875L4.12161 13.9641C3.11531 13.3813 2.38115 12.4233 2.08011 11.3001C1.77907 10.1769 1.93573 8.98007 2.51573 7.97213ZM18.7057 11.7397L13.0138 8.45312L14.9843 7.31576C14.994 7.30938 15.0052 7.30546 15.0168 7.3044C15.0284 7.30335 15.0401 7.30522 15.0508 7.30979L19.7641 10.0309C20.4862 10.448 21.0745 11.0622 21.4602 11.8015C21.8459 12.5409 22.0129 13.3748 21.9418 14.2057C21.8706 15.0366 21.5642 15.83 21.0585 16.493C20.5527 17.1561 19.8686 17.6613 19.086 17.9495C19.086 17.9089 19.086 17.8378 19.086 17.7884V12.4025C19.0872 12.2682 19.0525 12.1361 18.9857 12.0196C18.9188 11.9031 18.8222 11.8065 18.7057 11.7397ZM20.667 8.78778C20.6324 8.76653 20.5719 8.73006 20.5286 8.70518L15.8664 6.01221C15.7502 5.94442 15.6181 5.90866 15.4835 5.90866C15.349 5.90866 15.2168 5.94442 15.1006 6.01221L9.40872 9.2988V7.02313C9.40808 7.01149 9.4103 6.9999 9.41522 6.98936C9.42014 6.97882 9.42757 6.96963 9.43688 6.96267L14.1498 4.24385C14.8718 3.82752 15.6974 3.62541 16.5301 3.66116C17.3628 3.6969 18.168 3.96903 18.8517 4.4457C19.5354 4.92237 20.0692 5.58387 20.3907 6.35283C20.7121 7.12177 20.808 7.96633 20.667 8.78778ZM8.33738 12.8438L6.36634 11.706C6.35604 11.7009 6.34708 11.6932 6.34041 11.6838C6.33374 11.6744 6.32946 11.6634 6.32806 11.652V6.20883C6.32858 5.37518 6.56659 4.55891 7.01416 3.85558C7.46179 3.15225 8.10049 2.59097 8.85549 2.23744C9.6105 1.88391 10.4506 1.75276 11.2774 1.85933C12.1043 1.9659 12.8836 2.30579 13.5243 2.83921C13.4888 2.8586 13.4269 2.89276 13.3858 2.91769L8.72373 5.61063C8.60671 5.67713 8.5096 5.77359 8.44222 5.8901C8.37491 6.00659 8.33984 6.13894 8.3406 6.27346L8.33738 12.8438ZM9.40778 10.5359L11.9429 9.07168L14.4779 10.5349V13.4623L11.9429 14.9256L9.40778 13.4623V10.5359Z" }), 'OpenAI');
 
@@ -5493,7 +5495,7 @@ const functionTools = [
         type: 'function',
         function: {
             name: 'update_content',
-            description: "Update page or component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
+            description: "Update a page or component. Pages are top-level container types. Pages hold content, and optionally components. Content within pages is made up of various types, for example content can be a date, an image, or a rich text field. Components only differ from pages in that they can't render by themselves, instead, they must render within a container page or another component. The page or component path usually start with '/site/webiste', '/site/components' or '/site/taxonomy'. The content file name is XML and has .xml extension.",
             parameters: {
                 type: 'object',
                 properties: {
@@ -5508,6 +5510,32 @@ const functionTools = [
                     contentPath: {
                         type: 'string',
                         description: "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'"
+                    }
+                },
+                required: ['instructions'],
+                additionalProperties: false
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'update_content_type',
+            description: "Every content object in CrafterCMS is an object associated with a Content Model. Content Models allow you to add structure to your content and facilitate consumption via various visual representations or via APIs. Content Types are limited to two core types: Pages and Components. The content model is the content pieces that will be captured from the content authors for the page or component. Content type model is defined using the file 'form-definition.xml'. For example, the content model definition file for the content type '/page/home' is located at '/config/studio/content-types/page/home/form-definition.xml'. This function triggers an update to a content model definition to includes new fields, modify existing fields.",
+            parameters: {
+                type: 'object',
+                properties: {
+                    instructions: {
+                        type: 'string',
+                        description: 'Instructions for updating the content model'
+                    },
+                    currentContent: {
+                        type: 'boolean',
+                        description: "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+                    },
+                    contentType: {
+                        type: 'string',
+                        description: "The content type to be updated the model definition. The content type is a string start with either '/page' or '/component'. For example, updating the content type '/page/home' would result in updating the file '/config/studio/content-types/page/home/form-definition.xml'"
                     }
                 },
                 required: ['instructions'],
@@ -5714,6 +5742,18 @@ async function resolveContentPath(internalName) {
     return await fetchContentPath(internalName);
 }
 /**
+ * Resolve the content type for the current previewing page
+ * @returns content type id
+ */
+async function resolveCurrentContentModel() {
+    const currentPath = window.craftercms.getStore().getState().preview.guest.path;
+    let storedContent = window.craftercms.getStore().getState().content.itemsByPath[currentPath];
+    if (!storedContent) {
+        storedContent = await fetchSandboxItemByPath(currentPath);
+    }
+    return storedContent.contentTypeId;
+}
+/**
  * Get content type description
  * @param contentPath the conten path
  * @returns content type description in JSON
@@ -5890,6 +5930,68 @@ async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
     };
 }
 /**
+ * Use ChatGPT to update a content type definition using user provided instructions
+ * @param contentTypeId the content type id
+ * @param instructions the user instructions
+ * @param currentContent true if updating content type of the current previewing page
+ * @returns message indicate if the operation is succedded or not
+ */
+async function chatGPTUpdateContentType(contentTypeId, instructions, currentContent) {
+    const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+    const completion = await createChatCompletion({
+        model: defaultChatModel,
+        messages: [
+            {
+                role: 'system',
+                content: 'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+            },
+            {
+                role: 'user',
+                content: `Here is the current content type description:\n\n${contentTypeDescriptor}`
+            },
+            {
+                role: 'user',
+                content: `Please apply the following instructions: ${instructions}. Use the correct postfix for the id using the following CSV data:\n\n
+        Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
+        integer,_i,_is,a 32 bit signed integer\n
+        string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
+        long,_l,_ls,a 64 bit signed integer\n
+        text,_t,_txt,Multiple words or tokens\n
+        boolean,_b,_bs,true or false\n
+        float,_f,_fs,IEEE 32 bit floating point number\n
+        double,_d,_ds,IEEE 64 bit floating point number\n
+        date,_dt,_dts,A date in ISO 8601 date format\n
+        time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
+        text with html tags,_html,,Rich Text Editor content\n'
+        \n\n
+        Keep the XML format unchange. The response should only contains the updated content in XML.`
+            }
+        ],
+        stream: false
+    });
+    const message = completion.choices[0]?.message?.content;
+    if (message) {
+        const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+        const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
+        if (succeed && currentContent) {
+            reloadPreview();
+        }
+        return {
+            succeed,
+            message: succeed
+                ? `Your content type '${contentTypeId}' has been updated.`
+                : `Error updating content type '${contentTypeId}'. Please try again later or contact administration.`
+        };
+    }
+    return {
+        succeed: false,
+        message: `Error updating content type '${contentTypeId}'. Please try again later or contact administration.`
+    };
+}
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
@@ -6001,6 +6103,21 @@ async function chatGPTFunctionCall(name, params = '') {
                 };
             }
             return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
+        }
+        case 'update_content_type': {
+            if (!args.instructions) {
+                break;
+            }
+            if (!args.contentType && args.currentContent) {
+                args.contentType = await resolveCurrentContentModel();
+            }
+            if (!args.contentType) {
+                return {
+                    succeed: false,
+                    message: "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
+                };
+            }
+            return await chatGPTUpdateContentType(args.contentType, args.instructions, args.currentContent);
         }
         default:
             throw new Error('No function found');

@@ -17,6 +17,9 @@ import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/model
 import { defaultChatModel } from './consts';
 import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils/subjects';
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
+import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
+import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
+import { firstValueFrom } from 'rxjs';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -255,6 +258,20 @@ export async function resolveContentPath(internalName: string) {
 }
 
 /**
+ * Resolve the content type for the current previewing page
+ * @returns content type id
+ */
+export async function resolveCurrentContentModel() {
+  const currentPath = window.craftercms.getStore().getState().preview.guest.path;
+  let storedContent = window.craftercms.getStore().getState().content.itemsByPath[currentPath];
+  if (!storedContent) {
+    storedContent = await fetchSandboxItemByPath(currentPath);
+  }
+
+  return storedContent.contentTypeId;
+}
+
+/**
  * Get content type description
  * @param contentPath the conten path
  * @returns content type description in JSON
@@ -464,6 +481,73 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
 }
 
 /**
+ * Use ChatGPT to update a content type definition using user provided instructions
+ * @param contentTypeId the content type id
+ * @param instructions the user instructions
+ * @param currentContent true if updating content type of the current previewing page
+ * @returns message indicate if the operation is succedded or not
+ */
+export async function chatGPTUpdateContentType(contentTypeId: string, instructions: string, currentContent: boolean) {
+  const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+  const completion = await createChatCompletion({
+    model: defaultChatModel,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+      },
+      {
+        role: 'user',
+        content: `Here is the current content type description:\n\n${contentTypeDescriptor}`
+      },
+      {
+        role: 'user',
+        content: `Please apply the following instructions: ${instructions}. Use the correct postfix for the id using the following CSV data:\n\n
+        Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
+        integer,_i,_is,a 32 bit signed integer\n
+        string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
+        long,_l,_ls,a 64 bit signed integer\n
+        text,_t,_txt,Multiple words or tokens\n
+        boolean,_b,_bs,true or false\n
+        float,_f,_fs,IEEE 32 bit floating point number\n
+        double,_d,_ds,IEEE 64 bit floating point number\n
+        date,_dt,_dts,A date in ISO 8601 date format\n
+        time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
+        text with html tags,_html,,Rich Text Editor content\n'
+        \n\n
+        Keep the XML format unchange. The response should only contains the updated content in XML.`
+      }
+    ],
+    stream: false
+  });
+
+  const message = completion.choices[0]?.message?.content;
+  if (message) {
+    const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+    const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
+    if (succeed && currentContent) {
+      reloadPreview();
+    }
+
+    return {
+      succeed,
+      message: succeed
+        ? `Your content type '${contentTypeId}' has been updated.`
+        : `Error updating content type '${contentTypeId}'. Please try again later or contact administration.`
+    };
+  }
+
+  return {
+    succeed: false,
+    message: `Error updating content type '${contentTypeId}'. Please try again later or contact administration.`
+  };
+}
+
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
@@ -599,6 +683,26 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       }
 
       return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
+    }
+
+    case 'update_content_type': {
+      if (!args.instructions) {
+        break;
+      }
+
+      if (!args.contentType && args.currentContent) {
+        args.contentType = await resolveCurrentContentModel();
+      }
+
+      if (!args.contentType) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
+        };
+      }
+
+      return await chatGPTUpdateContentType(args.contentType, args.instructions, args.currentContent);
     }
 
     default:
