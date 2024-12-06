@@ -195,7 +195,8 @@ export const functionTools = [
           },
           contentType: {
             type: 'string',
-            description: "The content type to be updated the model definition. The content type is a string start with either '/page' or '/component'. For example, updating the content type '/page/home' would result in updating the file '/config/studio/content-types/page/home/form-definition.xml'"
+            description:
+              "The content type to be updated the model definition. The content type is a string start with either '/page' or '/component'. For example, updating the content type '/page/home' would result in updating the file '/config/studio/content-types/page/home/form-definition.xml'"
           }
         },
         required: ['instructions'],

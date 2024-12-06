@@ -272,11 +272,33 @@ export async function resolveCurrentContentModel() {
 }
 
 /**
- * Get content type description
- * @param contentPath the conten path
- * @returns content type description in JSON
+ * Fetch content type description from server
+ * @param contentPath the content path (page or component)
+ * @returns content type description in XML format
  */
-export async function getContentTypeDescription(contentPath: string) {
+export async function fetchContentTypeDescription(contentPath: string) {
+  if (!contentPath) {
+    contentPath = window.craftercms.getStore().getState().preview.guest.path;
+  }
+
+  let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
+  if (!storedContent) {
+    storedContent = await fetchSandboxItemByPath(contentPath);
+  }
+  const contentTypeId = storedContent.contentTypeId;
+  const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  return await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+}
+
+/**
+ * Resolve template path from content path.
+ * Use current previewing page if content path not specify
+ * @param contentPath the content path (page, component)
+ * @returns template path if available, empty otherwise
+ */
+export async function resolveTemplatePath(contentPath: string) {
   if (!contentPath) {
     contentPath = window.craftercms.getStore().getState().preview.guest.path;
   }
@@ -287,16 +309,7 @@ export async function getContentTypeDescription(contentPath: string) {
   }
 
   const contentTypeId = storedContent.contentTypeId;
-  return window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
-}
-
-/**
- * Resolve template path from content path
- * @param contentPath the content path (page, component)
- * @returns template path if available, empty otherwise
- */
-export async function resolveTemplatePath(contentPath: string) {
-  const storedContentType = await getContentTypeDescription(contentPath);
+  const storedContentType = window.craftercms.getStore().getState().contentTypes.byId[contentTypeId];
   return storedContentType?.displayTemplate;
 }
 
@@ -443,7 +456,7 @@ export async function writeContent(path: string, content: string) {
  */
 export async function chatGPTUpdateContent(contentPath: string, instructions: string, currentContent: boolean) {
   const content = await fetchContent(contentPath);
-  const contentTypeDescription = await getContentTypeDescription(contentPath);
+  const contentTypeDescription = await fetchContentTypeDescription(contentPath);
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
@@ -501,25 +514,30 @@ export async function chatGPTUpdateContentType(contentTypeId: string, instructio
           'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
       },
       {
-        role: 'user',
-        content: `Here is the current content type description:\n\n${contentTypeDescriptor}`
+        role: 'system',
+        content: `
+          You should use the correct postfix for the id using the following CSV data when there is an instruction to add a new field:\n\n
+          Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
+          integer,_i,_is,a 32 bit signed integer\n
+          string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
+          long,_l,_ls,a 64 bit signed integer\n
+          text,_t,_txt,Multiple words or tokens\n
+          boolean,_b,_bs,true or false\n
+          float,_f,_fs,IEEE 32 bit floating point number\n
+          double,_d,_ds,IEEE 64 bit floating point number\n
+          date,_dt,_dts,A date in ISO 8601 date format\n
+          time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
+          text with html tags,_html,,Rich Text Editor content\n'
+          \n\n
+        `
       },
       {
         role: 'user',
-        content: `Please apply the following instructions: ${instructions}. Use the correct postfix for the id using the following CSV data:\n\n
-        Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
-        integer,_i,_is,a 32 bit signed integer\n
-        string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
-        long,_l,_ls,a 64 bit signed integer\n
-        text,_t,_txt,Multiple words or tokens\n
-        boolean,_b,_bs,true or false\n
-        float,_f,_fs,IEEE 32 bit floating point number\n
-        double,_d,_ds,IEEE 64 bit floating point number\n
-        date,_dt,_dts,A date in ISO 8601 date format\n
-        time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
-        text with html tags,_html,,Rich Text Editor content\n'
-        \n\n
-        Keep the XML format unchange. The response should only contains the updated content in XML.`
+        content: `Here is the content type model:\n\n${contentTypeDescriptor}`
+      },
+      {
+        role: 'user',
+        content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange. Do not remove other fields from the model if it is not specified in the instructions. The response should only contains the updated content in XML.`
       }
     ],
     stream: false
