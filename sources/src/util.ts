@@ -512,11 +512,13 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
  * @param currentContent true if updating content type of the current previewing page
  * @returns message indicate if the operation is succedded or not
  */
-export async function chatGPTUpdateContentType(contentTypeId: string, instructions: string, currentContent: boolean) {
+export async function chatGPTUpdateContentType(contentTypeId: string, templatePath: string, instructions: string, currentContent: boolean) {
   const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+  const templateContent = await fetchContent(templatePath);
+
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
@@ -540,12 +542,14 @@ export async function chatGPTUpdateContentType(contentTypeId: string, instructio
           date,_dt,_dts,A date in ISO 8601 date format\n
           time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
           text with html tags,_html,,Rich Text Editor content\n'
+          image,_s,,Image path\n'
           \n\n
+          image fields use a type of image-picker.
         `
       },
       {
         role: 'user',
-        content: `Here is the content type model:\n\n${contentTypeDescriptor}`
+        content: `Here is the content type model:\n\n${contentTypeDescriptor}\n\n this is my template:\n\n ${templateContent}`
       },
       {
         role: 'user',
@@ -583,8 +587,15 @@ export async function chatGPTUpdateContentType(contentTypeId: string, instructio
  * @param instruction the instruction to update template
  * @param currentContent indicate the template is of the current content
  */
-export async function chatGPTUpdateTemplate(templatePath: string, instructions: string, currentContent: boolean) {
+export async function chatGPTUpdateTemplate(templatePath: string, contentPath: string, contentTypeId: string, instructions: string, currentContent: boolean) {
+
   const templateContent = await fetchContent(templatePath);
+  const content ="";//= await fetchContent(contentPath);
+  const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
@@ -595,7 +606,7 @@ export async function chatGPTUpdateTemplate(templatePath: string, instructions: 
       },
       {
         role: 'user',
-        content: `Here is the current template:\n\n${templateContent}`
+        content: `This is the currnt CrafterCMS Freemarker Template:\n\n${templateContent}\n\n This is the current Content stuctured as an XML document. Each field is an element. The element name is the field id in the content type form definition: ${content} \n\n this is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. THe id in the field is the variable name to reference in the template to retrieve the field value.`
       },
       {
         role: 'user',
@@ -680,6 +691,10 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         args.templatePath = await resolveTemplatePath(args.contentPath);
       }
 
+      if(!args.contetType) {
+        args.contentType = await resolveCurrentContentModel();
+      }
+
       if (!args.templatePath) {
         return {
           succeed: false,
@@ -688,7 +703,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateTemplate(args.templatePath, args.instructions, args.currentContent);
+      return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions, args.currentContent);
     }
 
     case 'update_content': {
@@ -723,6 +738,11 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       if (!args.contentType && args.currentContent) {
         args.contentType = await resolveCurrentContentModel();
       }
+      if (!args.templatePath && args.currentContent) {
+        args.templatePath = await resolveTemplatePath('');
+      } else if (!args.templatePath && args.contentPath) {
+        args.templatePath = await resolveTemplatePath(args.contentPath);
+      }
 
       if (!args.contentType) {
         return {
@@ -732,7 +752,8 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateContentType(args.contentType, args.instructions, args.currentContent);
+      
+      return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions, args.currentContent);
     }
 
     default:
