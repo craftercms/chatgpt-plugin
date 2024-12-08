@@ -530,6 +530,12 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
       {
         role: 'system',
         content: `
+          When there is an instruction to update a form defintions aways eforce these rules:\n
+          - The response must only contains the updated content in XML.\n
+          - Never update the form definition if the response is not XML.\m
+          - Do not remove or replace other fields in the model unless instructed to do so.\n
+          \n\n
+
           When there is an instruction to add a field use th following rules:\n
           - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.\n
           - A repeat group is a special kind of field that acts like an array and contains other fields.
@@ -555,12 +561,14 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
           text with html tags,_html,,Rich Text Editor content\n'
           image,_s,,Image path\n'
           \n\n       
+
           
+
           If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
           - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
+          - Analyze the content elements in the provided template. 
           - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
-          - Always make sure that the form definiton is well-formed XML with no other text or markup before or after it.\n
           - Create an individual field for each img element\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
           - Create an individual RTE field for any text or markup inside of div tags\n
@@ -574,7 +582,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
       },
       {
         role: 'user',
-        content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange. Do not remove other fields from the model if it is not specified in the instructions. The response should only contains the updated content in XML.`
+        content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange.`
       }
     ],
     stream: false
@@ -627,8 +635,20 @@ export async function chatGPTUpdateTemplate(templatePath: string, contentPath: s
       },
       {
         role: 'user',
-        content: `This is the currnt CrafterCMS Freemarker Template:\n\n${templateContent}\n\n This is the current Content stuctured as an XML document. Each field is an element. The element name is the field id in the content type form definition: ${content} \n\n this is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. THe id in the field is the variable name to reference in the template to retrieve the field value.`
-      },
+        content: `This is the currnt CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n 
+                  This is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+                  If asked to update the template with new markup or a new design follow thsse instructions:\n
+                  - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
+                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n 
+                  - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>\n
+                  - When adding images to the template use img tags rather than putting the image url in the CSS\n
+                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>
+                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''} />
+                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>
+                  - Example editable ahref: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>`
+
+                  },
       {
         role: 'user',
         content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
