@@ -530,7 +530,18 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
       {
         role: 'system',
         content: `
-          You should use the correct postfix for the id using the following CSV data when there is an instruction to add a new field:\n\n
+          When there is an instruction to add a field use th following rules:\n
+          - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.\n
+          - A repeat group is a special kind of field that acts like an array and contains other fields.
+          - Fields have a type that maps to the type of contnt they store:\n 
+          - Text should use an "input" type\n
+          - Numbers should use the "numberic-input" type\n
+          - Text with HTML tags should use the "rte" type\n
+          - Images should use the "image-picker" type\n
+          - If it's not clear what field type to use, assume the "input" type
+          \n\n
+
+          You should use the correct postfix for the id of a field using the following CSV data when there is an instruction to add a new field:\n\n
           Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
           integer,_i,_is,a 32 bit signed integer\n
           string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
@@ -543,9 +554,19 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
           time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
           text with html tags,_html,,Rich Text Editor content\n'
           image,_s,,Image path\n'
-          \n\n
-          image fields use a type of image-picker.
-        `
+          \n\n       
+          
+          If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
+          - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
+          - Always make sure that the form definiton is well-formed XML with no other text or markup before or after it.\n
+          - Create an individual field for each img element\n
+          - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
+          - Create an individual RTE field for any text or markup inside of div tags\n
+          - Use field labels and ids that are based on the subject or purpose of the content\n
+          - For each new field, set the required property to true\n
+          \n\n`
       },
       {
         role: 'user',
