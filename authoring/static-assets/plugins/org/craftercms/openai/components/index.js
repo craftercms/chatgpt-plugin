@@ -6005,6 +6005,7 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
           - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
           - Analyze the content elements in the provided template. 
           - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
           - Create an individual field for each img element\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
@@ -6084,7 +6085,9 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
                   3. Analize the visual representation to determine what placeholders would be used in place of the image and text values\n
                   4. Update for form definiton with the new fields required by the design\n
                   5. Updatee the template using editbale placeholders where images and content will be displayed\n
-                  6. Update the content xml for the page with example content.\n\n`
+                  6. Update the content xml for the page with example content.\n
+                  7. This is a image url that can generate images of any size: https://placehold.co/600x400/EEE/31343C  The size parameters are in the URL. When generating default values for images use this url and generate the proper size image for the given placeholder.\n
+                  \n\n`
             },
             {
                 role: 'user',
