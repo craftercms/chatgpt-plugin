@@ -5541,22 +5541,22 @@ const functionTools = [
     {
         type: 'function',
         function: {
-            name: "revert_change",
-            description: "Reverts or rollbacks content update to a previous version in CrafterCMS. If no `path` is provided and `currentContent` is used, make sure to ask the user what is the `revertType` in the case `revertType` is not provided.",
+            name: 'revert_change',
+            description: 'Reverts or rollbacks content update to a previous version in CrafterCMS. If no `path` is provided and `currentContent` is used, make sure to ask the user what is the `revertType` in the case `revertType` is not provided.',
             parameters: {
-                type: "object",
+                type: 'object',
                 properties: {
                     path: {
-                        type: "string",
-                        description: "The path of the content to revert."
+                        type: 'string',
+                        description: 'The path of the content to revert.'
                     },
                     currentContent: {
-                        type: "boolean",
+                        type: 'boolean',
                         description: "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
                     },
                     revertType: {
-                        type: "string",
-                        description: "If currentContent is true. This parameter is required to know that kind of data to revert. The possible values are: content, template, contentType"
+                        type: 'string',
+                        description: 'If currentContent is true. This parameter is required to know that kind of data to revert. The possible values are: content, template, contentType'
                     }
                 },
                 additionalProperties: false
@@ -5993,9 +5993,8 @@ async function writeContent(path, content) {
  * Update a page or component
  * @param contentPath the content path
  * @param instructions the instructions
- * @param currentContent indicate if the content is the current previewing page
  */
-async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
+async function chatGPTUpdateContent(contentPath, instructions) {
     const content = await fetchContent(contentPath);
     const contentTypeDescription = await fetchContentTypeDescription(contentPath);
     const completion = await createChatCompletion({
@@ -6020,7 +6019,7 @@ async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
     if (message) {
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
         const result = await writeContent(contentPath, newContent);
-        if (result.succeed && currentContent) {
+        if (result.succeed) {
             reloadPreview();
         }
         return result;
@@ -6034,10 +6033,9 @@ async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
  * Use ChatGPT to update a content type definition using user provided instructions
  * @param contentTypeId the content type id
  * @param instructions the user instructions
- * @param currentContent true if updating content type of the current previewing page
  * @returns message indicate if the operation is succedded or not
  */
-async function chatGPTUpdateContentType(contentTypeId, templatePath, instructions, currentContent) {
+async function chatGPTUpdateContentType(contentTypeId, templatePath, instructions) {
     const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
@@ -6114,7 +6112,7 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
     if (message) {
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
         const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
-        if (succeed && currentContent) {
+        if (succeed) {
             reloadPreview();
         }
         return {
@@ -6132,9 +6130,8 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
 /**
  * Revert content at path to previous version
  * @param path the path to revert
- * @param currentContent true if reverting previewing content
  */
-async function chatGPTRevertContent(path, currentContent) {
+async function chatGPTRevertContent(path) {
     const versions = await fetchItemVersions(path);
     if (!versions || versions.length <= 1) {
         return {
@@ -6145,9 +6142,7 @@ async function chatGPTRevertContent(path, currentContent) {
     const previousCommitId = versions[1]?.versionNumber;
     const succeed = await revertItemVersion(path, previousCommitId);
     if (succeed) {
-        if (currentContent) {
-            reloadPreview();
-        }
+        reloadPreview();
         return {
             succeed,
             message: `Your content at path '${path}' has been reverted to previous version.`
@@ -6162,11 +6157,10 @@ async function chatGPTRevertContent(path, currentContent) {
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
- * @param currentContent indicate the template is of the current content
  */
-async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, instructions, currentContent) {
+async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, instructions) {
     const templateContent = await fetchContent(templatePath);
-    const content = ""; //= await fetchContent(contentPath);
+    const content = ''; //= await fetchContent(contentPath);
     const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
@@ -6212,7 +6206,7 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
     if (message) {
         const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
         const result = await writeContent(templatePath, newTemplate);
-        if (result.succeed && currentContent) {
+        if (result.succeed) {
             reloadPreview();
         }
         return result;
@@ -6278,7 +6272,7 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
                 };
             }
-            return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions, args.currentContent);
+            return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions);
         }
         case 'update_content': {
             if (!args.instructions) {
@@ -6296,7 +6290,7 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the content path from current context. Could you please provide more detail the content you would like to update?"
                 };
             }
-            return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
+            return await chatGPTUpdateContent(args.contentPath, args.instructions);
         }
         case 'update_content_type': {
             if (!args.instructions) {
@@ -6317,7 +6311,7 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
                 };
             }
-            return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions, args.currentContent);
+            return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
         }
         case 'revert_change': {
             if (!args.path && !args.currentContent) {
@@ -6332,7 +6326,7 @@ async function chatGPTFunctionCall(name, params = '') {
                     message: "I'm not able to resolve the path from current context. Could you please provide more detail the path you would like to revert?"
                 };
             }
-            return await chatGPTRevertContent(args.path, args.currentContent);
+            return await chatGPTRevertContent(args.path);
         }
         default:
             throw new Error('No function found');

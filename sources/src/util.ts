@@ -12,15 +12,14 @@ import * as Core from 'openai/src/core';
 import { APIPromise } from 'openai/src/core';
 import { Stream } from 'openai/src/streaming';
 import { RequestInfo, Response } from 'openai/_shims';
-import { messages, User } from '@craftercms/studio-ui';
+import { User } from '@craftercms/studio-ui';
 import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
 import { defaultChatModel } from './consts';
 import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils/subjects';
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
-import { revertToPreviousVersion } from '@craftercms/studio-ui/state/actions/versions';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
-import { firstValueFrom, last } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -537,9 +536,8 @@ export async function writeContent(path: string, content: string) {
  * Update a page or component
  * @param contentPath the content path
  * @param instructions the instructions
- * @param currentContent indicate if the content is the current previewing page
  */
-export async function chatGPTUpdateContent(contentPath: string, instructions: string, currentContent: boolean) {
+export async function chatGPTUpdateContent(contentPath: string, instructions: string) {
   const content = await fetchContent(contentPath);
   const contentTypeDescription = await fetchContentTypeDescription(contentPath);
   const completion = await createChatCompletion({
@@ -566,7 +564,7 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
   if (message) {
     const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
     const result = await writeContent(contentPath, newContent);
-    if (result.succeed && currentContent) {
+    if (result.succeed) {
       reloadPreview();
     }
     return result;
@@ -582,15 +580,9 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
  * Use ChatGPT to update a content type definition using user provided instructions
  * @param contentTypeId the content type id
  * @param instructions the user instructions
- * @param currentContent true if updating content type of the current previewing page
  * @returns message indicate if the operation is succedded or not
  */
-export async function chatGPTUpdateContentType(
-  contentTypeId: string,
-  templatePath: string,
-  instructions: string,
-  currentContent: boolean
-) {
+export async function chatGPTUpdateContentType(contentTypeId: string, templatePath: string, instructions: string) {
   const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
@@ -670,7 +662,7 @@ export async function chatGPTUpdateContentType(
   if (message) {
     const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
     const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
-    if (succeed && currentContent) {
+    if (succeed) {
       reloadPreview();
     }
 
@@ -691,9 +683,8 @@ export async function chatGPTUpdateContentType(
 /**
  * Revert content at path to previous version
  * @param path the path to revert
- * @param currentContent true if reverting previewing content
  */
-export async function chatGPTRevertContent(path: string, currentContent: boolean) {
+export async function chatGPTRevertContent(path: string) {
   const versions = await fetchItemVersions(path);
   if (!versions || versions.length <= 1) {
     return {
@@ -705,9 +696,7 @@ export async function chatGPTRevertContent(path: string, currentContent: boolean
   const previousCommitId = versions[1]?.versionNumber;
   const succeed = await revertItemVersion(path, previousCommitId);
   if (succeed) {
-    if (currentContent) {
-      reloadPreview();
-    }
+    reloadPreview();
 
     return {
       succeed,
@@ -725,14 +714,12 @@ export async function chatGPTRevertContent(path: string, currentContent: boolean
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
- * @param currentContent indicate the template is of the current content
  */
 export async function chatGPTUpdateTemplate(
   templatePath: string,
   contentPath: string,
   contentTypeId: string,
-  instructions: string,
-  currentContent: boolean
+  instructions: string
 ) {
   const templateContent = await fetchContent(templatePath);
   const content = ''; //= await fetchContent(contentPath);
@@ -784,7 +771,7 @@ export async function chatGPTUpdateTemplate(
   if (message) {
     const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
     const result = await writeContent(templatePath, newTemplate);
-    if (result.succeed && currentContent) {
+    if (result.succeed) {
       reloadPreview();
     }
     return result;
@@ -867,13 +854,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateTemplate(
-        args.templatePath,
-        args.contentPath,
-        args.contentType,
-        args.instructions,
-        args.currentContent
-      );
+      return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions);
     }
 
     case 'update_content': {
@@ -897,7 +878,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateContent(args.contentPath, args.instructions, args.currentContent);
+      return await chatGPTUpdateContent(args.contentPath, args.instructions);
     }
 
     case 'update_content_type': {
@@ -922,12 +903,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateContentType(
-        args.contentType,
-        args.templatePath,
-        args.instructions,
-        args.currentContent
-      );
+      return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
     }
 
     case 'revert_change': {
@@ -947,7 +923,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTRevertContent(args.path, args.currentContent);
+      return await chatGPTRevertContent(args.path);
     }
 
     default:
