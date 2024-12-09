@@ -6073,10 +6073,18 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
                   - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n 
                   - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>\n
                   - When adding images to the template use img tags rather than putting the image url in the CSS\n
-                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>
-                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''} />
-                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>
-                  - Example editable ahref: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>`
+                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>\n
+                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''}" />\n
+                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>\n
+                  - Example editable ahref: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>\n\n
+                  
+                  If asked to create or update a template with a completely new design follow this process:\n
+                  1. Analyze the content and functional requirements and instructions carefully\n
+                  2. Design a visual presentation with mock images and other content to meet the requirements\n
+                  3. Analize the visual representation to determine what placeholders would be used in place of the image and text values\n
+                  4. Update for form definiton with the new fields required by the design\n
+                  5. Updatee the template using editbale placeholders where images and content will be displayed\n
+                  6. Update the content xml for the page with example content.\n\n`
             },
             {
                 role: 'user',
