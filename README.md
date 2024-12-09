@@ -198,6 +198,14 @@ By default, user can select the model from the dropdown menu. Administrators can
 ...
 ```
 
+**Note**: Some features such as saving generated images required the Groovy sandbox for Studio to be disabled. Please disable the sandbox or modify the blacklist in `/bin/apache-tomcat/shared/classes/crafter/studio/extension/studio-config-override.yaml`.
+
+To disable:
+
+```yaml
+studio.scripting.sandbox.enable: false
+```
+
 ## Contributing
 
 - Clone this repository.
