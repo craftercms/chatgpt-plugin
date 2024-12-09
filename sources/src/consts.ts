@@ -203,5 +203,33 @@ export const functionTools = [
         additionalProperties: false
       }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'revert_change',
+      description:
+        'Reverts or rollbacks content update to a previous version in CrafterCMS. If no `path` is provided and `currentContent` is used, make sure to ask the user what is the `revertType` in the case `revertType` is not provided.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the content to revert.'
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+          },
+          revertType: {
+            type: 'string',
+            description:
+              'If currentContent is true. This parameter is required to know that kind of data to revert. The possible values are: content, template, contentType'
+          }
+        },
+        additionalProperties: false
+      }
+    }
   }
 ];

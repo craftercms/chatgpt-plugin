@@ -12,14 +12,15 @@ import * as Core from 'openai/src/core';
 import { APIPromise } from 'openai/src/core';
 import { Stream } from 'openai/src/streaming';
 import { RequestInfo, Response } from 'openai/_shims';
-import { User } from '@craftercms/studio-ui';
+import { messages, User } from '@craftercms/studio-ui';
 import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
 import { defaultChatModel } from './consts';
 import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils/subjects';
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
+import { revertToPreviousVersion } from '@craftercms/studio-ui/state/actions/versions';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, last } from 'rxjs';
 
 let openai: OpenAI;
 const getOpenAiInstance =
@@ -276,6 +277,37 @@ export async function resolveCurrentContentModel() {
 }
 
 /**
+ * Resolve site path for a type
+ * @param type the type (content, template, contentType or contentModel)
+ * @returns the path of the content
+ */
+export async function resolveCurrentPath(type: string) {
+  const contentPath = window.craftercms.getStore().getState().preview.guest?.path;
+  if (!contentPath) {
+    return '';
+  }
+
+  if (type === 'content') {
+    return contentPath;
+  }
+
+  if (type === 'template') {
+    return await resolveTemplatePath(contentPath);
+  }
+
+  if (type === 'contentType' || type === 'contentModel') {
+    let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
+    if (!storedContent) {
+      storedContent = await fetchSandboxItemByPath(contentPath);
+    }
+    const contentTypeId = storedContent.contentTypeId;
+    return stripDuplicateSlashes(`/config/studio/content-types/${contentTypeId}/form-definition.xml`);
+  }
+
+  return '';
+}
+
+/**
  * Fetch content type description from server
  * @param contentPath the content path (page or component)
  * @returns content type description in XML format
@@ -373,6 +405,47 @@ export async function publishContent({
       ? `Your content at path '${path}' has been scheduled to publish ${dateMessage} to the target '${publishingTarget}'.`
       : 'Error publishing content. Please try again later or contact administration.'
   };
+}
+
+/**
+ * Fetch item versions by path
+ * @param path the path to fetch
+ * @returns versions
+ */
+export async function fetchItemVersions(path: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(`${authoringBase}/api/2/content/item_history?siteId=${siteId}&path=${path}`, {
+    headers
+  });
+  if (response.status !== 200) {
+    return '';
+  }
+
+  const data = await response.json();
+  return data?.items;
+}
+
+/**
+ * Revert item to a version
+ * @param path the item path
+ * @param versionId the version to revert
+ * @returns true if succeeded, false otherwise
+ */
+export async function revertItemVersion(path: string, versionId: string) {
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const authoringBase = state.env.authoringBase;
+  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const response = await fetch(
+    `${authoringBase}/api/1/services/api/1/content/revert-content.json?site=${siteId}&path=${path}&version=${versionId}`,
+    {
+      headers
+    }
+  );
+  return response.status === 200;
 }
 
 /**
@@ -512,7 +585,12 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
  * @param currentContent true if updating content type of the current previewing page
  * @returns message indicate if the operation is succedded or not
  */
-export async function chatGPTUpdateContentType(contentTypeId: string, templatePath: string, instructions: string, currentContent: boolean) {
+export async function chatGPTUpdateContentType(
+  contentTypeId: string,
+  templatePath: string,
+  instructions: string,
+  currentContent: boolean
+) {
   const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
@@ -532,14 +610,14 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
         content: `
           When there is an instruction to update a form defintions aways eforce these rules:\n
           - The response must only contains the updated content in XML.\n
-          - Never update the form definition if the response is not XML.\m
+          - Never update the form definition if the response is not XML.\n
           - Do not remove or replace other fields in the model unless instructed to do so.\n
           \n\n
 
           When there is an instruction to add a field use th following rules:\n
           - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.\n
           - A repeat group is a special kind of field that acts like an array and contains other fields.
-          - Fields have a type that maps to the type of contnt they store:\n 
+          - Fields have a type that maps to the type of contnt they store:\n
           - Text should use an "input" type\n
           - Numbers should use the "numberic-input" type\n
           - Text with HTML tags should use the "rte" type\n
@@ -560,14 +638,14 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
           time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
           text with html tags,_html,,Rich Text Editor content\n'
           image,_s,,Image path\n'
-          \n\n       
+          \n\n
 
-          
+
 
           If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
           - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
-          - Analyze the content elements in the provided template. 
-          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - Analyze the content elements in the provided template.
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
           - Create an individual field for each img element\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
@@ -611,15 +689,53 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
 }
 
 /**
+ * Revert content at path to previous version
+ * @param path the path to revert
+ * @param currentContent true if reverting previewing content
+ */
+export async function chatGPTRevertContent(path: string, currentContent: boolean) {
+  const versions = await fetchItemVersions(path);
+  if (!versions || versions.length <= 1) {
+    return {
+      succeed: false,
+      messages: `No version to revert for content at path '${path}'`
+    };
+  }
+
+  const previousCommitId = versions[1]?.versionNumber;
+  const succeed = await revertItemVersion(path, previousCommitId);
+  if (succeed) {
+    if (currentContent) {
+      reloadPreview();
+    }
+
+    return {
+      succeed,
+      message: `Your content at path '${path}' has been reverted to previous version.`
+    };
+  }
+
+  return {
+    succeed,
+    message: `Error reverting content at path '${path}' to previous version. Please try again later or contact administration.`
+  };
+}
+
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
  * @param currentContent indicate the template is of the current content
  */
-export async function chatGPTUpdateTemplate(templatePath: string, contentPath: string, contentTypeId: string, instructions: string, currentContent: boolean) {
-
+export async function chatGPTUpdateTemplate(
+  templatePath: string,
+  contentPath: string,
+  contentTypeId: string,
+  instructions: string,
+  currentContent: boolean
+) {
   const templateContent = await fetchContent(templatePath);
-  const content ="";//= await fetchContent(contentPath);
+  const content = ''; //= await fetchContent(contentPath);
   const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
@@ -635,19 +751,19 @@ export async function chatGPTUpdateTemplate(templatePath: string, contentPath: s
       },
       {
         role: 'user',
-        content: `This is the currnt CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
-                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n 
+        content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n
                   This is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
                   If asked to update the template with new markup or a new design follow thsse instructions:\n
                   - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
-                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n 
+                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n
                   - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>\n
                   - When adding images to the template use img tags rather than putting the image url in the CSS\n
                   - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>\n
                   - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''}" />\n
                   - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>\n
-                  - Example editable ahref: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>\n\n
-                  
+                  - Example editable a href: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>\n\n
+
                   If asked to create or update a template with a completely new design follow this process:\n
                   1. Analyze the content and functional requirements and instructions carefully\n
                   2. Design a visual presentation with mock images and other content to meet the requirements\n
@@ -655,8 +771,7 @@ export async function chatGPTUpdateTemplate(templatePath: string, contentPath: s
                   4. Update for form definiton with the new fields required by the design\n
                   5. Updatee the template using editbale placeholders where images and content will be displayed\n
                   6. Update the content xml for the page with example content.\n\n`
-
-                  },
+      },
       {
         role: 'user',
         content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
@@ -740,7 +855,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         args.templatePath = await resolveTemplatePath(args.contentPath);
       }
 
-      if(!args.contetType) {
+      if (!args.contetType) {
         args.contentType = await resolveCurrentContentModel();
       }
 
@@ -752,7 +867,13 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions, args.currentContent);
+      return await chatGPTUpdateTemplate(
+        args.templatePath,
+        args.contentPath,
+        args.contentType,
+        args.instructions,
+        args.currentContent
+      );
     }
 
     case 'update_content': {
@@ -801,8 +922,32 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         };
       }
 
-      
-      return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions, args.currentContent);
+      return await chatGPTUpdateContentType(
+        args.contentType,
+        args.templatePath,
+        args.instructions,
+        args.currentContent
+      );
+    }
+
+    case 'revert_change': {
+      if (!args.path && !args.currentContent) {
+        break;
+      }
+
+      if (!args.path) {
+        args.path = await resolveCurrentPath(args.revertType);
+      }
+
+      if (!args.path) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the path from current context. Could you please provide more detail the path you would like to revert?"
+        };
+      }
+
+      return await chatGPTRevertContent(args.path, args.currentContent);
     }
 
     default:
