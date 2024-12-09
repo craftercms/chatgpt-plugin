@@ -32,7 +32,7 @@ const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 
-var OpenAI$2 = createSvgIcon(jsx("path", { d: "M21.9706 9.87533C22.233 9.08708 22.3241 8.25193 22.2376 7.42569C22.1511 6.59945 21.8892 5.80122 21.4692 5.08441C20.8468 4.00021 19.8959 3.14181 18.7539 2.63307C17.6119 2.12433 16.3378 1.99156 15.1154 2.25391C14.564 1.63256 13.8864 1.13614 13.1276 0.797891C12.3689 0.459646 11.5467 0.28737 10.716 0.292596C9.4662 0.28958 8.24776 0.683523 7.23631 1.41764C6.22486 2.15174 5.47268 3.18809 5.08819 4.37725C4.27404 4.54391 3.50487 4.88257 2.83219 5.37056C2.15951 5.85855 1.59885 6.4846 1.18772 7.20682C0.560251 8.28805 0.292411 9.54056 0.422827 10.7839C0.553243 12.0271 1.07517 13.1968 1.91334 14.1243C1.6509 14.9125 1.55986 15.7477 1.64631 16.5739C1.73277 17.4002 1.99472 18.1984 2.41463 18.9152C3.03719 19.9994 3.98806 20.8577 5.13005 21.3664C6.27204 21.8752 7.54615 22.008 8.76851 21.7457C9.31986 22.367 9.9976 22.8634 10.7563 23.2017C11.515 23.5399 12.3372 23.7122 13.1679 23.707C14.4183 23.7103 15.6374 23.3162 16.6492 22.5816C17.6611 21.847 18.4134 20.8099 18.7976 19.62C19.6117 19.4534 20.3809 19.1147 21.0536 18.6267C21.7262 18.1388 22.2869 17.5127 22.698 16.7904C23.3247 15.7093 23.592 14.4571 23.4612 13.2143C23.3305 11.9715 22.8085 10.8024 21.9706 9.87533ZM13.1698 22.1763C12.1434 22.1778 11.1492 21.8183 10.361 21.1608C10.3965 21.1415 10.4589 21.1073 10.4995 21.0824L15.1616 18.3894C15.2786 18.3229 15.3758 18.2263 15.4431 18.1097C15.5105 17.9931 15.5455 17.8607 15.5447 17.7261V11.1535L17.5153 12.2913C17.5256 12.2965 17.5345 12.3041 17.5412 12.3135C17.5479 12.3229 17.5521 12.3339 17.5536 12.3453V17.7884C17.5521 18.951 17.0899 20.0656 16.2682 20.8881C15.4465 21.7106 14.3324 22.1738 13.1698 22.1763ZM3.74219 18.1499C3.22806 17.2615 3.04276 16.2207 3.21873 15.2095C3.25335 15.2303 3.31382 15.2672 3.35721 15.2921L8.0193 17.985C8.13549 18.0529 8.26767 18.0888 8.40224 18.0888C8.53676 18.0888 8.66894 18.0529 8.78513 17.985L14.4771 14.6985V16.9742C14.4777 16.9858 14.4755 16.9974 14.4706 17.008C14.4656 17.0185 14.4582 17.0277 14.4489 17.0346L9.736 19.7557C8.72794 20.3363 7.53069 20.4933 6.40702 20.1922C5.28333 19.8912 4.32496 19.1567 3.74219 18.1499ZM2.51573 7.97213C3.02762 7.08261 3.83615 6.40159 4.7997 6.04821C4.7997 6.08836 4.79739 6.15949 4.79739 6.20883V11.5947C4.79657 11.7292 4.83159 11.8615 4.89885 11.9781C4.9661 12.0946 5.06316 12.191 5.18006 12.2576L10.872 15.5437L8.90144 16.6815C8.89173 16.6879 8.88055 16.6918 8.86896 16.6929C8.85737 16.6939 8.84566 16.6921 8.83495 16.6875L4.12161 13.9641C3.11531 13.3813 2.38115 12.4233 2.08011 11.3001C1.77907 10.1769 1.93573 8.98007 2.51573 7.97213ZM18.7057 11.7397L13.0138 8.45312L14.9843 7.31576C14.994 7.30938 15.0052 7.30546 15.0168 7.3044C15.0284 7.30335 15.0401 7.30522 15.0508 7.30979L19.7641 10.0309C20.4862 10.448 21.0745 11.0622 21.4602 11.8015C21.8459 12.5409 22.0129 13.3748 21.9418 14.2057C21.8706 15.0366 21.5642 15.83 21.0585 16.493C20.5527 17.1561 19.8686 17.6613 19.086 17.9495C19.086 17.9089 19.086 17.8378 19.086 17.7884V12.4025C19.0872 12.2682 19.0525 12.1361 18.9857 12.0196C18.9188 11.9031 18.8222 11.8065 18.7057 11.7397ZM20.667 8.78778C20.6324 8.76653 20.5719 8.73006 20.5286 8.70518L15.8664 6.01221C15.7502 5.94442 15.6181 5.90866 15.4835 5.90866C15.349 5.90866 15.2168 5.94442 15.1006 6.01221L9.40872 9.2988V7.02313C9.40808 7.01149 9.4103 6.9999 9.41522 6.98936C9.42014 6.97882 9.42757 6.96963 9.43688 6.96267L14.1498 4.24385C14.8718 3.82752 15.6974 3.62541 16.5301 3.66116C17.3628 3.6969 18.168 3.96903 18.8517 4.4457C19.5354 4.92237 20.0692 5.58387 20.3907 6.35283C20.7121 7.12177 20.808 7.96633 20.667 8.78778ZM8.33738 12.8438L6.36634 11.706C6.35604 11.7009 6.34708 11.6932 6.34041 11.6838C6.33374 11.6744 6.32946 11.6634 6.32806 11.652V6.20883C6.32858 5.37518 6.56659 4.55891 7.01416 3.85558C7.46179 3.15225 8.10049 2.59097 8.85549 2.23744C9.6105 1.88391 10.4506 1.75276 11.2774 1.85933C12.1043 1.9659 12.8836 2.30579 13.5243 2.83921C13.4888 2.8586 13.4269 2.89276 13.3858 2.91769L8.72373 5.61063C8.60671 5.67713 8.5096 5.77359 8.44222 5.8901C8.37491 6.00659 8.33984 6.13894 8.3406 6.27346L8.33738 12.8438ZM9.40778 10.5359L11.9429 9.07168L14.4779 10.5349V13.4623L11.9429 14.9256L9.40778 13.4623V10.5359Z" }), 'OpenAI');
+var OpenAI$1 = createSvgIcon(jsx("path", { d: "M21.9706 9.87533C22.233 9.08708 22.3241 8.25193 22.2376 7.42569C22.1511 6.59945 21.8892 5.80122 21.4692 5.08441C20.8468 4.00021 19.8959 3.14181 18.7539 2.63307C17.6119 2.12433 16.3378 1.99156 15.1154 2.25391C14.564 1.63256 13.8864 1.13614 13.1276 0.797891C12.3689 0.459646 11.5467 0.28737 10.716 0.292596C9.4662 0.28958 8.24776 0.683523 7.23631 1.41764C6.22486 2.15174 5.47268 3.18809 5.08819 4.37725C4.27404 4.54391 3.50487 4.88257 2.83219 5.37056C2.15951 5.85855 1.59885 6.4846 1.18772 7.20682C0.560251 8.28805 0.292411 9.54056 0.422827 10.7839C0.553243 12.0271 1.07517 13.1968 1.91334 14.1243C1.6509 14.9125 1.55986 15.7477 1.64631 16.5739C1.73277 17.4002 1.99472 18.1984 2.41463 18.9152C3.03719 19.9994 3.98806 20.8577 5.13005 21.3664C6.27204 21.8752 7.54615 22.008 8.76851 21.7457C9.31986 22.367 9.9976 22.8634 10.7563 23.2017C11.515 23.5399 12.3372 23.7122 13.1679 23.707C14.4183 23.7103 15.6374 23.3162 16.6492 22.5816C17.6611 21.847 18.4134 20.8099 18.7976 19.62C19.6117 19.4534 20.3809 19.1147 21.0536 18.6267C21.7262 18.1388 22.2869 17.5127 22.698 16.7904C23.3247 15.7093 23.592 14.4571 23.4612 13.2143C23.3305 11.9715 22.8085 10.8024 21.9706 9.87533ZM13.1698 22.1763C12.1434 22.1778 11.1492 21.8183 10.361 21.1608C10.3965 21.1415 10.4589 21.1073 10.4995 21.0824L15.1616 18.3894C15.2786 18.3229 15.3758 18.2263 15.4431 18.1097C15.5105 17.9931 15.5455 17.8607 15.5447 17.7261V11.1535L17.5153 12.2913C17.5256 12.2965 17.5345 12.3041 17.5412 12.3135C17.5479 12.3229 17.5521 12.3339 17.5536 12.3453V17.7884C17.5521 18.951 17.0899 20.0656 16.2682 20.8881C15.4465 21.7106 14.3324 22.1738 13.1698 22.1763ZM3.74219 18.1499C3.22806 17.2615 3.04276 16.2207 3.21873 15.2095C3.25335 15.2303 3.31382 15.2672 3.35721 15.2921L8.0193 17.985C8.13549 18.0529 8.26767 18.0888 8.40224 18.0888C8.53676 18.0888 8.66894 18.0529 8.78513 17.985L14.4771 14.6985V16.9742C14.4777 16.9858 14.4755 16.9974 14.4706 17.008C14.4656 17.0185 14.4582 17.0277 14.4489 17.0346L9.736 19.7557C8.72794 20.3363 7.53069 20.4933 6.40702 20.1922C5.28333 19.8912 4.32496 19.1567 3.74219 18.1499ZM2.51573 7.97213C3.02762 7.08261 3.83615 6.40159 4.7997 6.04821C4.7997 6.08836 4.79739 6.15949 4.79739 6.20883V11.5947C4.79657 11.7292 4.83159 11.8615 4.89885 11.9781C4.9661 12.0946 5.06316 12.191 5.18006 12.2576L10.872 15.5437L8.90144 16.6815C8.89173 16.6879 8.88055 16.6918 8.86896 16.6929C8.85737 16.6939 8.84566 16.6921 8.83495 16.6875L4.12161 13.9641C3.11531 13.3813 2.38115 12.4233 2.08011 11.3001C1.77907 10.1769 1.93573 8.98007 2.51573 7.97213ZM18.7057 11.7397L13.0138 8.45312L14.9843 7.31576C14.994 7.30938 15.0052 7.30546 15.0168 7.3044C15.0284 7.30335 15.0401 7.30522 15.0508 7.30979L19.7641 10.0309C20.4862 10.448 21.0745 11.0622 21.4602 11.8015C21.8459 12.5409 22.0129 13.3748 21.9418 14.2057C21.8706 15.0366 21.5642 15.83 21.0585 16.493C20.5527 17.1561 19.8686 17.6613 19.086 17.9495C19.086 17.9089 19.086 17.8378 19.086 17.7884V12.4025C19.0872 12.2682 19.0525 12.1361 18.9857 12.0196C18.9188 11.9031 18.8222 11.8065 18.7057 11.7397ZM20.667 8.78778C20.6324 8.76653 20.5719 8.73006 20.5286 8.70518L15.8664 6.01221C15.7502 5.94442 15.6181 5.90866 15.4835 5.90866C15.349 5.90866 15.2168 5.94442 15.1006 6.01221L9.40872 9.2988V7.02313C9.40808 7.01149 9.4103 6.9999 9.41522 6.98936C9.42014 6.97882 9.42757 6.96963 9.43688 6.96267L14.1498 4.24385C14.8718 3.82752 15.6974 3.62541 16.5301 3.66116C17.3628 3.6969 18.168 3.96903 18.8517 4.4457C19.5354 4.92237 20.0692 5.58387 20.3907 6.35283C20.7121 7.12177 20.808 7.96633 20.667 8.78778ZM8.33738 12.8438L6.36634 11.706C6.35604 11.7009 6.34708 11.6932 6.34041 11.6838C6.33374 11.6744 6.32946 11.6634 6.32806 11.652V6.20883C6.32858 5.37518 6.56659 4.55891 7.01416 3.85558C7.46179 3.15225 8.10049 2.59097 8.85549 2.23744C9.6105 1.88391 10.4506 1.75276 11.2774 1.85933C12.1043 1.9659 12.8836 2.30579 13.5243 2.83921C13.4888 2.8586 13.4269 2.89276 13.3858 2.91769L8.72373 5.61063C8.60671 5.67713 8.5096 5.77359 8.44222 5.8901C8.37491 6.00659 8.33984 6.13894 8.3406 6.27346L8.33738 12.8438ZM9.40778 10.5359L11.9429 9.07168L14.4779 10.5349V13.4623L11.9429 14.9256L9.40778 13.4623V10.5359Z" }), 'OpenAI');
 
 const default_format = 'RFC3986';
 const formatters = {
@@ -402,7 +402,7 @@ function stringify(object, opts = {}) {
     return joined.length > 0 ? prefix + joined : '';
 }
 
-const VERSION = '4.73.1'; // x-release-please-version
+const VERSION = '4.76.0'; // x-release-please-version
 
 let auto = false;
 let kind = undefined;
@@ -424,11 +424,7 @@ function setShims(shims, options = { auto: false }) {
     auto = options.auto;
     kind = shims.kind;
     fetch$1 = shims.fetch;
-    shims.Request;
-    shims.Response;
-    shims.Headers;
     FormData$1 = shims.FormData;
-    shims.Blob;
     File$1 = shims.File;
     ReadableStream$1 = shims.ReadableStream;
     getMultipartRequestOptions = shims.getMultipartRequestOptions;
@@ -5352,7 +5348,6 @@ OpenAI.Beta = Beta;
 OpenAI.Batches = Batches;
 OpenAI.BatchesPage = BatchesPage;
 OpenAI.Uploads = Uploads;
-var OpenAI$1 = OpenAI;
 
 const helperWidgetId = 'craftercms.components.openai.Helper';
 const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
@@ -5564,7 +5559,6 @@ const functionTools = [
 const reloadRequest = /*#__PURE__*/ createAction('RELOAD_REQUEST');
 const contentTypeDropTargetsResponse = /*#__PURE__*/ createAction('CONTENT_TYPE_DROP_TARGETS_RESPONSE');
 /*#__PURE__*/ createAction(contentTypeDropTargetsResponse.type);
-// endregion
 
 let openai;
 const getOpenAiInstance = () => {
@@ -5577,7 +5571,7 @@ const getOpenAiInstance = () => {
             const authoringBase = state.env.authoringBase;
             const baseOptions = { maxRetries: 0, dangerouslyAllowBrowser: true };
             const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
-            return (openai = new OpenAI$1({
+            return (openai = new OpenAI({
                 ...baseOptions,
                 // When we have a working proxy service....
                 // apiKey: null,
@@ -5591,7 +5585,7 @@ const getOpenAiInstance = () => {
                     .then((response) => response.json())
                     .then((response) => {
                     init.headers['authorization'] = `Bearer ${response.result}`;
-                    openai = new OpenAI$1({ ...baseOptions, apiKey: response.result });
+                    openai = new OpenAI({ ...baseOptions, apiKey: response.result });
                     return fetch(url, init);
                 })
             }));
@@ -5957,11 +5951,12 @@ async function chatGPTUpdateContent(contentPath, instructions, currentContent) {
  * @param currentContent true if updating content type of the current previewing page
  * @returns message indicate if the operation is succedded or not
  */
-async function chatGPTUpdateContentType(contentTypeId, instructions, currentContent) {
+async function chatGPTUpdateContentType(contentTypeId, templatePath, instructions, currentContent) {
     const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+    const templateContent = await fetchContent(templatePath);
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
@@ -5972,7 +5967,24 @@ async function chatGPTUpdateContentType(contentTypeId, instructions, currentCont
             {
                 role: 'system',
                 content: `
-          You should use the correct postfix for the id using the following CSV data when there is an instruction to add a new field:\n\n
+          When there is an instruction to update a form defintions aways eforce these rules:\n
+          - The response must only contains the updated content in XML.\n
+          - Never update the form definition if the response is not XML.\m
+          - Do not remove or replace other fields in the model unless instructed to do so.\n
+          \n\n
+
+          When there is an instruction to add a field use th following rules:\n
+          - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.\n
+          - A repeat group is a special kind of field that acts like an array and contains other fields.
+          - Fields have a type that maps to the type of contnt they store:\n 
+          - Text should use an "input" type\n
+          - Numbers should use the "numberic-input" type\n
+          - Text with HTML tags should use the "rte" type\n
+          - Images should use the "image-picker" type\n
+          - If it's not clear what field type to use, assume the "input" type
+          \n\n
+
+          You should use the correct postfix for the id of a field using the following CSV data when there is an instruction to add a new field:\n\n
           Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
           integer,_i,_is,a 32 bit signed integer\n
           string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
@@ -5984,16 +5996,30 @@ async function chatGPTUpdateContentType(contentTypeId, instructions, currentCont
           date,_dt,_dts,A date in ISO 8601 date format\n
           time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
           text with html tags,_html,,Rich Text Editor content\n'
-          \n\n
-        `
+          image,_s,,Image path\n'
+          \n\n       
+
+          
+
+          If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
+          - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
+          - Analyze the content elements in the provided template. 
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
+          - Create an individual field for each img element\n
+          - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
+          - Create an individual RTE field for any text or markup inside of div tags\n
+          - Use field labels and ids that are based on the subject or purpose of the content\n
+          - For each new field, set the required property to true\n
+          \n\n`
             },
             {
                 role: 'user',
-                content: `Here is the content type model:\n\n${contentTypeDescriptor}`
+                content: `Here is the content type model:\n\n${contentTypeDescriptor}\n\n this is my template:\n\n ${templateContent}`
             },
             {
                 role: 'user',
-                content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange. Do not remove other fields from the model if it is not specified in the instructions. The response should only contains the updated content in XML.`
+                content: `Please apply the following instructions: ${instructions}. Keep the XML format unchange.`
             }
         ],
         stream: false
@@ -6023,8 +6049,13 @@ async function chatGPTUpdateContentType(contentTypeId, instructions, currentCont
  * @param instruction the instruction to update template
  * @param currentContent indicate the template is of the current content
  */
-async function chatGPTUpdateTemplate(templatePath, instructions, currentContent) {
+async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, instructions, currentContent) {
     const templateContent = await fetchContent(templatePath);
+    const content = ""; //= await fetchContent(contentPath);
+    const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
@@ -6034,7 +6065,26 @@ async function chatGPTUpdateTemplate(templatePath, instructions, currentContent)
             },
             {
                 role: 'user',
-                content: `Here is the current template:\n\n${templateContent}`
+                content: `This is the currnt CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n 
+                  This is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+                  If asked to update the template with new markup or a new design follow thsse instructions:\n
+                  - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
+                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n 
+                  - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>\n
+                  - When adding images to the template use img tags rather than putting the image url in the CSS\n
+                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>\n
+                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''}" />\n
+                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>\n
+                  - Example editable ahref: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>\n\n
+                  
+                  If asked to create or update a template with a completely new design follow this process:\n
+                  1. Analyze the content and functional requirements and instructions carefully\n
+                  2. Design a visual presentation with mock images and other content to meet the requirements\n
+                  3. Analize the visual representation to determine what placeholders would be used in place of the image and text values\n
+                  4. Update for form definiton with the new fields required by the design\n
+                  5. Updatee the template using editbale placeholders where images and content will be displayed\n
+                  6. Update the content xml for the page with example content.\n\n`
             },
             {
                 role: 'user',
@@ -6104,13 +6154,16 @@ async function chatGPTFunctionCall(name, params = '') {
             else if (!args.templatePath && args.contentPath) {
                 args.templatePath = await resolveTemplatePath(args.contentPath);
             }
+            if (!args.contetType) {
+                args.contentType = await resolveCurrentContentModel();
+            }
             if (!args.templatePath) {
                 return {
                     succeed: false,
                     message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
                 };
             }
-            return await chatGPTUpdateTemplate(args.templatePath, args.instructions, args.currentContent);
+            return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions, args.currentContent);
         }
         case 'update_content': {
             if (!args.instructions) {
@@ -6137,13 +6190,19 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.contentType && args.currentContent) {
                 args.contentType = await resolveCurrentContentModel();
             }
+            if (!args.templatePath && args.currentContent) {
+                args.templatePath = await resolveTemplatePath('');
+            }
+            else if (!args.templatePath && args.contentPath) {
+                args.templatePath = await resolveTemplatePath(args.contentPath);
+            }
             if (!args.contentType) {
                 return {
                     succeed: false,
                     message: "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
                 };
             }
-            return await chatGPTUpdateContentType(args.contentType, args.instructions, args.currentContent);
+            return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions, args.currentContent);
         }
         default:
             throw new Error('No function found');
@@ -6567,10 +6626,10 @@ const ChatGPT = forwardRef((props, ref) => {
                         }, children: jsxs("div", { children: [jsx(IconButton, { onClick: () => {
                                         setMode('chat');
                                         onModeSelected?.('chat');
-                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$2, {}) }) }), jsx(IconButton, { onClick: () => {
+                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton, { onClick: () => {
                                         setMode('image');
                                         onModeSelected?.('image');
-                                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$2, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
+                                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
                                             mx: 'auto',
                                             display: 'grid',
                                             maxWidth: '700px',
@@ -6579,7 +6638,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                             rowGap: '16px'
                                         }, children: emptyStateOptions.map((option) => (jsx(Card, { children: jsx(CardActionArea, { onClick: (e) => onEmptyStateOptionClick(e, option, api), children: jsx(CardHeader, { title: option.title, subheader: option.subheader, titleTypographyProps: { variant: 'body1' }, subheaderTypographyProps: { variant: 'body2' } }) }) }, option.id))) })] })), messages.map(({ role, content }, index) => role === 'system' ? null : (jsxs(Box, { sx: { bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }, children: [jsxs(StyledBox, { children: [jsx(StyledAvatar, { variant: "rounded", sx: role === 'assistant'
                                                     ? { backgroundColor: aiAvatarColour, color: theme.palette.getContrastText(aiAvatarColour) }
-                                                    : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }, children: role === 'assistant' ? jsx(OpenAI$2, {}) : nameToInitials(userName) }), role === 'assistant' ? (jsx(StyledIframe, { className: "message-iframe", style: { height: 30 }, srcDoc: srcDoc, ref: (node) => {
+                                                    : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }, children: role === 'assistant' ? jsx(OpenAI$1, {}) : nameToInitials(userName) }), role === 'assistant' ? (jsx(StyledIframe, { className: "message-iframe", style: { height: 30 }, srcDoc: srcDoc, ref: (node) => {
                                                     if (node?.contentWindow?.document?.documentElement) {
                                                         node.contentWindow.document.body.innerHTML = content;
                                                         if (content.startsWith('<img')) {
@@ -6788,7 +6847,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$2, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, enableCustomModel: enableCustomModel.toLowerCase() === 'true', open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$1, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, enableCustomModel: enableCustomModel.toLowerCase() === 'true', open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
 }
 
 const plugin = {
@@ -6798,7 +6857,7 @@ const plugin = {
     id: 'craftercms.openai',
     widgets: {
         [helperWidgetId]: ChatGptHelper,
-        [logoWidgetId]: OpenAI$2,
+        [logoWidgetId]: OpenAI$1,
         [chatWidgetId]: ChatGPT,
         [popoverWidgetId]: ChatGPTPopover
     }
