@@ -545,8 +545,15 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
     messages: [
       {
         role: 'system',
-        content:
-          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+        content: `
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
+        Use your expertise to support the author with CrafterCMS content operations, including:
+        - Creating and updating content
+        - Updating CrafterCMS Freemarker templates
+        - Updating CrafterCMS content models
+        - Publishing, 
+        - Managing, and troubleshooting content-related tasks. 
+        Utilize the supplied tools to provide accurate and efficient assistance.`
       },
       {
         role: 'user',
@@ -594,9 +601,17 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
     messages: [
       {
         role: 'system',
-        content:
-          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+        content: `
+         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
+          Use your expertise to support the author with CrafterCMS content operations, including:
+          - Creating and updating content
+          - Updating CrafterCMS Freemarker templates
+          - Updating CrafterCMS content models
+          - Publishing, 
+          - Managing, and troubleshooting content-related tasks. 
+          Utilize the supplied tools to provide accurate and efficient assistance.`
       },
+
       {
         role: 'system',
         content: `
@@ -636,14 +651,63 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
 
           If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
           - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
-          - Analyze the content elements in the provided template.
-          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n
+          - Analyze the content elements in the provided template. 
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
-          - Create an individual field for each img element\n
+          - Create an individual field for each img element. 
+            If the size of the image is known, set the height and width properties according to the image requirements, for example: 						<property>
+							<name>width</name>
+							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+							<type>range</type>
+						</property>
+						<property>
+							<name>height</name>
+							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+							<type>range</type>
+						</property>
+
+            Aways check the form definition to see if the following two datasource are in the form defintion when images fields are rquired:
+              <datasource>
+                <type>img-desktop-upload</type>
+                <id>upload</id>
+                <title>Upload</title>
+                <interface>image</interface>
+                <properties>
+                  <property>
+                    <name>repoPath</name>
+                    <value>/static-assets/images</value>
+                    <type>content-path-input</type>
+                  </property>
+                </properties>
+              </datasource>
+              <datasource>
+                <type>img-repository-upload</type>
+                <id>library</id>
+                <title>Library</title>
+                <interface>image</interface>
+                <properties>
+                  <property>
+                    <name>repoPath</name>
+                    <value>/static-assets/images</value>
+                    <type>content-path-input</type>
+                  </property>
+                </properties>
+              </datasource>\n\n
+              
+              Associate an new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
+            
+              <property>
+							  <name>imageManager</name>
+							  <value>upload,library</value>
+							  <type>datasource:image</type>
+						  </property>\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
           - Create an individual RTE field for any text or markup inside of div tags\n
           - Use field labels and ids that are based on the subject or purpose of the content\n
           - For each new field, set the required property to true\n
+          \n\n
+
           \n\n`
       },
       {
@@ -733,8 +797,16 @@ export async function chatGPTUpdateTemplate(
     messages: [
       {
         role: 'system',
-        content:
-          'You are a helpful customer support assistant and a guru in CrafterCMS. Use your expertise to support the author with CrafterCMS content operations, including publishing, managing, and troubleshooting content-related tasks. Utilize the supplied tools to provide accurate and efficient assistance.'
+        content: `
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
+        Use your expertise to support the author with CrafterCMS content operations, including:
+        - Creating and updating content
+        - Updating CrafterCMS Freemarker templates
+        - Updating CrafterCMS content models
+        - Publishing, 
+        - Managing, and troubleshooting content-related tasks. 
+        Utilize the supplied tools to provide accurate and efficient assistance.`
+
       },
       {
         role: 'user',
@@ -757,8 +829,10 @@ export async function chatGPTUpdateTemplate(
                   3. Analize the visual representation to determine what placeholders would be used in place of the image and text values\n
                   4. Update for form definiton with the new fields required by the design\n
                   5. Updatee the template using editbale placeholders where images and content will be displayed\n
-                  6. Update the content xml for the page with example content.\n\n`
-      },
+                  6. Update the content xml for the page with example content.\n
+                  7. This is a image url that can generate images of any size: https://placehold.co/600x400/EEE/31343C  The size parameters are in the URL. When generating default values for images use this url and generate the proper size image for the given placeholder.\n
+                  \n\n`
+                  },
       {
         role: 'user',
         content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
