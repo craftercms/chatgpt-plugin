@@ -551,6 +551,7 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
+        - Revert / undo changes
         - Publishing,
         - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
@@ -626,6 +627,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
           - Creating and updating content
           - Updating CrafterCMS Freemarker templates
           - Updating CrafterCMS content models
+          - Revert / undo changes
           - Publishing,
           - Managing, and troubleshooting content-related tasks.
           Utilize the supplied tools to provide accurate and efficient assistance.`
@@ -837,6 +839,7 @@ export async function chatGPTUpdateTemplate(
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
+        - Revert / undo changes
         - Publishing,
         - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
