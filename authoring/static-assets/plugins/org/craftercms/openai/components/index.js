@@ -6008,8 +6008,8 @@ async function chatGPTUpdateContent(contentPath, instructions) {
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
-        - Publishing, 
-        - Managing, and troubleshooting content-related tasks. 
+        - Publishing,
+        - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
             },
             {
@@ -6073,8 +6073,8 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
           - Creating and updating content
           - Updating CrafterCMS Freemarker templates
           - Updating CrafterCMS content models
-          - Publishing, 
-          - Managing, and troubleshooting content-related tasks. 
+          - Publishing,
+          - Managing, and troubleshooting content-related tasks.
           Utilize the supplied tools to provide accurate and efficient assistance.`
             },
             {
@@ -6116,11 +6116,11 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
 
           If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
           - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
-          - Analyze the content elements in the provided template. 
-          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a tempalte placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n 
+          - Analyze the content elements in the provided template.
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a template placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n
           - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
-          - Create an individual field for each img element. 
+          - Create an individual field for each img element.
             If the size of the image is known, set the height and width properties according to the image requirements, for example: 						<property>
 							<name>width</name>
 							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
@@ -6132,7 +6132,7 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
 							<type>range</type>
 						</property>
 
-            Aways check the form definition to see if the following two datasource are in the form defintion when images fields are rquired:
+            Always check the form definition to see if the following two datasource are in the form defintion when images fields are required:
               <datasource>
                 <type>img-desktop-upload</type>
                 <id>upload</id>
@@ -6159,9 +6159,9 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
                   </property>
                 </properties>
               </datasource>\n\n
-              
-              Associate an new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
-            
+
+              Associate a new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
+
               <property>
 							  <name>imageManager</name>
 							  <value>upload,library</value>
@@ -6265,8 +6265,8 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
-        - Publishing, 
-        - Managing, and troubleshooting content-related tasks. 
+        - Publishing,
+        - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
             },
             {
