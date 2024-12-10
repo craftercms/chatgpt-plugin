@@ -6026,11 +6026,24 @@ async function chatGPTUpdateContent(contentPath, instructions) {
     const message = completion.choices[0]?.message?.content;
     if (message) {
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-        const result = await writeContent(contentPath, newContent);
-        if (result.succeed) {
-            reloadPreview();
+        /* validate that the response is a valid XML document */
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(newContent, "application/xml");
+        // retrive the parse error if any
+        const errorContent = doc.querySelector("parsererror");
+        if (errorContent) {
+            return {
+                succeed: false,
+                message: newContent
+            };
         }
-        return result;
+        else {
+            const result = await writeContent(contentPath, newContent);
+            if (result.succeed) {
+                reloadPreview();
+            }
+            return result;
+        }
     }
     return {
         succeed: false,
@@ -6176,6 +6189,17 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
     const message = completion.choices[0]?.message?.content;
     if (message) {
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+        /* validate that the response is a valid XML document */
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(newContent, "application/xml");
+        // retrive the parse error if any
+        const errorContent = doc.querySelector("parsererror");
+        if (errorContent) {
+            return {
+                succeed: false,
+                message: newContent
+            };
+        }
         const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
         if (succeed) {
             reloadPreview();

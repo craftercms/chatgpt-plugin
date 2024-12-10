@@ -551,6 +551,7 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
+        - Revert / undo changes
         - Publishing,
         - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
@@ -570,11 +571,30 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
   const message = completion.choices[0]?.message?.content;
   if (message) {
     const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-    const result = await writeContent(contentPath, newContent);
-    if (result.succeed) {
-      reloadPreview();
+
+    /* validate that the response is a valid XML document */
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(newContent, "application/xml");
+
+    // retrive the parse error if any
+    const errorContent = doc.querySelector("parsererror");
+
+    if (errorContent) {
+      return {
+        succeed: false,
+        message: newContent
+      };
+    
     }
-    return result;
+    else {
+      const result = await writeContent(contentPath, newContent);
+    
+      if (result.succeed) {
+        reloadPreview();
+      }
+
+      return result;
+    }
   }
 
   return {
@@ -602,13 +622,16 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
       {
         role: 'system',
         content: `
-         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-          Use your expertise to support the author with CrafterCMS content operations, including:
-          - Creating and updating content
-          - Updating CrafterCMS Freemarker templates
-          - Updating CrafterCMS content models
-          - Publishing,
-          - Managing, and troubleshooting content-related tasks.
+         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+
+          Use your expertise to support the author with CrafterCMS content operations, including:\n
+          - Creating and updating content\n
+          - Updating CrafterCMS Freemarker templates\n
+          - Updating CrafterCMS content models\n
+          - Revert / undo changes to previous versions\n
+          - Publishing\n
+          - Managing, and troubleshooting content-related tasks\n\n
+
           Utilize the supplied tools to provide accurate and efficient assistance.`
       },
 
@@ -725,6 +748,21 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
   const message = completion.choices[0]?.message?.content;
   if (message) {
     const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
+
+    /* validate that the response is a valid XML document */
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(newContent, "application/xml");
+
+    // retrive the parse error if any
+    const errorContent = doc.querySelector("parsererror");
+
+    if (errorContent) {
+      return {
+        succeed: false,
+        message: newContent
+      };
+    }
+    
     const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
     if (succeed) {
       reloadPreview();
@@ -798,21 +836,32 @@ export async function chatGPTUpdateTemplate(
       {
         role: 'system',
         content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-        Use your expertise to support the author with CrafterCMS content operations, including:
-        - Creating and updating content
-        - Updating CrafterCMS Freemarker templates
-        - Updating CrafterCMS content models
-        - Publishing,
-        - Managing, and troubleshooting content-related tasks.
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+
+        Use your expertise to support the author with CrafterCMS content operations, including:\n
+        - Creating and updating content\n
+        - Updating CrafterCMS Freemarker templates\n
+        - Updating CrafterCMS content models\n
+        - Revert / undo changes to previous versions\n
+        - Publishing\n
+        - Managing, and troubleshooting content-related tasks\n\n
+
         Utilize the supplied tools to provide accurate and efficient assistance.`
 
       },
       {
         role: 'user',
         content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
-                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n
-                  This is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+                  
+                  This is the current Content stuctured as an XML document:\n\n 
+                  ${content}\n\n 
+                  
+                  Each field is an element. The element name is the field id in the content type form definition\n
+                  This is the current content type form definition:\n\n
+                  ${contentTypeDescriptor} \n\n 
+                  
+                  The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+
                   If asked to update the template with new markup or a new design follow thsse instructions:\n
                   - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
                   - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n
