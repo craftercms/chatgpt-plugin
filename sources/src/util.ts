@@ -574,21 +574,19 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
 
     /* validate that the response is a valid XML document */
     const parser = new DOMParser();
-    const doc = parser.parseFromString(newContent, "application/xml");
+    const doc = parser.parseFromString(newContent, 'application/xml');
 
     // retrive the parse error if any
-    const errorContent = doc.querySelector("parsererror");
+    const errorContent = doc.querySelector('parsererror');
 
     if (errorContent) {
       return {
         succeed: false,
         message: newContent
       };
-    
-    }
-    else {
+    } else {
       const result = await writeContent(contentPath, newContent);
-    
+
       if (result.succeed) {
         reloadPreview();
       }
@@ -679,16 +677,17 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
           - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
           - Create an individual field for each img element.
-            If the size of the image is known, set the height and width properties according to the image requirements, for example: 						<property>
-							<name>width</name>
-							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
-							<type>range</type>
-						</property>
-						<property>
-							<name>height</name>
-							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
-							<type>range</type>
-						</property>
+            If the size of the image is known, set the height and width properties according to the image requirements, for example:
+            <property>
+              <name>width</name>
+              <value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+              <type>range</type>
+            </property>
+            <property>
+              <name>height</name>
+              <value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+              <type>range</type>
+            </property>
 
             Always check the form definition to see if the following two datasource are in the form defintion when images fields are required:
               <datasource>
@@ -721,10 +720,10 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
               Associate a new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
 
               <property>
-							  <name>imageManager</name>
-							  <value>upload,library</value>
-							  <type>datasource:image</type>
-						  </property>\n
+                <name>imageManager</name>
+                <value>upload,library</value>
+                <type>datasource:image</type>
+              </property>\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
           - Create an individual RTE field for any text or markup inside of div tags\n
           - Use field labels and ids that are based on the subject or purpose of the content\n
@@ -751,10 +750,10 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
 
     /* validate that the response is a valid XML document */
     const parser = new DOMParser();
-    const doc = parser.parseFromString(newContent, "application/xml");
+    const doc = parser.parseFromString(newContent, 'application/xml');
 
     // retrive the parse error if any
-    const errorContent = doc.querySelector("parsererror");
+    const errorContent = doc.querySelector('parsererror');
 
     if (errorContent) {
       return {
@@ -762,7 +761,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
         message: newContent
       };
     }
-    
+
     const succeed = await firstValueFrom(writeConfiguration(siteId, path, 'studio', newContent));
     if (succeed) {
       reloadPreview();
@@ -847,19 +846,18 @@ export async function chatGPTUpdateTemplate(
         - Managing, and troubleshooting content-related tasks\n\n
 
         Utilize the supplied tools to provide accurate and efficient assistance.`
-
       },
       {
         role: 'user',
         content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
-                  
-                  This is the current Content stuctured as an XML document:\n\n 
-                  ${content}\n\n 
-                  
+
+                  This is the current Content stuctured as an XML document:\n\n
+                  ${content}\n\n
+
                   Each field is an element. The element name is the field id in the content type form definition\n
                   This is the current content type form definition:\n\n
-                  ${contentTypeDescriptor} \n\n 
-                  
+                  ${contentTypeDescriptor} \n\n
+
                   The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
 
                   If asked to update the template with new markup or a new design follow thsse instructions:\n
@@ -881,7 +879,7 @@ export async function chatGPTUpdateTemplate(
                   6. Update the content xml for the page with example content.\n
                   7. This is a image url that can generate images of any size: https://placehold.co/600x400/EEE/31343C  The size parameters are in the URL. When generating default values for images use this url and generate the proper size image for the given placeholder.\n
                   \n\n`
-                  },
+      },
       {
         role: 'user',
         content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`

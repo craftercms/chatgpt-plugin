@@ -6008,6 +6008,7 @@ async function chatGPTUpdateContent(contentPath, instructions) {
         - Creating and updating content
         - Updating CrafterCMS Freemarker templates
         - Updating CrafterCMS content models
+        - Revert / undo changes
         - Publishing,
         - Managing, and troubleshooting content-related tasks.
         Utilize the supplied tools to provide accurate and efficient assistance.`
@@ -6028,9 +6029,9 @@ async function chatGPTUpdateContent(contentPath, instructions) {
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
         /* validate that the response is a valid XML document */
         const parser = new DOMParser();
-        const doc = parser.parseFromString(newContent, "application/xml");
+        const doc = parser.parseFromString(newContent, 'application/xml');
         // retrive the parse error if any
-        const errorContent = doc.querySelector("parsererror");
+        const errorContent = doc.querySelector('parsererror');
         if (errorContent) {
             return {
                 succeed: false,
@@ -6068,13 +6069,16 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
             {
                 role: 'system',
                 content: `
-         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-          Use your expertise to support the author with CrafterCMS content operations, including:
-          - Creating and updating content
-          - Updating CrafterCMS Freemarker templates
-          - Updating CrafterCMS content models
-          - Publishing,
-          - Managing, and troubleshooting content-related tasks.
+         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+
+          Use your expertise to support the author with CrafterCMS content operations, including:\n
+          - Creating and updating content\n
+          - Updating CrafterCMS Freemarker templates\n
+          - Updating CrafterCMS content models\n
+          - Revert / undo changes to previous versions\n
+          - Publishing\n
+          - Managing, and troubleshooting content-related tasks\n\n
+
           Utilize the supplied tools to provide accurate and efficient assistance.`
             },
             {
@@ -6121,16 +6125,17 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
           - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
           - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
           - Create an individual field for each img element.
-            If the size of the image is known, set the height and width properties according to the image requirements, for example: 						<property>
-							<name>width</name>
-							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
-							<type>range</type>
-						</property>
-						<property>
-							<name>height</name>
-							<value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
-							<type>range</type>
-						</property>
+            If the size of the image is known, set the height and width properties according to the image requirements, for example:
+            <property>
+              <name>width</name>
+              <value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+              <type>range</type>
+            </property>
+            <property>
+              <name>height</name>
+              <value>{ &quot;exact&quot;:&quot;400&quot;, &quot;min&quot;:&quot;&quot;, &quot;max&quot;:&quot;&quot; }</value>
+              <type>range</type>
+            </property>
 
             Always check the form definition to see if the following two datasource are in the form defintion when images fields are required:
               <datasource>
@@ -6163,10 +6168,10 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
               Associate a new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
 
               <property>
-							  <name>imageManager</name>
-							  <value>upload,library</value>
-							  <type>datasource:image</type>
-						  </property>\n
+                <name>imageManager</name>
+                <value>upload,library</value>
+                <type>datasource:image</type>
+              </property>\n
           - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
           - Create an individual RTE field for any text or markup inside of div tags\n
           - Use field labels and ids that are based on the subject or purpose of the content\n
@@ -6191,9 +6196,9 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
         const newContent = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
         /* validate that the response is a valid XML document */
         const parser = new DOMParser();
-        const doc = parser.parseFromString(newContent, "application/xml");
+        const doc = parser.parseFromString(newContent, 'application/xml');
         // retrive the parse error if any
-        const errorContent = doc.querySelector("parsererror");
+        const errorContent = doc.querySelector('parsererror');
         if (errorContent) {
             return {
                 succeed: false,
@@ -6260,20 +6265,31 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
             {
                 role: 'system',
                 content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-        Use your expertise to support the author with CrafterCMS content operations, including:
-        - Creating and updating content
-        - Updating CrafterCMS Freemarker templates
-        - Updating CrafterCMS content models
-        - Publishing,
-        - Managing, and troubleshooting content-related tasks.
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+
+        Use your expertise to support the author with CrafterCMS content operations, including:\n
+        - Creating and updating content\n
+        - Updating CrafterCMS Freemarker templates\n
+        - Updating CrafterCMS content models\n
+        - Revert / undo changes to previous versions\n
+        - Publishing\n
+        - Managing, and troubleshooting content-related tasks\n\n
+
         Utilize the supplied tools to provide accurate and efficient assistance.`
             },
             {
                 role: 'user',
                 content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
-                  This is the current Content stuctured as an XML document:\n\n ${content}\n\n Each field is an element. The element name is the field id in the content type form definition\n
-                  This is the current content type form definition: ${contentTypeDescriptor} \n\n The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+
+                  This is the current Content stuctured as an XML document:\n\n
+                  ${content}\n\n
+
+                  Each field is an element. The element name is the field id in the content type form definition\n
+                  This is the current content type form definition:\n\n
+                  ${contentTypeDescriptor} \n\n
+
+                  The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+
                   If asked to update the template with new markup or a new design follow thsse instructions:\n
                   - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
                   - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n
