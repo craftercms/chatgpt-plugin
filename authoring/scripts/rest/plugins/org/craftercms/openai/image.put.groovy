@@ -1,7 +1,11 @@
 import groovy.json.JsonSlurper
 import jakarta.servlet.http.HttpServletResponse
-import java.net.URL
 import java.io.InputStream
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
 
 def result = [:]
 def invalidParams = false
@@ -59,8 +63,17 @@ if (invalidParams) {
     return result
 }
 
-def documentStream = new URL(url).openStream()
-def contentService = applicationContext.get('cstudioContentService')
-contentService.writeContentAsset(siteId, path, name, documentStream, 'true', '', '', '', 'false', 'true', 'false')
+CloseableHttpClient httpClient = HttpClients.createDefault()
+HttpGet request = new HttpGet(url)
 
-return 'OK'
+try (CloseableHttpResponse res = httpClient.execute(request)) {
+    HttpEntity entity = res.getEntity()
+    if (entity != null) {
+        def contentService = applicationContext.get('cstudioContentService')
+        InputStream inputStream = entity.getContent();
+        contentService.writeContentAsset(siteId, path, name, inputStream, 'true', '', '', '', 'false', 'true', 'false')
+        return 'OK'
+    }
+
+    return null
+}
