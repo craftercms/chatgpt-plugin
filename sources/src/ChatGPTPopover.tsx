@@ -62,14 +62,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
     });
   }, [allModels, selectedMode]);
 
-  useEffect(() => {
-    const currentMode = chatGptRef.current?.mode();
-    if (currentMode) {
-      const newModel = currentMode === 'image' ? defaultImageModel : defaultChatModel;
-      setSelectedModel(newModel);
-    }
-  }, [chatGptRef.current?.mode()]);
-
   const handleModelMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
   };

@@ -6965,13 +6965,6 @@ function ChatGPTPopover(props) {
             return false;
         });
     }, [allModels, selectedMode]);
-    useEffect(() => {
-        const currentMode = chatGptRef.current?.mode();
-        if (currentMode) {
-            const newModel = currentMode === 'image' ? defaultImageModel : defaultChatModel;
-            setSelectedModel(newModel);
-        }
-    }, [chatGptRef.current?.mode()]);
     const handleModelMenuClick = (event) => {
         setModelMenuAnchorEl(modelMenuAnchorEl ? null : event.currentTarget);
     };
