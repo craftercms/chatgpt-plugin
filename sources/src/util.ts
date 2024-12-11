@@ -812,6 +812,62 @@ export async function chatGPTRevertContent(path: string) {
 }
 
 /**
+ * Analyize th template
+ * @param templatePath the template path to fetch it's content
+ * @param instruction the instruction to update template
+ */
+export async function chatGPTAnalyzeTemplate(
+  templatePath: string,
+  instructions: string
+) {
+  const templateContent = await fetchContent(templatePath);
+  const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
+
+  const completion = await createChatCompletion({
+    model: defaultChatModel,
+    messages: [
+      {
+        role: 'system',
+        content: `
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+
+        Use your expertise an expert in CrafterCMS Freemarker Templates and Contnt Modeling, web design and front end development. 
+        You can help user with the following tasks:
+        - Review the template to determine what contentModel place hodlers are used
+        - Make markup design decisions`
+      },
+      {
+        role: 'user',
+        content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+
+                  If asked to identifty the content model variables or placeholders in the template, follow these instructions:\n
+                  1. identify for every instance of "model.PLACE_HOLDER_NAME" or "contentModel.PLACE_HOLDER_NAME" where PLACE_HOLDER_NAME is a variable
+                  2. Use the following CSV file to match the suffix of the PLACE_HOLDER_NAME to a field type:
+                            Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
+                            integer,_i,_is,a 32 bit signed integer\n
+                            string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
+                            long,_l,_ls,a 64 bit signed integer\n
+                            text,_t,_txt,Multiple words or tokens\n
+                            boolean,_b,_bs,true or false\n
+                            float,_f,_fs,IEEE 32 bit floating point number\n
+                            double,_d,_ds,IEEE 64 bit floating point number\n
+                            date,_dt,_dts,A date in ISO 8601 date format\n
+                            time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
+                            text with html tags,_html,,Rich Text Editor content\n'
+                            image,_s,,Image path\n'
+                  3. Return a table of content place holders to the user in the form of a table with the first colume as the name and the second column as the type
+                  \n\n`
+      },
+      {
+        role: 'user',
+        content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
+      }
+    ],
+    stream: false
+  });
+}
+
+/**
  * Update a template with ChatGPT
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
@@ -948,6 +1004,43 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       return await publishContent(args);
     }
 
+    case 'analyze_template': {
+      if (!args.instructions) {
+        break;
+      }
+
+      if (!args.templatePath) {
+        args.templatePath = await resolveTemplatePath(args.contentPath);
+      }
+
+      return await chatGPTAnalyzeTemplate(args.templatePath, args.instructions);
+    }
+
+    case 'update_content_type': {
+      if (!args.instructions) {
+        break;
+      }
+
+      if (!args.contentType && args.currentContent) {
+        args.contentType = await resolveCurrentContentModel();
+      }
+      if (!args.templatePath && args.currentContent) {
+        args.templatePath = await resolveTemplatePath('');
+      } else if (!args.templatePath && args.contentPath) {
+        args.templatePath = await resolveTemplatePath(args.contentPath);
+      }
+
+      if (!args.contentType) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
+        };
+      }
+
+      return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
+    }
+    
     case 'update_template': {
       if (!args.instructions) {
         break;
@@ -1000,31 +1093,6 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       }
 
       return await chatGPTUpdateContent(args.contentPath, args.instructions);
-    }
-
-    case 'update_content_type': {
-      if (!args.instructions) {
-        break;
-      }
-
-      if (!args.contentType && args.currentContent) {
-        args.contentType = await resolveCurrentContentModel();
-      }
-      if (!args.templatePath && args.currentContent) {
-        args.templatePath = await resolveTemplatePath('');
-      } else if (!args.templatePath && args.contentPath) {
-        args.templatePath = await resolveTemplatePath(args.contentPath);
-      }
-
-      if (!args.contentType) {
-        return {
-          succeed: false,
-          message:
-            "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
-        };
-      }
-
-      return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
     }
 
     case 'revert_change': {
