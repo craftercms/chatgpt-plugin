@@ -3572,6 +3572,8 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.5"
     fs-extra: "npm:^11.2.0"
     js-cookie: "npm:^3.0.5"
+    marked: "npm:^15.0.3"
+    marked-highlight: "npm:^2.2.1"
     openai: "npm:^4.73.1"
     prettier: "npm:^3.2.2"
     query-string: "npm:^6.14.1"
@@ -5435,7 +5437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked-highlight@npm:^2.1.1":
+"marked-highlight@npm:^2.1.1, marked-highlight@npm:^2.2.1":
   version: 2.2.1
   resolution: "marked-highlight@npm:2.2.1"
   peerDependencies:
@@ -5450,6 +5452,15 @@ __metadata:
   bin:
     marked: bin/marked.js
   checksum: 24d4fc58d37c1779197fa7f93c504d8c71d4df54eb69cbbc14a55ba2a8e2ad83d723801fc25452c21ce74b38a483c5863c53449f130253a597be9e9c1d3e7e2b
+  languageName: node
+  linkType: hard
+
+"marked@npm:^15.0.3":
+  version: 15.0.3
+  resolution: "marked@npm:15.0.3"
+  bin:
+    marked: bin/marked.js
+  checksum: 821c1af0e527b3f6f4684a68802a0fa5e91cd2b0887d0600ce9035896f8b0fbad180a3f8c5be91de25bdc20323abbd674351832c40d48820b6f0d888fd77cd59
   languageName: node
   linkType: hard
 

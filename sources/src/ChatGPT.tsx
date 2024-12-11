@@ -40,10 +40,13 @@ import {
   createImageGeneration,
   fetchMemoryData
 } from './util';
-import { defaultChatModel, functionTools } from './consts';
+import { copiedCodeSvg, copyCodeSvg, defaultChatModel, functionTools } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
 import ImageRounded from '@mui/icons-material/ImageRounded';
+import { Marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
+import hljs from 'highlight.js';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -91,6 +94,7 @@ function createSrcDoc(html: string, theme: Theme) {
   <html>
   <head>
   <meta name="color-scheme" content="${theme.palette.mode}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css">
   <script>
   document.addEventListener("click", function (e) {
     for (var elm = e.target; elm; elm = elm.parentNode) {
@@ -101,21 +105,56 @@ function createSrcDoc(html: string, theme: Theme) {
   }, false);
   </script>
   <style>
-  * { box-sizing: border-box }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background-color: transparent!important;
-    font-family: ${theme.typography.fontFamily};
-    font-size: ${theme.typography.fontSize}px;
-    color: ${theme.palette.text.primary};
-    width: 100%;
-    height: fit-content;
-    overflow: hidden;
-  }
-  body { border: solid transparent }
-  p { margin: 10px 0; }
-  body > :last-child { margin-bottom: 0 }
+    * { box-sizing: border-box }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: transparent!important;
+      font-family: ${theme.typography.fontFamily};
+      font-size: ${theme.typography.fontSize}px;
+      color: ${theme.palette.text.primary};
+      width: 100%;
+      height: fit-content;
+      overflow: hidden;
+    }
+    body { border: solid transparent }
+    p { margin: 10px 0; }
+    body > :last-child { margin-bottom: 0 }
+
+    .code-container {
+      position: relative;
+    }
+
+    .copy-button {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background-color: transparent;
+      color: #444444;
+      border: 1px solid #d1d5db;
+      border-radius: 2px;
+      padding-bottom: .25rem;
+      padding-top: .25rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .copy-button:hover {
+      background-color: #374151;
+      color: white;
+      border-color: #374151;
+    }
+
+    .copy-button:active {
+      background-color: #1f2937;
+      color: white;
+      border-color: #1f2937;
+    }
+
   </style>
   </head>
   <body>${html}</body>
@@ -292,6 +331,28 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+
+  const marked = new Marked(
+    markedHighlight({
+      emptyLangClass: 'hljs',
+      langPrefix: 'hljs language-',
+      highlight(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+      }
+    })
+  );
+  marked.setOptions({
+    async: false,
+    breaks: false,
+    extensions: null,
+    gfm: true,
+    hooks: null,
+    pedantic: false,
+    silent: false,
+    tokenizer: null,
+    walkTokens: null
+  });
 
   useEffect(() => {
     fetchMemoryData().then((items) => {
@@ -610,10 +671,46 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                       className="message-iframe"
                       style={{ height: 30 }}
                       srcDoc={srcDoc}
-                      ref={(node) => {
+                      ref={async (node) => {
                         if (node?.contentWindow?.document?.documentElement) {
-                          node.contentWindow.document.body.innerHTML = content;
-                          if (content.startsWith('<img')) {
+                          const contentString = Array.isArray(content) ? content.join('') : content;
+                          node.contentWindow.document.body.innerHTML = !contentString.startsWith('<img')
+                            ? await marked.parse(contentString)
+                            : contentString;
+                          if (!streaming || index !== maxMessageIndex) {
+                            const nodeDocument = node.contentWindow.document;
+                            nodeDocument.querySelectorAll('pre > code').forEach((codeBlock) => {
+                              if (!codeBlock.parentElement.classList.contains('code-container')) {
+                                const container = nodeDocument.createElement('div');
+                                container.classList.add('code-container');
+
+                                const copyButton = nodeDocument.createElement('button');
+                                copyButton.innerHTML = `${copyCodeSvg}Copy code`;
+                                copyButton.classList.add('copy-button');
+
+                                copyButton.addEventListener('click', () => {
+                                  const code = codeBlock.textContent;
+                                  navigator.clipboard
+                                    .writeText(code)
+                                    .then(() => {
+                                      copyButton.innerHTML = `${copiedCodeSvg} Copied!`;
+                                      setTimeout(() => {
+                                        copyButton.innerHTML = `${copyCodeSvg} Copy code`;
+                                      }, 2000);
+                                    })
+                                    .catch((err) => {
+                                      console.error('Failed to copy text:', err);
+                                    });
+                                });
+
+                                const pre = codeBlock.parentElement;
+                                pre.parentNode.replaceChild(container, pre);
+                                container.appendChild(copyButton);
+                                container.appendChild(pre);
+                              }
+                            });
+                          }
+                          if (contentString.startsWith('<img')) {
                             node.style.height = '300px';
                           } else {
                             node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
