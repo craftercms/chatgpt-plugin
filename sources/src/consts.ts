@@ -124,6 +124,40 @@ export const functionTools = [
   {
     type: 'function',
     function: {
+      name: 'analyze_template',
+      description:
+        'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template analyzing action in CrafterCMS for a specific path or the current previewing page. If no currentContent or path or name parameters are available. Ask user what template to update. If analyzing currentContent template, the function will resolve the template path from the current page.',
+      parameters: {
+        type: 'object',
+        properties: {
+          instructions: {
+            type: 'string',
+            description: 'Instructions for analyzing the template of a page or a component'
+          },
+          currentContent: {
+            type: 'boolean',
+            description:
+              "A flag which is true if the content path is the 'current previewing page', 'current content', 'previewing page', or terms such as 'this content', 'this page', 'this component'."
+          },
+          templatePath: {
+            type: 'string',
+            description:
+              "The path in CrafterCMS where the template resides. For example, '/templates/web/pages/home.ftl'."
+          },
+          contentPath: {
+            type: 'string',
+            description:
+              "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. This path is used to resolve the template path using this function"
+          }
+        },
+        required: ['instructions'],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
       name: 'update_template',
       description:
         'CrafterCMS allows developers to model the content as general reusable items, and fold those into pages. Pages aggregate content from components as needed and are associated with a FreeMarker template that can render the final page. This function triggers a template update action in CrafterCMS for a specific path or the current previewing page. If no currentContent or path or name parameters are available. Ask user what template to update. If updating currentContent template, the function will resolve the template path from the current page.',
@@ -148,6 +182,11 @@ export const functionTools = [
             type: 'string',
             description:
               "The path in CrafterCMS where the content resides. For example, '/site/website/index.xml'. This path is used to resolve the template path using this function"
+          },
+          contentType: {
+            type: 'string',
+            description:
+              "The content type to be updated the model definition. The content type is a string start with either '/page' or '/component'. For example, updating the content type '/page/home' would result in updating the file '/config/studio/content-types/page/home/form-definition.xml'"
           }
         },
         required: ['instructions'],

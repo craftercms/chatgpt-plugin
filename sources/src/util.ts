@@ -812,7 +812,7 @@ export async function chatGPTRevertContent(path: string) {
 }
 
 /**
- * Analyize th template
+ * Analyize the template
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
  */
@@ -821,8 +821,6 @@ export async function chatGPTAnalyzeTemplate(
   instructions: string
 ) {
   const templateContent = await fetchContent(templatePath);
-  const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
-
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
@@ -831,7 +829,7 @@ export async function chatGPTAnalyzeTemplate(
         content: `
         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
 
-        Use your expertise an expert in CrafterCMS Freemarker Templates and Contnt Modeling, web design and front end development. 
+        Use your expertise an expert in CrafterCMS Freemarker Templates and Contnt Modeling, web design and front end development.
         You can help user with the following tasks:
         - Review the template to determine what contentModel place hodlers are used
         - Make markup design decisions`
@@ -860,11 +858,17 @@ export async function chatGPTAnalyzeTemplate(
       },
       {
         role: 'user',
-        content: `Please apply the following instructions: ${instructions}. The response should only contains the updated template.`
+        content: `Please apply the following instructions: ${instructions}. The response should also contains the updated template.`
       }
     ],
     stream: false
   });
+
+  const message = completion.choices[0]?.message?.content;
+  return {
+    succeed: !!message,
+    message
+  };
 }
 
 /**
@@ -1009,8 +1013,22 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         break;
       }
 
-      if (!args.templatePath) {
+      if (!args.currentContent && !args.templatePath && !args.contentPath) {
+        break;
+      }
+
+      if (!args.templatePath && args.currentContent) {
+        args.templatePath = await resolveTemplatePath('');
+      } else if (!args.templatePath && args.contentPath) {
         args.templatePath = await resolveTemplatePath(args.contentPath);
+      }
+
+      if (!args.templatePath) {
+        return {
+          succeed: false,
+          message:
+            "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+        };
       }
 
       return await chatGPTAnalyzeTemplate(args.templatePath, args.instructions);
@@ -1040,7 +1058,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
 
       return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
     }
-    
+
     case 'update_template': {
       if (!args.instructions) {
         break;
@@ -1056,7 +1074,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         args.templatePath = await resolveTemplatePath(args.contentPath);
       }
 
-      if (!args.contetType) {
+      if (!args.contentType) {
         args.contentType = await resolveCurrentContentModel();
       }
 
