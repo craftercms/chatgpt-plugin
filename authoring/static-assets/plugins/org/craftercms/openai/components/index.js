@@ -5604,6 +5604,64 @@ const functionTools = [
         }
     }
 ];
+const chatGptEmptyStateOptionsChat$1 = [
+    {
+        id: 'useCasualTone',
+        title: 'Set a casual tone for the AI content',
+        subheader: 'e.g. Ready to chat about anything you like!',
+        messages: [
+            {
+                role: 'system',
+                content: 'Answer upcoming questions using casual, informal language to convey a casual conversation with a real person. Confirm and ask the user for a prompt to begin working'
+            }
+        ]
+    },
+    {
+        id: 'useProfessionalTone',
+        title: 'Set a formal tone for the AI content',
+        subheader: 'e.g. How may I be of assistance to you today?',
+        messages: [
+            {
+                role: 'system',
+                content: 'Answers upcoming questions using polished, formal, and respectful language to convey professional expertise and competence. Acknowledge and ask the user for a prompt to begin working'
+            }
+        ]
+    },
+    {
+        id: 'generateTitle',
+        title: 'Suggest title for your content',
+        prompt: 'Suggest a title for an article. Topic: '
+    },
+    {
+        id: 'generateBody',
+        title: 'Generate a body for your an article',
+        prompt: 'Write the body for an article. Topic: '
+    }
+];
+const emptyStateOptionsGenerateImages = [
+    {
+        id: 'generateCasualImage',
+        title: 'Create an image with a casual vibe',
+        subheader: 'e.g. Design a fun, relaxed scene!',
+        prompt: 'Generate an image with a casual, informal theme. Include this text in the design: '
+    },
+    {
+        id: 'generateFormalImage',
+        title: 'Create an image with a professional tone',
+        subheader: 'e.g. Depict a sleek, corporate environment',
+        prompt: 'Generate an image with a polished, formal theme. Include this text in the design: '
+    },
+    {
+        id: 'generateTitleImage',
+        title: 'Incorporate a title into your image',
+        prompt: 'Create an image based on a title. Title: '
+    },
+    {
+        id: 'generateBodyImage',
+        title: 'Incorporate a body of text into your image',
+        prompt: 'Generate an image based on an article body text concept. Concept: '
+    }
+];
 
 /*
  * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
@@ -70322,40 +70380,7 @@ function nameToInitials(name) {
 }
 const ChatGPT = forwardRef((props, ref) => {
     // region const { ... } = props;
-    const { sxs, model = defaultChatModel, userName, scrollToReply = true, initialMessages, aiAvatarColour = '#19c37d', extraActions, emptyStateOptions = [
-        {
-            id: 'useCasualTone',
-            title: 'Set a casual tone for the AI content',
-            subheader: 'e.g. Ready to chat about anything you like!',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'Answer upcoming questions using casual, informal language to convey a casual conversation with a real person. Confirm and ask the user for a prompt to begin working'
-                }
-            ]
-        },
-        {
-            id: 'useProfessionalTone',
-            title: 'Set a formal tone for the AI content',
-            subheader: 'e.g. How may I be of assistance to you today?',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'Answers upcoming questions using polished, formal, and respectful language to convey professional expertise and competence. Acknowledge and ask the user for a prompt to begin working'
-                }
-            ]
-        },
-        {
-            id: 'generateTitle',
-            title: 'Suggest title for your content',
-            prompt: 'Suggest a title for an article. Topic: '
-        },
-        {
-            id: 'generateBody',
-            title: 'Generate a body for your an article',
-            prompt: 'Write the body for an article. Topic: '
-        }
-    ], onExtraActionClick, onEmptyStateOptionClick = (e, option, api) => {
+    const { sxs, model = defaultChatModel, userName, scrollToReply = true, initialMessages, aiAvatarColour = '#19c37d', extraActions, emptyStateOptions = chatGptEmptyStateOptionsChat, onExtraActionClick, onEmptyStateOptionClick = (e, option, api) => {
         if (option?.prompt) {
             const len = option.prompt.length;
             api.setPrompt(option.prompt);
@@ -70801,7 +70826,7 @@ function ChatGPTPopover(props) {
                                 setSelectedModel(defaultImageModel);
                             }
                             setSelectedMode(mode);
-                        } })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
+                        }, emptyStateOptions: selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat$1 })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {

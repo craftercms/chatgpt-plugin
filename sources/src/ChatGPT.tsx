@@ -244,42 +244,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     initialMessages,
     aiAvatarColour = '#19c37d',
     extraActions,
-    emptyStateOptions = [
-      {
-        id: 'useCasualTone',
-        title: 'Set a casual tone for the AI content',
-        subheader: 'e.g. Ready to chat about anything you like!',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Answer upcoming questions using casual, informal language to convey a casual conversation with a real person. Confirm and ask the user for a prompt to begin working'
-          }
-        ]
-      },
-      {
-        id: 'useProfessionalTone',
-        title: 'Set a formal tone for the AI content',
-        subheader: 'e.g. How may I be of assistance to you today?',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Answers upcoming questions using polished, formal, and respectful language to convey professional expertise and competence. Acknowledge and ask the user for a prompt to begin working'
-          }
-        ]
-      },
-      {
-        id: 'generateTitle',
-        title: 'Suggest title for your content',
-        prompt: 'Suggest a title for an article. Topic: '
-      },
-      {
-        id: 'generateBody',
-        title: 'Generate a body for your an article',
-        prompt: 'Write the body for an article. Topic: '
-      }
-    ],
+    emptyStateOptions = chatGptEmptyStateOptionsChat,
     onExtraActionClick,
     onEmptyStateOptionClick = (e, option, api) => {
       if (option?.prompt) {

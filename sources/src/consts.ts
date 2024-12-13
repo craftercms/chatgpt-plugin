@@ -1,3 +1,5 @@
+import { EmptyStateOption } from "./ChatGPT";
+
 export const helperWidgetId = 'craftercms.components.openai.Helper';
 export const logoWidgetId = 'craftercms.components.openai.OpenAILogo';
 export const chatWidgetId = 'craftercms.components.openai.ChatGPT';
@@ -278,5 +280,67 @@ export const functionTools = [
         additionalProperties: false
       }
     }
+  }
+];
+
+export const chatGptEmptyStateOptionsChat: Array<EmptyStateOption> = [
+  {
+    id: 'useCasualTone',
+    title: 'Set a casual tone for the AI content',
+    subheader: 'e.g. Ready to chat about anything you like!',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'Answer upcoming questions using casual, informal language to convey a casual conversation with a real person. Confirm and ask the user for a prompt to begin working'
+      }
+    ]
+  },
+  {
+    id: 'useProfessionalTone',
+    title: 'Set a formal tone for the AI content',
+    subheader: 'e.g. How may I be of assistance to you today?',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'Answers upcoming questions using polished, formal, and respectful language to convey professional expertise and competence. Acknowledge and ask the user for a prompt to begin working'
+      }
+    ]
+  },
+  {
+    id: 'generateTitle',
+    title: 'Suggest title for your content',
+    prompt: 'Suggest a title for an article. Topic: '
+  },
+  {
+    id: 'generateBody',
+    title: 'Generate a body for your an article',
+    prompt: 'Write the body for an article. Topic: '
+  }
+];
+
+export const emptyStateOptionsGenerateImages: Array<EmptyStateOption> = [
+  {
+    id: 'generateCasualImage',
+    title: 'Create an image with a casual vibe',
+    subheader: 'e.g. Design a fun, relaxed scene!',
+    prompt: 'Generate an image with a casual, informal theme. Include this text in the design: '
+  },
+  {
+    id: 'generateFormalImage',
+    title: 'Create an image with a professional tone',
+    subheader: 'e.g. Depict a sleek, corporate environment',
+    prompt: 'Generate an image with a polished, formal theme. Include this text in the design: '
+  },
+  {
+    id: 'generateTitleImage',
+    title: 'Incorporate a title into your image',
+    prompt: 'Create an image based on a title. Title: '
+  },
+  {
+    id: 'generateBodyImage',
+    title: 'Incorporate a body of text into your image',
+    prompt: 'Generate an image based on an article body text concept. Concept: '
   }
 ];

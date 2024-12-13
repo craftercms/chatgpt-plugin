@@ -7,7 +7,7 @@ import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
 import { listChatModels } from './util.ts';
-import { defaultChatModel, defaultImageModel } from './consts.ts';
+import { chatGptEmptyStateOptionsChat, defaultChatModel, defaultImageModel, emptyStateOptionsGenerateImages } from './consts.ts';
 import ChatGPTModelSelectMenu from './ChatGPTModelSelectMenu.tsx';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
@@ -141,6 +141,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             }
             setSelectedMode(mode);
           }}
+          emptyStateOptions={selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat}
         />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
