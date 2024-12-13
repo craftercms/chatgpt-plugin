@@ -5604,7 +5604,7 @@ const functionTools = [
         }
     }
 ];
-const chatGptEmptyStateOptionsChat$1 = [
+const chatGptEmptyStateOptionsChat = [
     {
         id: 'useCasualTone',
         title: 'Set a casual tone for the AI content',
@@ -70647,10 +70647,10 @@ const ChatGPT = forwardRef((props, ref) => {
                                 width: 42,
                                 position: 'relative'
                             }
-                        }, children: jsxs("div", { children: [jsx(IconButton, { onClick: () => {
+                        }, children: jsxs("div", { children: [jsx(IconButton, { color: mode === 'chat' ? 'primary' : 'default', onClick: () => {
                                         setMode('chat');
                                         onModeSelected?.('chat');
-                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton, { onClick: () => {
+                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton, { color: mode === 'image' ? 'primary' : 'default', onClick: () => {
                                         setMode('image');
                                         onModeSelected?.('image');
                                     }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
@@ -70826,7 +70826,7 @@ function ChatGPTPopover(props) {
                                 setSelectedModel(defaultImageModel);
                             }
                             setSelectedMode(mode);
-                        }, emptyStateOptions: selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat$1 })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
+                        }, emptyStateOptions: selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {

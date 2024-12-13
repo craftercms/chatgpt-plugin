@@ -40,7 +40,7 @@ import {
   createImageGeneration,
   fetchMemoryData
 } from './util';
-import { copiedCodeSvg, copyCodeSvg, defaultChatModel, functionTools } from './consts';
+import { chatGptEmptyStateOptionsChat, copiedCodeSvg, copyCodeSvg, defaultChatModel, functionTools } from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
 import ImageRounded from '@mui/icons-material/ImageRounded';
@@ -559,6 +559,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         >
           <div>
             <IconButton
+              color={mode === 'chat' ? 'primary' : 'default'}
               onClick={() => {
                 setMode('chat');
                 onModeSelected?.('chat');
@@ -569,6 +570,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
               </Tooltip>
             </IconButton>
             <IconButton
+              color={mode === 'image' ? 'primary' : 'default'}
               onClick={() => {
                 setMode('image');
                 onModeSelected?.('image');
