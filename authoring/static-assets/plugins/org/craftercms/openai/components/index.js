@@ -70770,7 +70770,8 @@ function ChatGPTPopover(props) {
     };
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e, reason) => {
                     if (chatGptRef.current?.hasConversation()) {
-                        setOpenAlertDialog(true);
+                        // setOpenAlertDialog(true);
+                        onMinimize?.();
                     }
                     else {
                         onClose(e, reason);

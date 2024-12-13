@@ -81,7 +81,8 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         open={open && !isMinimized}
         onClose={(e, reason) => {
           if (chatGptRef.current?.hasConversation()) {
-            setOpenAlertDialog(true);
+            // setOpenAlertDialog(true);
+            onMinimize?.();
           } else {
             onClose(e, reason);
           }
