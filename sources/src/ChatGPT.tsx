@@ -21,7 +21,7 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import OpenAILogo from './OpenAI';
+import OpenAILogo, { ThinkingIcon } from './OpenAI';
 import SendIcon from '@mui/icons-material/SendRounded';
 import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/index';
 import { SxProps } from '@mui/system/styleFunctionSx';
@@ -295,7 +295,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const isDark = theme.palette.mode === 'dark';
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
-  const srcDoc = messages.length ? createSrcDoc('...', theme) : '';
+  const srcDoc = messages.length ? createSrcDoc('', theme) : '';
 
   const marked = new Marked(
     markedHighlight({
@@ -372,7 +372,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
     abortStream();
     setError(null);
     setStreaming(true);
-    setMessages([...messagesRef.current, { role: 'assistant', content: '...' }]);
+    setMessages([...messagesRef.current, { role: 'assistant', content: '' }]);
     try {
       let stream;
       if (mode === 'image') {
@@ -428,7 +428,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
 
         if (funcName) {
           const result = await chatGPTFunctionCall(funcName, funcArgs);
-          reply.content += result.message;
+          reply.content += result?.message;
           setMessages([...messagesRef.current]);
         }
       }
@@ -436,8 +436,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       setMessages(messagesRef.current);
       setError(e);
       console.error(e);
+    } finally {
+      setStreaming(false);
     }
-    setStreaming(false);
     setTimeout(() => {
       inputRef.current?.focus();
     }, 10);
@@ -619,7 +620,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
               </Box>
             </Box>
           )}
-          {messages.map(({ role, content }, index) =>
+          {messages.map(({ role, content }, index) => (
             role === 'system' ? null : (
               <Box sx={{ bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }} key={index}>
                 <StyledBox>
@@ -633,6 +634,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                   >
                     {role === 'assistant' ? <OpenAILogo /> : nameToInitials(userName)}
                   </StyledAvatar>
+                  {streaming && content?.length === 0 && index === maxMessageIndex && (
+                    <Box><ThinkingIcon /></Box>
+                  )}
                   {role === 'assistant' ? (
                     <StyledIframe
                       className="message-iframe"
@@ -772,7 +776,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                 )}
               </Box>
             )
-          )}
+          ))}
           {error && <Alert severity="error">{error.message}</Alert>}
           {scrollToReply && <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' })} />}
         </Box>

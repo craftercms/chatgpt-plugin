@@ -790,7 +790,7 @@ export async function chatGPTRevertContent(path: string) {
   if (!versions || versions.length <= 1) {
     return {
       succeed: false,
-      messages: `No version to revert for content at path '${path}'`
+      message: `No version to revert for content at path '${path}'`
     };
   }
 
