@@ -40,7 +40,14 @@ import {
   createImageGeneration,
   fetchMemoryData
 } from './util';
-import { chatGptEmptyStateOptionsChat, copiedCodeSvg, copyCodeSvg, defaultChatModel, functionTools } from './consts';
+import {
+  chatGptEmptyStateOptionsChat,
+  copiedCodeSvg,
+  copyCodeSvg,
+  defaultChatModel,
+  defaultDallEImageSize,
+  functionTools
+} from './consts';
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
 import ImageRounded from '@mui/icons-material/ImageRounded';
@@ -228,6 +235,7 @@ export interface ChatGPTProps {
   aiAvatarColour?: string;
   onModeSelected: (mode: ChatMode) => void;
   speakerMode: boolean;
+  imageSize: string;
 }
 
 export interface ChatGPTRef {
@@ -257,7 +265,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       }
     },
     onModeSelected,
-    speakerMode
+    speakerMode,
+    imageSize = defaultDallEImageSize
   } = props;
   // endregion
   const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
@@ -381,7 +390,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           model,
           prompt,
           n: 1,
-          size: '1024x1024'
+          size: imageSize
         });
 
         const imageResponse = await stream;

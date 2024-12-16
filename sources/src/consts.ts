@@ -11,6 +11,7 @@ export const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
 // Default ChatGPT models
 export const defaultChatModel = 'gpt-4o';
 export const defaultImageModel = 'dall-e-3';
+export const defaultDallEImageSize = '1024x1024';
 
 // Lanaguge codes for speech to text
 export const languageCodes = [

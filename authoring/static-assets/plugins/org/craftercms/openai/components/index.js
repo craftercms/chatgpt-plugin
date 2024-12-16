@@ -1,5 +1,5 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Drawer, IconButton, Tooltip, Paper, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, Popover, paperClasses } = craftercms.libs.MaterialUI;
+const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Drawer, IconButton, Tooltip, Paper, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, FormControl, Select, Popover, paperClasses } = craftercms.libs.MaterialUI;
 const { useState, useEffect, forwardRef, useRef, useImperativeHandle, useMemo } = craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
@@ -31,6 +31,7 @@ const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.protot
 const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
 const VolumeUpRounded = craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded');
 const VolumeOffRounded = craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded');
+const InfoRounded = craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 
@@ -5362,6 +5363,7 @@ const chatGptClosedMessageId = 'craftercms.openai.ChatGPTClosed';
 // Default ChatGPT models
 const defaultChatModel = 'gpt-4o';
 const defaultImageModel = 'dall-e-3';
+const defaultDallEImageSize = '1024x1024';
 // Lanaguge codes for speech to text
 const languageCodes = [
     { code: 'en-US', label: 'English (United States)' },
@@ -70396,7 +70398,7 @@ const ChatGPT = forwardRef((props, ref) => {
         else if (option?.messages) {
             api.pushMessages(option.messages);
         }
-    }, onModeSelected, speakerMode } = props;
+    }, onModeSelected, speakerMode, imageSize = defaultDallEImageSize } = props;
     // endregion
     const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
     const [settingMenuAnchorEl, setSettingMenuAnchorEl] = useState(null);
@@ -70506,7 +70508,7 @@ const ChatGPT = forwardRef((props, ref) => {
                     model,
                     prompt,
                     n: 1,
-                    size: '1024x1024'
+                    size: imageSize
                 });
                 const imageResponse = await stream;
                 const imageUrl = imageResponse.data[0]?.url;
@@ -70779,6 +70781,34 @@ function SpeakerModeControl(props) {
         }, children: jsx(Tooltip, { title: speakerMode ? 'Turn off speaker mode' : 'Turn on speaker mode', children: speakerMode ? (jsx(VolumeUpRounded, { onClick: onChange, style: { cursor: 'pointer' } })) : (jsx(VolumeOffRounded, { onClick: onChange, style: { cursor: 'pointer' } })) }) }));
 }
 
+function ImageSizeSelection(props) {
+    const { model, size, onChange } = props;
+    const [possibleSizes, setPossibleSizes] = useState([]);
+    useEffect(() => {
+        if (model === 'dall-e-3') {
+            setPossibleSizes(['1024x1024', '1792x1024', '1024x1792']);
+        }
+        else if (model === 'dall-e-2') {
+            setPossibleSizes(['256x256', '512x512', '1024x1024']);
+        }
+        else {
+            setPossibleSizes([]);
+        }
+    }, [model]);
+    return (jsxs(Box, { sx: {
+            position: 'relative',
+            top: '3px',
+            marginLeft: 'auto',
+            display: 'inline-flex',
+            alignItems: 'center'
+        }, children: [jsx(FormControl, { variant: "standard", sx: { m: 0 }, children: jsx(Select, { labelId: "image-size-selector", value: size, onChange: (e) => onChange?.(e.target.value), sx: {
+                        cursor: 'pointer',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            border: 'none'
+                        }
+                    }, children: possibleSizes.map((size) => (jsx(MenuItem, { value: size, children: size }, size))) }) }), jsx(Tooltip, { title: jsx(Typography, { children: "Select an image size." }), arrow: true, children: jsx(InfoRounded, {}) })] }));
+}
+
 function ChatGPTPopover(props) {
     const theme = useTheme();
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 492, height = 595, enableCustomModel = true, ...popoverProps } = props;
@@ -70788,6 +70818,7 @@ function ChatGPTPopover(props) {
     const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState(null);
     const [selectedModel, setSelectedModel] = useState(defaultChatModel);
     const [selectedMode, setSelectedMode] = useState('chat');
+    const [selectedImageSize, setSelectedImageSize] = useState(defaultDallEImageSize);
     const [allModels, setAllModels] = useState([]);
     useEffect(() => {
         listChatModels().then((modelList) => {
@@ -70817,7 +70848,6 @@ function ChatGPTPopover(props) {
     };
     return (jsxs(Fragment, { children: [jsxs(Popover, { open: open && !isMinimized, onClose: (e, reason) => {
                     if (chatGptRef.current?.hasConversation()) {
-                        // setOpenAlertDialog(true);
                         onMinimize?.();
                     }
                     else {
@@ -70847,7 +70877,7 @@ function ChatGPTPopover(props) {
                             }, children: [jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }), selectedMode === 'chat' && (jsx(SpeakerModeControl, { speakerMode: speakerMode, onChange: () => {
                                         window.speechSynthesis.cancel();
                                         setSpeakerMode((prev) => !prev);
-                                    } }))] }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, speakerMode: speakerMode, sxs: {
+                                    } })), selectedMode === 'image' && (jsx(ImageSizeSelection, { model: selectedModel, size: selectedImageSize, onChange: (value) => setSelectedImageSize(value) }))] }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, speakerMode: speakerMode, sxs: {
                             root: { height: 'calc(100% - 113px)' },
                             chat: { height: 'calc(100% - 97px)' },
                             ...chatGPTProps?.sxs
@@ -70859,7 +70889,7 @@ function ChatGPTPopover(props) {
                                 setSelectedModel(defaultImageModel);
                             }
                             setSelectedMode(mode);
-                        }, emptyStateOptions: selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
+                        }, emptyStateOptions: selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat, imageSize: selectedImageSize })] }), jsx(MinimizedBar, { open: isMinimized, onMaximize: onMaximize, title: appBarTitle }), jsx(AlertDialog, { disableBackdropClick: true, disableEscapeKeyDown: true, open: openAlertDialog, title: "Close this chat?", body: "The current conversation will be lost.", buttons: jsxs(Fragment, { children: [jsx(PrimaryButton$1, { onClick: (e) => {
                                 setOpenAlertDialog(false);
                                 onClose(e, null);
                             }, autoFocus: true, fullWidth: true, size: "large", children: "Close" }), jsx(SecondaryButton$1, { onClick: () => {

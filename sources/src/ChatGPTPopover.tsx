@@ -10,11 +10,13 @@ import { listChatModels } from './util.ts';
 import {
   chatGptEmptyStateOptionsChat,
   defaultChatModel,
+  defaultDallEImageSize,
   defaultImageModel,
   emptyStateOptionsGenerateImages
 } from './consts.ts';
 import ChatGPTModelSelectMenu from './ChatGPTModelSelectMenu.tsx';
 import SpeakerModeControl from './SpeakerModeControl.tsx';
+import ImageSizeSelection from './ImageSizeSelection.tsx';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
   appBarTitle?: string;
@@ -50,6 +52,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedModel, setSelectedModel] = useState(defaultChatModel);
   const [selectedMode, setSelectedMode] = useState<ChatMode>('chat');
+  const [selectedImageSize, setSelectedImageSize] = useState(defaultDallEImageSize);
   const [allModels, setAllModels] = useState<Array<{ id: string }>>([]);
 
   useEffect(() => {
@@ -88,7 +91,6 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
         open={open && !isMinimized}
         onClose={(e, reason) => {
           if (chatGptRef.current?.hasConversation()) {
-            // setOpenAlertDialog(true);
             onMinimize?.();
           } else {
             onClose(e, reason);
@@ -150,6 +152,13 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
                 }}
               />
             )}
+            {selectedMode === 'image' && (
+              <ImageSizeSelection
+                model={selectedModel}
+                size={selectedImageSize}
+                onChange={(value) => setSelectedImageSize(value)}
+              />
+            )}
           </Box>
         </DialogHeader>
         <ChatGPT
@@ -171,6 +180,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             setSelectedMode(mode);
           }}
           emptyStateOptions={selectedMode === 'image' ? emptyStateOptionsGenerateImages : chatGptEmptyStateOptionsChat}
+          imageSize={selectedImageSize}
         />
       </Popover>
       <MinimizedBar open={isMinimized} onMaximize={onMaximize} title={appBarTitle} />
