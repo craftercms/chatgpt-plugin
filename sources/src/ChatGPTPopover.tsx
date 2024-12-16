@@ -1,4 +1,4 @@
-import { AppBarProps, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
+import { AppBarProps, Box, paperClasses, Popover, PopoverProps, useTheme } from '@mui/material';
 import ChatGPT, { ChatGPTProps, ChatGPTRef, ChatMode } from './ChatGPT.tsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import MinimizedBar from '@craftercms/studio-ui/components/MinimizedBar';
@@ -7,8 +7,14 @@ import AlertDialog from '@craftercms/studio-ui/components/AlertDialog';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton/PrimaryButton';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton/SecondaryButton';
 import { listChatModels } from './util.ts';
-import { chatGptEmptyStateOptionsChat, defaultChatModel, defaultImageModel, emptyStateOptionsGenerateImages } from './consts.ts';
+import {
+  chatGptEmptyStateOptionsChat,
+  defaultChatModel,
+  defaultImageModel,
+  emptyStateOptionsGenerateImages
+} from './consts.ts';
 import ChatGPTModelSelectMenu from './ChatGPTModelSelectMenu.tsx';
+import SpeakerModeControl from './SpeakerModeControl.tsx';
 
 export interface ChatGPTPopoverProps extends PopoverProps {
   appBarTitle?: string;
@@ -39,6 +45,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
   } = props;
 
   const chatGptRef = useRef<ChatGPTRef>(null);
+  const [speakerMode, setSpeakerMode] = useState(false);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedModel, setSelectedModel] = useState(defaultChatModel);
@@ -110,24 +117,46 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
       >
         <DialogHeader
           title={appBarTitle}
-          sxs={{ root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }}
+          sxs={{
+            root: { boxShadow: theme.shadows[4], borderBottom: 'none' },
+            subtitleWrapper: {
+              width: '100%'
+            }
+          }}
           onMinimizeButtonClick={() => onMinimize?.()}
           onCloseButtonClick={(e) => onClose(e, null)}
         >
-          <ChatGPTModelSelectMenu
-            models={filteredModels}
-            enableCustomModel={enableCustomModel}
-            handleModelMenuClick={handleModelMenuClick}
-            modelMenuAnchorEl={modelMenuAnchorEl}
-            selectedModel={selectedModel}
-            handleModelSelect={handleModelSelect}
-            handleClose={handleClose}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <ChatGPTModelSelectMenu
+              models={filteredModels}
+              enableCustomModel={enableCustomModel}
+              handleModelMenuClick={handleModelMenuClick}
+              modelMenuAnchorEl={modelMenuAnchorEl}
+              selectedModel={selectedModel}
+              handleModelSelect={handleModelSelect}
+              handleClose={handleClose}
+            />
+            {selectedMode === 'chat' && (
+              <SpeakerModeControl
+                speakerMode={speakerMode}
+                onChange={() => {
+                  window.speechSynthesis.cancel();
+                  setSpeakerMode((prev) => !prev);
+                }}
+              />
+            )}
+          </Box>
         </DialogHeader>
         <ChatGPT
           {...chatGPTProps}
           ref={chatGptRef}
           model={selectedModel}
+          speakerMode={speakerMode}
           sxs={{
             root: { height: 'calc(100% - 113px)' },
             chat: { height: 'calc(100% - 97px)' },

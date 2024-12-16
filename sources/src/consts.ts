@@ -1,4 +1,4 @@
-import { EmptyStateOption } from "./ChatGPT";
+import { EmptyStateOption } from './ChatGPT';
 
 export const helperWidgetId = 'craftercms.components.openai.Helper';
 export const logoWidgetId = 'craftercms.components.openai.OpenAILogo';

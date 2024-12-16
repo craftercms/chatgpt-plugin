@@ -816,10 +816,7 @@ export async function chatGPTRevertContent(path: string) {
  * @param templatePath the template path to fetch it's content
  * @param instruction the instruction to update template
  */
-export async function chatGPTAnalyzeTemplate(
-  templatePath: string,
-  instructions: string
-) {
+export async function chatGPTAnalyzeTemplate(templatePath: string, instructions: string) {
   const templateContent = await fetchContent(templatePath);
   const completion = await createChatCompletion({
     model: defaultChatModel,

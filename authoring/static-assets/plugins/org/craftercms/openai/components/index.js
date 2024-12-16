@@ -29,6 +29,8 @@ const AlertDialog = craftercms.components.AlertDialog && Object.prototype.hasOwn
 const PrimaryButton$1 = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const SecondaryButton$1 = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
 const ExpandMoreRounded = craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ExpandMoreRounded');
+const VolumeUpRounded = craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/VolumeUpRounded');
+const VolumeOffRounded = craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
 const { useSelector } = craftercms.libs.ReactRedux;
 
@@ -70392,7 +70394,7 @@ const ChatGPT = forwardRef((props, ref) => {
         else if (option?.messages) {
             api.pushMessages(option.messages);
         }
-    }, onModeSelected } = props;
+    }, onModeSelected, speakerMode } = props;
     // endregion
     const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
     const [settingMenuAnchorEl, setSettingMenuAnchorEl] = useState(null);
@@ -70548,6 +70550,13 @@ const ChatGPT = forwardRef((props, ref) => {
                     reply.content += result?.message;
                     setMessages([...messagesRef.current]);
                 }
+                console.log(speakerMode);
+                if (speakerMode) {
+                    const contentToSpeak = Array.isArray(reply.content) ? reply.content.join(' ') : reply.content;
+                    const utterance = new SpeechSynthesisUtterance(contentToSpeak);
+                    utterance.lang = selectedLanguage;
+                    window.speechSynthesis.speak(utterance);
+                }
             }
         }
         catch (e) {
@@ -70665,7 +70674,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                             gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                                             columnGap: '16px',
                                             rowGap: '16px'
-                                        }, children: emptyStateOptions.map((option) => (jsx(Card, { children: jsx(CardActionArea, { onClick: (e) => onEmptyStateOptionClick(e, option, api), children: jsx(CardHeader, { title: option.title, subheader: option.subheader, titleTypographyProps: { variant: 'body1' }, subheaderTypographyProps: { variant: 'body2' } }) }) }, option.id))) })] })), messages.map(({ role, content }, index) => (role === 'system' ? null : (jsxs(Box, { sx: { bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }, children: [jsxs(StyledBox, { children: [jsx(StyledAvatar, { variant: "rounded", sx: role === 'assistant'
+                                        }, children: emptyStateOptions.map((option) => (jsx(Card, { children: jsx(CardActionArea, { onClick: (e) => onEmptyStateOptionClick(e, option, api), children: jsx(CardHeader, { title: option.title, subheader: option.subheader, titleTypographyProps: { variant: 'body1' }, subheaderTypographyProps: { variant: 'body2' } }) }) }, option.id))) })] })), messages.map(({ role, content }, index) => role === 'system' ? null : (jsxs(Box, { sx: { bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }, children: [jsxs(StyledBox, { children: [jsx(StyledAvatar, { variant: "rounded", sx: role === 'assistant'
                                                     ? { backgroundColor: aiAvatarColour, color: theme.palette.getContrastText(aiAvatarColour) }
                                                     : { backgroundColor: userColour, color: theme.palette.getContrastText(userColour) }, children: role === 'assistant' ? jsx(OpenAI$1, {}) : nameToInitials(userName) }), streaming && content?.length === 0 && index === maxMessageIndex && (jsx(Box, { children: jsx(ThinkingIcon, {}) })), role === 'assistant' ? (jsx(StyledIframe, { className: "message-iframe", style: { height: 30 }, srcDoc: srcDoc, ref: async (node) => {
                                                     if (node?.contentWindow?.document?.documentElement) {
@@ -70732,7 +70741,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                                                                 setImageUrl(url);
                                                                                 setSaveImageDialogOpen(true);
                                                                             }
-                                                                        }, children: jsx(SaveRounded, { fontSize: "small" }) }) })] }))] })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index)))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
+                                                                        }, children: jsx(SaveRounded, { fontSize: "small" }) }) })] }))] })) }))] }), !streaming && maxMessageIndex === index && role === 'assistant' && extraActions?.length && (jsx(Box, { sx: { px: 1, pb: 1, display: 'flex', justifyContent: 'right' }, children: extraActions.map(({ label, id }) => (jsx(Button, { variant: "text", size: "small", onClick: (e) => onExtraActionClick?.(e, id, content, api), children: label }, id))) }))] }, index))), error && jsx(Alert, { severity: "error", children: error.message }), scrollToReply && jsx("div", { ref: (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' }) })] })] }), jsxs(Box, { component: "form", onSubmit: handleSubmit, sx: {
                     p: 2,
                     pr: 1,
                     display: 'flex',
@@ -70763,10 +70772,20 @@ function ChatGPTModelSelectMenu({ models, enableCustomModel, handleModelMenuClic
                 }, children: models && models.length > 0 ? (models.map((model) => (jsx(MenuItem, { onClick: () => handleModelSelect(model.id), children: jsx(FormControlLabel, { control: jsx(Radio, { checked: selectedModel === model.id }), label: model.id }) }, model.id)))) : (jsx(MenuItem, { children: jsx(CircularProgress, { size: 16 }) })) }))] }));
 }
 
+function SpeakerModeControl(props) {
+    const { speakerMode, onChange, } = props;
+    return (jsx(Box, { sx: {
+            position: 'relative',
+            top: '3px',
+            marginLeft: 'auto'
+        }, children: jsx(Tooltip, { title: speakerMode ? "Turn off speaker mode" : "Turn on speaker mode", children: speakerMode ? (jsx(VolumeUpRounded, { onClick: onChange, style: { cursor: 'pointer' } })) : (jsx(VolumeOffRounded, { onClick: onChange, style: { cursor: 'pointer' } })) }) }));
+}
+
 function ChatGPTPopover(props) {
     const theme = useTheme();
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 492, height = 595, enableCustomModel = true, ...popoverProps } = props;
     const chatGptRef = useRef(null);
+    const [speakerMode, setSpeakerMode] = useState(false);
     const [openAlertDialog, setOpenAlertDialog] = useState(false);
     const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState(null);
     const [selectedModel, setSelectedModel] = useState(defaultChatModel);
@@ -70819,7 +70838,19 @@ function ChatGPTPopover(props) {
                         right: 10
                     },
                     ...popoverProps?.sx
-                }, children: [jsx(DialogHeader$2, { title: appBarTitle, sxs: { root: { boxShadow: theme.shadows[4], borderBottom: 'none' } }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, sxs: {
+                }, children: [jsx(DialogHeader$2, { title: appBarTitle, sxs: {
+                            root: { boxShadow: theme.shadows[4], borderBottom: 'none' },
+                            subtitleWrapper: {
+                                width: '100%'
+                            }
+                        }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsxs(Box, { sx: {
+                                display: 'flex',
+                                alignItems: 'center'
+                            }, children: [jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }), selectedMode === 'chat' &&
+                                    jsx(SpeakerModeControl, { speakerMode: speakerMode, onChange: () => {
+                                            window.speechSynthesis.cancel();
+                                            setSpeakerMode(prev => !prev);
+                                        } })] }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, speakerMode: speakerMode, sxs: {
                             root: { height: 'calc(100% - 113px)' },
                             chat: { height: 'calc(100% - 97px)' },
                             ...chatGPTProps?.sxs

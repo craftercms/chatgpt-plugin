@@ -227,6 +227,7 @@ export interface ChatGPTProps {
   initialMessages?: Array<ChatCompletionMessageParam>;
   aiAvatarColour?: string;
   onModeSelected: (mode: ChatMode) => void;
+  speakerMode: boolean;
 }
 
 export interface ChatGPTRef {
@@ -255,7 +256,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         api.pushMessages(option.messages);
       }
     },
-    onModeSelected
+    onModeSelected,
+    speakerMode
   } = props;
   // endregion
   const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
@@ -430,6 +432,13 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           const result = await chatGPTFunctionCall(funcName, funcArgs);
           reply.content += result?.message;
           setMessages([...messagesRef.current]);
+        }
+
+        if (speakerMode) {
+          const contentToSpeak = Array.isArray(reply.content) ? reply.content.join(' ') : reply.content;
+          const utterance = new SpeechSynthesisUtterance(contentToSpeak);
+          utterance.lang = selectedLanguage;
+          window.speechSynthesis.speak(utterance);
         }
       }
     } catch (e) {
@@ -620,7 +629,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
               </Box>
             </Box>
           )}
-          {messages.map(({ role, content }, index) => (
+          {messages.map(({ role, content }, index) =>
             role === 'system' ? null : (
               <Box sx={{ bgcolor: role === 'assistant' ? (isDark ? 'grey.900' : 'grey.100') : undefined }} key={index}>
                 <StyledBox>
@@ -635,7 +644,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                     {role === 'assistant' ? <OpenAILogo /> : nameToInitials(userName)}
                   </StyledAvatar>
                   {streaming && content?.length === 0 && index === maxMessageIndex && (
-                    <Box><ThinkingIcon /></Box>
+                    <Box>
+                      <ThinkingIcon />
+                    </Box>
                   )}
                   {role === 'assistant' ? (
                     <StyledIframe
@@ -776,7 +787,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                 )}
               </Box>
             )
-          ))}
+          )}
           {error && <Alert severity="error">{error.message}</Alert>}
           {scrollToReply && <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'end' })} />}
         </Box>
