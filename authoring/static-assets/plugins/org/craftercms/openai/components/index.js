@@ -6640,15 +6640,17 @@ function SelectLanguageDialog(props) {
 }
 
 function SaveImageDialog(props) {
-    const { open, onClose, url, suggestName } = props;
+    const { open, onClose, url } = props;
     const [name, setName] = useState('');
     const [path, setPath] = useState('/static-assets');
     const [processing, setProcessing] = useState(false);
     useEffect(() => {
-        if (suggestName) {
-            setName(suggestName);
+        if (url) {
+            const baseUrl = url.split('?')[0];
+            const defaultImageName = baseUrl.split('/').pop();
+            setName(defaultImageName);
         }
-    }, [suggestName]);
+    }, [url]);
     const handleSave = async () => {
         setProcessing(true);
         try {
@@ -70417,7 +70419,6 @@ const ChatGPT = forwardRef((props, ref) => {
     const [imageUrl, setImageUrl] = useState('');
     const [copyingIndex, setCopyingIndex] = useState(null);
     const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
-    const [suggestName, setSuggestName] = useState('');
     const chatModeRef = useRef('chat');
     const hasConversationRef = useRef(false);
     const messagesRef = useRef(messages);
@@ -70550,7 +70551,6 @@ const ChatGPT = forwardRef((props, ref) => {
                     reply.content += result?.message;
                     setMessages([...messagesRef.current]);
                 }
-                console.log(speakerMode);
                 if (speakerMode) {
                     const contentToSpeak = Array.isArray(reply.content) ? reply.content.join(' ') : reply.content;
                     const utterance = new SpeechSynthesisUtterance(contentToSpeak);
@@ -70578,8 +70578,6 @@ const ChatGPT = forwardRef((props, ref) => {
         e.preventDefault();
         if (!prompt)
             return;
-        const formattedName = prompt.trim().replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
-        setSuggestName(formattedName);
         setPrompt('');
         messagesRef.current.push({ role: 'user', content: prompt });
         await submit();
@@ -70758,7 +70756,7 @@ const ChatGPT = forwardRef((props, ref) => {
                             }
                         }, multiline: true, maxRows: 4, InputProps: {
                             endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onMouseLeave: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
-                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl, suggestName: suggestName })] })] }));
+                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl })] })] }));
 });
 
 function ChatGPTModelSelectMenu({ models, enableCustomModel, handleModelMenuClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
@@ -70773,12 +70771,12 @@ function ChatGPTModelSelectMenu({ models, enableCustomModel, handleModelMenuClic
 }
 
 function SpeakerModeControl(props) {
-    const { speakerMode, onChange, } = props;
+    const { speakerMode, onChange } = props;
     return (jsx(Box, { sx: {
             position: 'relative',
             top: '3px',
             marginLeft: 'auto'
-        }, children: jsx(Tooltip, { title: speakerMode ? "Turn off speaker mode" : "Turn on speaker mode", children: speakerMode ? (jsx(VolumeUpRounded, { onClick: onChange, style: { cursor: 'pointer' } })) : (jsx(VolumeOffRounded, { onClick: onChange, style: { cursor: 'pointer' } })) }) }));
+        }, children: jsx(Tooltip, { title: speakerMode ? 'Turn off speaker mode' : 'Turn on speaker mode', children: speakerMode ? (jsx(VolumeUpRounded, { onClick: onChange, style: { cursor: 'pointer' } })) : (jsx(VolumeOffRounded, { onClick: onChange, style: { cursor: 'pointer' } })) }) }));
 }
 
 function ChatGPTPopover(props) {
@@ -70846,11 +70844,10 @@ function ChatGPTPopover(props) {
                         }, onMinimizeButtonClick: () => onMinimize?.(), onCloseButtonClick: (e) => onClose(e, null), children: jsxs(Box, { sx: {
                                 display: 'flex',
                                 alignItems: 'center'
-                            }, children: [jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }), selectedMode === 'chat' &&
-                                    jsx(SpeakerModeControl, { speakerMode: speakerMode, onChange: () => {
-                                            window.speechSynthesis.cancel();
-                                            setSpeakerMode(prev => !prev);
-                                        } })] }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, speakerMode: speakerMode, sxs: {
+                            }, children: [jsx(ChatGPTModelSelectMenu, { models: filteredModels, enableCustomModel: enableCustomModel, handleModelMenuClick: handleModelMenuClick, modelMenuAnchorEl: modelMenuAnchorEl, selectedModel: selectedModel, handleModelSelect: handleModelSelect, handleClose: handleClose }), selectedMode === 'chat' && (jsx(SpeakerModeControl, { speakerMode: speakerMode, onChange: () => {
+                                        window.speechSynthesis.cancel();
+                                        setSpeakerMode((prev) => !prev);
+                                    } }))] }) }), jsx(ChatGPT, { ...chatGPTProps, ref: chatGptRef, model: selectedModel, speakerMode: speakerMode, sxs: {
                             root: { height: 'calc(100% - 113px)' },
                             chat: { height: 'calc(100% - 97px)' },
                             ...chatGPTProps?.sxs

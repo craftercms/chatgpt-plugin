@@ -285,7 +285,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const [imageUrl, setImageUrl] = useState('');
   const [copyingIndex, setCopyingIndex] = useState<number | null>(null);
   const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
-  const [suggestName, setSuggestName] = useState('');
   const chatModeRef = useRef<ChatMode>('chat');
   const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
@@ -460,9 +459,6 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt) return;
-
-    const formattedName = prompt.trim().replace(/\s+/g, '-').toLowerCase().slice(0, 32) + '.png';
-    setSuggestName(formattedName);
 
     setPrompt('');
     messagesRef.current.push({ role: 'user', content: prompt });
@@ -870,12 +866,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
           onClose={handleLanguageDialogClose}
           onLanguageChange={handleLanguageChange}
         />
-        <SaveImageDialog
-          open={saveImageDialogOpen}
-          onClose={() => setSaveImageDialogOpen(false)}
-          url={imageUrl}
-          suggestName={suggestName}
-        />
+        <SaveImageDialog open={saveImageDialogOpen} onClose={() => setSaveImageDialogOpen(false)} url={imageUrl} />
       </Box>
     </Box>
   );

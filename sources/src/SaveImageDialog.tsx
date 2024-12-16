@@ -10,21 +10,22 @@ export interface SaveImageDialogProps {
   open: boolean;
   onClose?: () => void;
   url: string;
-  suggestName?: string;
 }
 
-export default function SaveImageDialog(props: SaveImageDialogProps) {
-  const { open, onClose, url, suggestName } = props;
+export default function SaveImageDialog(props: Readonly<SaveImageDialogProps>) {
+  const { open, onClose, url } = props;
 
   const [name, setName] = useState('');
   const [path, setPath] = useState('/static-assets');
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    if (suggestName) {
-      setName(suggestName);
+    if (url) {
+      const baseUrl = url.split('?')[0];
+      const defaultImageName = baseUrl.split('/').pop();
+      setName(defaultImageName);
     }
-  }, [suggestName]);
+  }, [url]);
 
   const handleSave = async () => {
     setProcessing(true);
