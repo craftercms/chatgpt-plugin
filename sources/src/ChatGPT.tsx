@@ -38,7 +38,9 @@ import {
   copyImageToClipboard,
   createChatCompletion,
   createImageGeneration,
-  fetchMemoryData
+  fetchMemoryData,
+  speakText,
+  removeMarkdown
 } from './util';
 import {
   chatGptEmptyStateOptionsChat,
@@ -443,10 +445,8 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         }
 
         if (speakerMode) {
-          const contentToSpeak = Array.isArray(reply.content) ? reply.content.join(' ') : reply.content;
-          const utterance = new SpeechSynthesisUtterance(contentToSpeak);
-          utterance.lang = selectedLanguage;
-          window.speechSynthesis.speak(utterance);
+          const contentToSpeak = removeMarkdown(Array.isArray(reply.content) ? reply.content.join(' ') : reply.content);
+          speakText(contentToSpeak, selectedLanguage);
         }
       }
     } catch (e) {
