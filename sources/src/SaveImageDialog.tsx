@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, TextField } from '@mui/material';
 import { DialogBody, DialogFooter, DialogHeader } from '@craftercms/studio-ui/components';
-import PathSelector from '@craftercms/studio-ui/components/SiteSearchPathSelector';
+import PathSelector from './PathSelector';
 import SecondaryButton from '@craftercms/studio-ui/components/SecondaryButton';
 import PrimaryButton from '@craftercms/studio-ui/components/PrimaryButton';
 import { saveImage } from './util';

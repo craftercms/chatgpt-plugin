@@ -1,6 +1,8 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme, Drawer, IconButton, Tooltip, Paper, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, FormControl, Select, Popover, paperClasses } = craftercms.libs.MaterialUI;
-const { useState, useEffect, forwardRef, useRef, useImperativeHandle, useMemo } = craftercms.libs.React;
+const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme: useTheme$1, Drawer, IconButton: IconButton$1, Tooltip, Paper: Paper$1, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, FormControl, Select, Popover, paperClasses } = craftercms.libs.MaterialUI;
+const React = craftercms.libs.React;
+const { useRef, useMemo, useContext, createContext, forwardRef, createElement, useState, useEffect, useImperativeHandle } = craftercms.libs.React;
+const React__default = craftercms.libs.React && Object.prototype.hasOwnProperty.call(craftercms.libs.React, 'default') ? craftercms.libs.React['default'] : craftercms.libs.React;
 const { createSvgIcon } = craftercms.libs.MaterialUI;
 const SendIcon = craftercms.utils.constants.components.get('@mui/icons-material/SendRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/SendRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/SendRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/SendRounded');
 const MoreVertRounded = craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/MoreVertRounded');
@@ -20,7 +22,15 @@ const DialogBody = craftercms.components.DialogBody && Object.prototype.hasOwnPr
 const SecondaryButton = craftercms.components.SecondaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.SecondaryButton, 'default') ? craftercms.components.SecondaryButton['default'] : craftercms.components.SecondaryButton;
 const DialogFooter = craftercms.components.DialogFooter && Object.prototype.hasOwnProperty.call(craftercms.components.DialogFooter, 'default') ? craftercms.components.DialogFooter['default'] : craftercms.components.DialogFooter;
 const { DialogHeader: DialogHeader$1, DialogBody: DialogBody$1, DialogFooter: DialogFooter$1 } = craftercms.components;
-const PathSelector = craftercms.components.SiteSearchPathSelector && Object.prototype.hasOwnProperty.call(craftercms.components.SiteSearchPathSelector, 'default') ? craftercms.components.SiteSearchPathSelector['default'] : craftercms.components.SiteSearchPathSelector;
+const { defineMessages, useIntl } = craftercms.libs.ReactIntl;
+const { useDispatch, useSelector } = craftercms.libs.ReactRedux;
+const InputBase = craftercms.libs.MaterialUI.InputBase && Object.prototype.hasOwnProperty.call(craftercms.libs.MaterialUI.InputBase, 'default') ? craftercms.libs.MaterialUI.InputBase['default'] : craftercms.libs.MaterialUI.InputBase;
+const IconButton = craftercms.libs.MaterialUI.IconButton && Object.prototype.hasOwnProperty.call(craftercms.libs.MaterialUI.IconButton, 'default') ? craftercms.libs.MaterialUI.IconButton['default'] : craftercms.libs.MaterialUI.IconButton;
+const CloseIcon = craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CloseRounded');
+const { useTheme } = craftercms.libs.MaterialUI;
+const Paper = craftercms.libs.MaterialUI.Paper && Object.prototype.hasOwnProperty.call(craftercms.libs.MaterialUI.Paper, 'default') ? craftercms.libs.MaterialUI.Paper['default'] : craftercms.libs.MaterialUI.Paper;
+const SiteExplorer = craftercms.icons.SiteExplorer && Object.prototype.hasOwnProperty.call(craftercms.icons.SiteExplorer, 'default') ? craftercms.icons.SiteExplorer['default'] : craftercms.icons.SiteExplorer;
+const { createCustomDocumentEventListener } = craftercms.utils.dom;
 const PrimaryButton = craftercms.components.PrimaryButton && Object.prototype.hasOwnProperty.call(craftercms.components.PrimaryButton, 'default') ? craftercms.components.PrimaryButton['default'] : craftercms.components.PrimaryButton;
 const ImageRounded = craftercms.utils.constants.components.get('@mui/icons-material/ImageRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/ImageRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/ImageRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/ImageRounded');
 const MinimizedBar = craftercms.components.MinimizedBar && Object.prototype.hasOwnProperty.call(craftercms.components.MinimizedBar, 'default') ? craftercms.components.MinimizedBar['default'] : craftercms.components.MinimizedBar;
@@ -33,7 +43,6 @@ const VolumeUpRounded = craftercms.utils.constants.components.get('@mui/icons-ma
 const VolumeOffRounded = craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/VolumeOffRounded');
 const InfoRounded = craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/InfoRounded');
 const ToolsPanelListItemButton = craftercms.components.ToolsPanelListItemButton && Object.prototype.hasOwnProperty.call(craftercms.components.ToolsPanelListItemButton, 'default') ? craftercms.components.ToolsPanelListItemButton['default'] : craftercms.components.ToolsPanelListItemButton;
-const { useSelector } = craftercms.libs.ReactRedux;
 
 var OpenAI$1 = createSvgIcon(jsx("path", { d: "M21.9706 9.87533C22.233 9.08708 22.3241 8.25193 22.2376 7.42569C22.1511 6.59945 21.8892 5.80122 21.4692 5.08441C20.8468 4.00021 19.8959 3.14181 18.7539 2.63307C17.6119 2.12433 16.3378 1.99156 15.1154 2.25391C14.564 1.63256 13.8864 1.13614 13.1276 0.797891C12.3689 0.459646 11.5467 0.28737 10.716 0.292596C9.4662 0.28958 8.24776 0.683523 7.23631 1.41764C6.22486 2.15174 5.47268 3.18809 5.08819 4.37725C4.27404 4.54391 3.50487 4.88257 2.83219 5.37056C2.15951 5.85855 1.59885 6.4846 1.18772 7.20682C0.560251 8.28805 0.292411 9.54056 0.422827 10.7839C0.553243 12.0271 1.07517 13.1968 1.91334 14.1243C1.6509 14.9125 1.55986 15.7477 1.64631 16.5739C1.73277 17.4002 1.99472 18.1984 2.41463 18.9152C3.03719 19.9994 3.98806 20.8577 5.13005 21.3664C6.27204 21.8752 7.54615 22.008 8.76851 21.7457C9.31986 22.367 9.9976 22.8634 10.7563 23.2017C11.515 23.5399 12.3372 23.7122 13.1679 23.707C14.4183 23.7103 15.6374 23.3162 16.6492 22.5816C17.6611 21.847 18.4134 20.8099 18.7976 19.62C19.6117 19.4534 20.3809 19.1147 21.0536 18.6267C21.7262 18.1388 22.2869 17.5127 22.698 16.7904C23.3247 15.7093 23.592 14.4571 23.4612 13.2143C23.3305 11.9715 22.8085 10.8024 21.9706 9.87533ZM13.1698 22.1763C12.1434 22.1778 11.1492 21.8183 10.361 21.1608C10.3965 21.1415 10.4589 21.1073 10.4995 21.0824L15.1616 18.3894C15.2786 18.3229 15.3758 18.2263 15.4431 18.1097C15.5105 17.9931 15.5455 17.8607 15.5447 17.7261V11.1535L17.5153 12.2913C17.5256 12.2965 17.5345 12.3041 17.5412 12.3135C17.5479 12.3229 17.5521 12.3339 17.5536 12.3453V17.7884C17.5521 18.951 17.0899 20.0656 16.2682 20.8881C15.4465 21.7106 14.3324 22.1738 13.1698 22.1763ZM3.74219 18.1499C3.22806 17.2615 3.04276 16.2207 3.21873 15.2095C3.25335 15.2303 3.31382 15.2672 3.35721 15.2921L8.0193 17.985C8.13549 18.0529 8.26767 18.0888 8.40224 18.0888C8.53676 18.0888 8.66894 18.0529 8.78513 17.985L14.4771 14.6985V16.9742C14.4777 16.9858 14.4755 16.9974 14.4706 17.008C14.4656 17.0185 14.4582 17.0277 14.4489 17.0346L9.736 19.7557C8.72794 20.3363 7.53069 20.4933 6.40702 20.1922C5.28333 19.8912 4.32496 19.1567 3.74219 18.1499ZM2.51573 7.97213C3.02762 7.08261 3.83615 6.40159 4.7997 6.04821C4.7997 6.08836 4.79739 6.15949 4.79739 6.20883V11.5947C4.79657 11.7292 4.83159 11.8615 4.89885 11.9781C4.9661 12.0946 5.06316 12.191 5.18006 12.2576L10.872 15.5437L8.90144 16.6815C8.89173 16.6879 8.88055 16.6918 8.86896 16.6929C8.85737 16.6939 8.84566 16.6921 8.83495 16.6875L4.12161 13.9641C3.11531 13.3813 2.38115 12.4233 2.08011 11.3001C1.77907 10.1769 1.93573 8.98007 2.51573 7.97213ZM18.7057 11.7397L13.0138 8.45312L14.9843 7.31576C14.994 7.30938 15.0052 7.30546 15.0168 7.3044C15.0284 7.30335 15.0401 7.30522 15.0508 7.30979L19.7641 10.0309C20.4862 10.448 21.0745 11.0622 21.4602 11.8015C21.8459 12.5409 22.0129 13.3748 21.9418 14.2057C21.8706 15.0366 21.5642 15.83 21.0585 16.493C20.5527 17.1561 19.8686 17.6613 19.086 17.9495C19.086 17.9089 19.086 17.8378 19.086 17.7884V12.4025C19.0872 12.2682 19.0525 12.1361 18.9857 12.0196C18.9188 11.9031 18.8222 11.8065 18.7057 11.7397ZM20.667 8.78778C20.6324 8.76653 20.5719 8.73006 20.5286 8.70518L15.8664 6.01221C15.7502 5.94442 15.6181 5.90866 15.4835 5.90866C15.349 5.90866 15.2168 5.94442 15.1006 6.01221L9.40872 9.2988V7.02313C9.40808 7.01149 9.4103 6.9999 9.41522 6.98936C9.42014 6.97882 9.42757 6.96963 9.43688 6.96267L14.1498 4.24385C14.8718 3.82752 15.6974 3.62541 16.5301 3.66116C17.3628 3.6969 18.168 3.96903 18.8517 4.4457C19.5354 4.92237 20.0692 5.58387 20.3907 6.35283C20.7121 7.12177 20.808 7.96633 20.667 8.78778ZM8.33738 12.8438L6.36634 11.706C6.35604 11.7009 6.34708 11.6932 6.34041 11.6838C6.33374 11.6744 6.32946 11.6634 6.32806 11.652V6.20883C6.32858 5.37518 6.56659 4.55891 7.01416 3.85558C7.46179 3.15225 8.10049 2.59097 8.85549 2.23744C9.6105 1.88391 10.4506 1.75276 11.2774 1.85933C12.1043 1.9659 12.8836 2.30579 13.5243 2.83921C13.4888 2.8586 13.4269 2.89276 13.3858 2.91769L8.72373 5.61063C8.60671 5.67713 8.5096 5.77359 8.44222 5.8901C8.37491 6.00659 8.33984 6.13894 8.3406 6.27346L8.33738 12.8438ZM9.40778 10.5359L11.9429 9.07168L14.4779 10.5349V13.4623L11.9429 14.9256L9.40778 13.4623V10.5359Z" }), 'OpenAI');
 const ThinkingIcon = () => (jsxs("svg", { width: "40", height: "40", viewbox: "0 0 40 40", xmlns: "http://www.w3.org/2000/svg", children: [jsxs("circle", { cx: "20", cy: "20", fill: "none", r: "10", stroke: "#383a36", "stroke-width": "2", children: [jsx("animate", { attributeName: "r", from: "8", to: "20", dur: "1.5s", begin: "0s", repeatCount: "indefinite" }), jsx("animate", { attributeName: "opacity", from: "1", to: "0", dur: "1.5s", begin: "0s", repeatCount: "indefinite" })] }), jsx("circle", { cx: "20", cy: "20", fill: "#383a36", r: "10" })] }));
@@ -356,7 +365,7 @@ function normalize_stringify_options(opts = defaults) {
         strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling,
     };
 }
-function stringify(object, opts = {}) {
+function stringify$1(object, opts = {}) {
     let obj = object;
     const options = normalize_stringify_options(opts);
     let obj_keys;
@@ -5316,7 +5325,7 @@ class OpenAI extends APIClient {
         return { Authorization: `Bearer ${this.apiKey}` };
     }
     stringifyQuery(query) {
-        return stringify(query, { arrayFormat: 'brackets' });
+        return stringify$1(query, { arrayFormat: 'brackets' });
     }
 }
 _a = OpenAI;
@@ -6640,7 +6649,7 @@ function speakText(text, languageCode) {
         if (index < chunks.length) {
             const utterance = new SpeechSynthesisUtterance(chunks[index]);
             utterance.lang = languageCode;
-            utterance.voice = window.speechSynthesis.getVoices().find(voice => voice.lang === languageCode);
+            utterance.voice = window.speechSynthesis.getVoices().find((voice) => voice.lang === languageCode);
             utterance.onend = () => speakChunk(index + 1);
             synth.speak(utterance);
         }
@@ -6721,6 +6730,2704 @@ function SelectLanguageDialog(props) {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }, children: [lc.label, language === lc.code && (jsx(ListItemIcon, { children: jsx(CheckRounded, { fontSize: "small" }) }))] }, lc.code))) }), jsx(DialogFooter, { children: jsx(SecondaryButton, { onClick: onClose, children: "Cancel" }) })] }));
+}
+
+/*
+ * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 3 as published by
+ * the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// endregion
+// region Path Selection Dialog
+const showPathSelectionDialog = /*#__PURE__*/ createAction('SHOW_PATH_SELECTION_DIALOG');
+const closePathSelectionDialog = /*#__PURE__*/ createAction('CLOSE_PATH_SELECTION_DIALOG');
+const pathSelectionDialogClosed = /*#__PURE__*/ createAction('PATH_SELECTION_CLOSED');
+// endregion
+
+/*
+ * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 3 as published by
+ * the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// region Batch Actions
+const batchActions = /*#__PURE__*/ createAction('BATCH_ACTIONS');
+// endregion
+// region dispatch DOM Event
+const dispatchDOMEvent = /*#__PURE__*/ createAction('DISPATCH_DOM_EVENT');
+// endregion
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const objectFromEntries = !Object
+    .fromEntries
+    ? (entries) => {
+        if (!entries || !entries[Symbol.iterator]) {
+            throw new Error("Object.fromEntries() requires a single iterable argument");
+        }
+        const o = {};
+        Object.keys(entries).forEach(key => {
+            const [k, v] = entries[key];
+            o[k] = v;
+        });
+        return o;
+    }
+    : Object.fromEntries;
+
+/** Object.keys() with types */
+function objectKeys(o) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Object.keys(o);
+}
+
+/** https://docs.tsafe.dev/assert */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function assert(condition, msg) {
+    if (!condition) {
+        throw new Error(msg);
+    }
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** https://docs.tsafe.dev/typeguard */
+function typeGuard(_value, isMatched) {
+    return isMatched;
+}
+
+/** Copy pasted from
+ * https://github.com/emotion-js/emotion/blob/23f43ab9f24d44219b0b007a00f4ac681fe8712e/packages/react/src/class-names.js#L17-L63
+ **/
+const classnames = (args) => {
+    const len = args.length;
+    let i = 0;
+    let cls = "";
+    for (; i < len; i++) {
+        const arg = args[i];
+        if (arg == null)
+            continue;
+        let toAdd;
+        switch (typeof arg) {
+            case "boolean":
+                break;
+            case "object": {
+                if (Array.isArray(arg)) {
+                    toAdd = classnames(arg);
+                }
+                else {
+                    assert(!typeGuard(arg, false));
+                    if (process.env.NODE_ENV !== "production" &&
+                        arg.styles !== undefined &&
+                        arg.name !== undefined) {
+                        console.error("You have passed styles created with `css` from `@emotion/react` package to the `cx`.\n" +
+                            "`cx` is meant to compose class names (strings) so you should convert those styles to a class name by passing them to the `css` received from <ClassNames/> component.");
+                    }
+                    toAdd = "";
+                    for (const k in arg) {
+                        if (arg[k] && k) {
+                            toAdd && (toAdd += " ");
+                            toAdd += k;
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                toAdd = arg;
+            }
+        }
+        if (toAdd) {
+            cls && (cls += " ");
+            cls += toAdd;
+        }
+    }
+    return cls;
+};
+
+/* eslint-disable */
+// Inspired by https://github.com/garycourt/murmurhash-js
+// Ported from https://github.com/aappleby/smhasher/blob/61a0530f28277f2e850bfc39600ce61d02b518de/src/MurmurHash2.cpp#L37-L86
+function murmur2(str) {
+  // 'm' and 'r' are mixing constants generated offline.
+  // They're not really 'magic', they just happen to work well.
+  // const m = 0x5bd1e995;
+  // const r = 24;
+  // Initialize the hash
+  var h = 0; // Mix 4 bytes at a time into the hash
+
+  var k,
+      i = 0,
+      len = str.length;
+
+  for (; len >= 4; ++i, len -= 4) {
+    k = str.charCodeAt(i) & 0xff | (str.charCodeAt(++i) & 0xff) << 8 | (str.charCodeAt(++i) & 0xff) << 16 | (str.charCodeAt(++i) & 0xff) << 24;
+    k =
+    /* Math.imul(k, m): */
+    (k & 0xffff) * 0x5bd1e995 + ((k >>> 16) * 0xe995 << 16);
+    k ^=
+    /* k >>> r: */
+    k >>> 24;
+    h =
+    /* Math.imul(k, m): */
+    (k & 0xffff) * 0x5bd1e995 + ((k >>> 16) * 0xe995 << 16) ^
+    /* Math.imul(h, m): */
+    (h & 0xffff) * 0x5bd1e995 + ((h >>> 16) * 0xe995 << 16);
+  } // Handle the last few bytes of the input array
+
+
+  switch (len) {
+    case 3:
+      h ^= (str.charCodeAt(i + 2) & 0xff) << 16;
+
+    case 2:
+      h ^= (str.charCodeAt(i + 1) & 0xff) << 8;
+
+    case 1:
+      h ^= str.charCodeAt(i) & 0xff;
+      h =
+      /* Math.imul(h, m): */
+      (h & 0xffff) * 0x5bd1e995 + ((h >>> 16) * 0xe995 << 16);
+  } // Do a few final mixes of the hash to ensure the last few
+  // bytes are well-incorporated.
+
+
+  h ^= h >>> 13;
+  h =
+  /* Math.imul(h, m): */
+  (h & 0xffff) * 0x5bd1e995 + ((h >>> 16) * 0xe995 << 16);
+  return ((h ^ h >>> 15) >>> 0).toString(36);
+}
+
+var unitlessKeys = {
+  animationIterationCount: 1,
+  aspectRatio: 1,
+  borderImageOutset: 1,
+  borderImageSlice: 1,
+  borderImageWidth: 1,
+  boxFlex: 1,
+  boxFlexGroup: 1,
+  boxOrdinalGroup: 1,
+  columnCount: 1,
+  columns: 1,
+  flex: 1,
+  flexGrow: 1,
+  flexPositive: 1,
+  flexShrink: 1,
+  flexNegative: 1,
+  flexOrder: 1,
+  gridRow: 1,
+  gridRowEnd: 1,
+  gridRowSpan: 1,
+  gridRowStart: 1,
+  gridColumn: 1,
+  gridColumnEnd: 1,
+  gridColumnSpan: 1,
+  gridColumnStart: 1,
+  msGridRow: 1,
+  msGridRowSpan: 1,
+  msGridColumn: 1,
+  msGridColumnSpan: 1,
+  fontWeight: 1,
+  lineHeight: 1,
+  opacity: 1,
+  order: 1,
+  orphans: 1,
+  scale: 1,
+  tabSize: 1,
+  widows: 1,
+  zIndex: 1,
+  zoom: 1,
+  WebkitLineClamp: 1,
+  // SVG-related properties
+  fillOpacity: 1,
+  floodOpacity: 1,
+  stopOpacity: 1,
+  strokeDasharray: 1,
+  strokeDashoffset: 1,
+  strokeMiterlimit: 1,
+  strokeOpacity: 1,
+  strokeWidth: 1
+};
+
+function memoize(fn) {
+  var cache = Object.create(null);
+  return function (arg) {
+    if (cache[arg] === undefined) cache[arg] = fn(arg);
+    return cache[arg];
+  };
+}
+
+var isDevelopment$1 = false;
+
+var hyphenateRegex = /[A-Z]|^ms/g;
+var animationRegex = /_EMO_([^_]+?)_([^]*?)_EMO_/g;
+
+var isCustomProperty = function isCustomProperty(property) {
+  return property.charCodeAt(1) === 45;
+};
+
+var isProcessableValue = function isProcessableValue(value) {
+  return value != null && typeof value !== 'boolean';
+};
+
+var processStyleName = /* #__PURE__ */memoize(function (styleName) {
+  return isCustomProperty(styleName) ? styleName : styleName.replace(hyphenateRegex, '-$&').toLowerCase();
+});
+
+var processStyleValue = function processStyleValue(key, value) {
+  switch (key) {
+    case 'animation':
+    case 'animationName':
+      {
+        if (typeof value === 'string') {
+          return value.replace(animationRegex, function (match, p1, p2) {
+            cursor = {
+              name: p1,
+              styles: p2,
+              next: cursor
+            };
+            return p1;
+          });
+        }
+      }
+  }
+
+  if (unitlessKeys[key] !== 1 && !isCustomProperty(key) && typeof value === 'number' && value !== 0) {
+    return value + 'px';
+  }
+
+  return value;
+};
+
+var noComponentSelectorMessage = 'Component selectors can only be used in conjunction with ' + '@emotion/babel-plugin, the swc Emotion plugin, or another Emotion-aware ' + 'compiler transform.';
+
+function handleInterpolation(mergedProps, registered, interpolation) {
+  if (interpolation == null) {
+    return '';
+  }
+
+  var componentSelector = interpolation;
+
+  if (componentSelector.__emotion_styles !== undefined) {
+
+    return componentSelector;
+  }
+
+  switch (typeof interpolation) {
+    case 'boolean':
+      {
+        return '';
+      }
+
+    case 'object':
+      {
+        var keyframes = interpolation;
+
+        if (keyframes.anim === 1) {
+          cursor = {
+            name: keyframes.name,
+            styles: keyframes.styles,
+            next: cursor
+          };
+          return keyframes.name;
+        }
+
+        var serializedStyles = interpolation;
+
+        if (serializedStyles.styles !== undefined) {
+          var next = serializedStyles.next;
+
+          if (next !== undefined) {
+            // not the most efficient thing ever but this is a pretty rare case
+            // and there will be very few iterations of this generally
+            while (next !== undefined) {
+              cursor = {
+                name: next.name,
+                styles: next.styles,
+                next: cursor
+              };
+              next = next.next;
+            }
+          }
+
+          var styles = serializedStyles.styles + ";";
+          return styles;
+        }
+
+        return createStringFromObject(mergedProps, registered, interpolation);
+      }
+  } // finalize string values (regular strings and functions interpolated into css calls)
+
+
+  var asString = interpolation;
+
+  if (registered == null) {
+    return asString;
+  }
+
+  var cached = registered[asString];
+  return cached !== undefined ? cached : asString;
+}
+
+function createStringFromObject(mergedProps, registered, obj) {
+  var string = '';
+
+  if (Array.isArray(obj)) {
+    for (var i = 0; i < obj.length; i++) {
+      string += handleInterpolation(mergedProps, registered, obj[i]) + ";";
+    }
+  } else {
+    for (var key in obj) {
+      var value = obj[key];
+
+      if (typeof value !== 'object') {
+        var asString = value;
+
+        if (registered != null && registered[asString] !== undefined) {
+          string += key + "{" + registered[asString] + "}";
+        } else if (isProcessableValue(asString)) {
+          string += processStyleName(key) + ":" + processStyleValue(key, asString) + ";";
+        }
+      } else {
+        if (key === 'NO_COMPONENT_SELECTOR' && isDevelopment$1) {
+          throw new Error(noComponentSelectorMessage);
+        }
+
+        if (Array.isArray(value) && typeof value[0] === 'string' && (registered == null || registered[value[0]] === undefined)) {
+          for (var _i = 0; _i < value.length; _i++) {
+            if (isProcessableValue(value[_i])) {
+              string += processStyleName(key) + ":" + processStyleValue(key, value[_i]) + ";";
+            }
+          }
+        } else {
+          var interpolated = handleInterpolation(mergedProps, registered, value);
+
+          switch (key) {
+            case 'animation':
+            case 'animationName':
+              {
+                string += processStyleName(key) + ":" + interpolated + ";";
+                break;
+              }
+
+            default:
+              {
+
+                string += key + "{" + interpolated + "}";
+              }
+          }
+        }
+      }
+    }
+  }
+
+  return string;
+}
+
+var labelPattern = /label:\s*([^\s;{]+)\s*(;|$)/g; // this is the cursor for keyframes
+// keyframes are stored on the SerializedStyles object as a linked list
+
+var cursor;
+function serializeStyles(args, registered, mergedProps) {
+  if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null && args[0].styles !== undefined) {
+    return args[0];
+  }
+
+  var stringMode = true;
+  var styles = '';
+  cursor = undefined;
+  var strings = args[0];
+
+  if (strings == null || strings.raw === undefined) {
+    stringMode = false;
+    styles += handleInterpolation(mergedProps, registered, strings);
+  } else {
+    var asTemplateStringsArr = strings;
+
+    styles += asTemplateStringsArr[0];
+  } // we start at 1 since we've already handled the first arg
+
+
+  for (var i = 1; i < args.length; i++) {
+    styles += handleInterpolation(mergedProps, registered, args[i]);
+
+    if (stringMode) {
+      var templateStringsArr = strings;
+
+      styles += templateStringsArr[i];
+    }
+  } // using a global regex with .exec is stateful so lastIndex has to be reset each time
+
+
+  labelPattern.lastIndex = 0;
+  var identifierName = '';
+  var match; // https://esbench.com/bench/5b809c2cf2949800a0f61fb5
+
+  while ((match = labelPattern.exec(styles)) !== null) {
+    identifierName += '-' + match[1];
+  }
+
+  var name = murmur2(styles) + identifierName;
+
+  return {
+    name: name,
+    styles: styles,
+    next: cursor
+  };
+}
+
+var isBrowser$1 = typeof document !== 'undefined';
+
+function getRegisteredStyles(registered, registeredStyles, classNames) {
+  var rawClassName = '';
+  classNames.split(' ').forEach(function (className) {
+    if (registered[className] !== undefined) {
+      registeredStyles.push(registered[className] + ";");
+    } else if (className) {
+      rawClassName += className + " ";
+    }
+  });
+  return rawClassName;
+}
+var registerStyles = function registerStyles(cache, serialized, isStringTag) {
+  var className = cache.key + "-" + serialized.name;
+
+  if ( // we only need to add the styles to the registered cache if the
+  // class name could be used further down
+  // the tree but if it's a string tag, we know it won't
+  // so we don't have to add it to registered cache.
+  // this improves memory usage since we can avoid storing the whole style string
+  cache.registered[className] === undefined) {
+    cache.registered[className] = serialized.styles;
+  }
+};
+var insertStyles = function insertStyles(cache, serialized, isStringTag) {
+  registerStyles(cache, serialized);
+  var className = cache.key + "-" + serialized.name;
+
+  if (cache.inserted[serialized.name] === undefined) {
+    var stylesForSSR = '';
+    var current = serialized;
+
+    do {
+      var maybeStyles = cache.insert(serialized === current ? "." + className : '', current, cache.sheet, true);
+
+      if (!isBrowser$1 && maybeStyles !== undefined) {
+        stylesForSSR += maybeStyles;
+      }
+
+      current = current.next;
+    } while (current !== undefined);
+
+    if (!isBrowser$1 && stylesForSSR.length !== 0) {
+      return stylesForSSR;
+    }
+  }
+};
+
+/** Like react's useMemo but with guarantee that the fn
+ * won't be invoked again if deps hasn't change */
+function useGuaranteedMemo(fn, deps) {
+    var _a;
+    const ref = useRef();
+    if (!ref.current ||
+        deps.length !== ((_a = ref.current.prevDeps) === null || _a === void 0 ? void 0 : _a.length) ||
+        ref.current.prevDeps.map((v, i) => v === deps[i]).indexOf(false) >= 0) {
+        ref.current = {
+            "v": fn(),
+            "prevDeps": [...deps]
+        };
+    }
+    return ref.current.v;
+}
+
+function matchCSSObject(arg) {
+    return (arg instanceof Object &&
+        !("styles" in arg) &&
+        !("length" in arg) &&
+        !("__emotion_styles" in arg));
+}
+
+const { createCssAndCx } = (() => {
+    function merge(registered, css, className) {
+        const registeredStyles = [];
+        const rawClassName = getRegisteredStyles(registered, registeredStyles, className);
+        if (registeredStyles.length < 2) {
+            return className;
+        }
+        return rawClassName + css(registeredStyles);
+    }
+    function createCssAndCx(params) {
+        const { cache } = params;
+        const css = (...args) => {
+            const serialized = serializeStyles(args, cache.registered);
+            insertStyles(cache, serialized);
+            const className = `${cache.key}-${serialized.name}`;
+            scope: {
+                const arg = args[0];
+                if (!matchCSSObject(arg)) {
+                    break scope;
+                }
+                increaseSpecificityToTakePrecedenceOverMediaQueries.saveClassNameCSSObjectMapping(cache, className, arg);
+            }
+            return className;
+        };
+        const cx = (...args) => {
+            const className = classnames(args);
+            const feat27FixedClassnames = increaseSpecificityToTakePrecedenceOverMediaQueries.fixClassName(cache, className, css);
+            return merge(cache.registered, css, feat27FixedClassnames);
+            //return merge(cache.registered, css, className);
+        };
+        return { css, cx };
+    }
+    return { createCssAndCx };
+})();
+function createUseCssAndCx(params) {
+    const { useCache } = params;
+    function useCssAndCx() {
+        const cache = useCache();
+        const { css, cx } = useGuaranteedMemo(() => createCssAndCx({ cache }), [cache]);
+        return { css, cx };
+    }
+    return { useCssAndCx };
+}
+// https://github.com/garronej/tss-react/issues/27
+const increaseSpecificityToTakePrecedenceOverMediaQueries = (() => {
+    const cssObjectMapByCache = new WeakMap();
+    return {
+        "saveClassNameCSSObjectMapping": (cache, className, cssObject) => {
+            let cssObjectMap = cssObjectMapByCache.get(cache);
+            if (cssObjectMap === undefined) {
+                cssObjectMap = new Map();
+                cssObjectMapByCache.set(cache, cssObjectMap);
+            }
+            cssObjectMap.set(className, cssObject);
+        },
+        "fixClassName": (() => {
+            function fix(classNameCSSObjects) {
+                let isThereAnyMediaQueriesInPreviousClasses = false;
+                return classNameCSSObjects.map(([className, cssObject]) => {
+                    if (cssObject === undefined) {
+                        return className;
+                    }
+                    let out;
+                    if (!isThereAnyMediaQueriesInPreviousClasses) {
+                        out = className;
+                        for (const key in cssObject) {
+                            if (key.startsWith("@media")) {
+                                isThereAnyMediaQueriesInPreviousClasses = true;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        out = {
+                            "&&": cssObject
+                        };
+                    }
+                    return out;
+                });
+            }
+            return (cache, className, css) => {
+                const cssObjectMap = cssObjectMapByCache.get(cache);
+                return classnames(fix(className
+                    .split(" ")
+                    .map(className => [
+                    className,
+                    cssObjectMap === null || cssObjectMap === void 0 ? void 0 : cssObjectMap.get(className)
+                ])).map(classNameOrCSSObject => typeof classNameOrCSSObject === "string"
+                    ? classNameOrCSSObject
+                    : css(classNameOrCSSObject)));
+            };
+        })()
+    };
+})();
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * useEffect(
+ *    ()=> { ... },
+ *    [ { "foo": "bar" } ]
+ * )
+ * => The callback will be invoked every render.
+ * because { "foo": "bar" } is a new instance every render.
+ *
+ * useEffect(
+ *    ()=> { ... },
+ *    [ getDependencyArrayRef({ "foo": "bar" }) ]
+ * );
+ * => The callback will only be invoked once.
+ *
+ * The optimization will be enabled only if obj is
+ * of the form Record<string, string | number | undefined | null>
+ * otherwise the object is returned (the function is the identity function).
+ */
+function getDependencyArrayRef(obj) {
+    if (!(obj instanceof Object) || typeof obj === "function") {
+        return obj;
+    }
+    const arr = [];
+    for (const key in obj) {
+        const value = obj[key];
+        const typeofValue = typeof value;
+        if (!(typeofValue === "string" ||
+            (typeofValue === "number" && !isNaN(value)) ||
+            typeofValue === "boolean" ||
+            value === undefined ||
+            value === null)) {
+            return obj;
+        }
+        arr.push(`${key}:${typeofValue}_${value}`);
+    }
+    return "xSqLiJdLMd9s" + arr.join("|");
+}
+
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function mergeClasses(classesFromUseStyles, classesOverrides, cx) {
+    //NOTE: We use this test to be resilient in case classesOverrides is not of the expected type.
+    if (!(classesOverrides instanceof Object)) {
+        return classesFromUseStyles;
+    }
+    const out = {};
+    objectKeys(classesFromUseStyles).forEach(ruleName => (out[ruleName] = cx(classesFromUseStyles[ruleName], classesOverrides[ruleName])));
+    objectKeys(classesOverrides).forEach(ruleName => {
+        if (ruleName in classesFromUseStyles) {
+            return;
+        }
+        const className = classesOverrides[ruleName];
+        //...Same here, that why we don't do className === undefined
+        if (typeof className !== "string") {
+            return;
+        }
+        out[ruleName] = className;
+    });
+    return out;
+}
+
+const useMuiThemeStyleOverridesPlugin = ({ classes, theme, muiStyleOverridesParams, css, cx, name }) => {
+    var _a, _b;
+    require_named: {
+        // NOTE: Hack for backwards compatibility with the makeStyles API.
+        if (name === "makeStyle no name") {
+            name = undefined;
+            break require_named;
+        }
+        if (muiStyleOverridesParams !== undefined && name === undefined) {
+            throw new Error("To use muiStyleOverridesParams, you must specify a name using .withName('MyComponent')");
+        }
+    }
+    let styleOverrides = undefined;
+    try {
+        styleOverrides =
+            name === undefined
+                ? undefined
+                : ((_b = (_a = theme.components) === null || _a === void 0 ? void 0 : _a[name /*example*/]) === null || _b === void 0 ? void 0 : _b.styleOverrides) || undefined;
+        // eslint-disable-next-line no-empty
+    }
+    catch (_c) { }
+    const classesFromThemeStyleOverrides = useMemo(() => {
+        if (styleOverrides === undefined) {
+            return undefined;
+        }
+        const themeClasses = {};
+        for (const ruleName in styleOverrides) {
+            const cssObjectOrGetCssObject = styleOverrides[ruleName];
+            if (!(cssObjectOrGetCssObject instanceof Object)) {
+                continue;
+            }
+            themeClasses[ruleName] = css(typeof cssObjectOrGetCssObject === "function"
+                ? cssObjectOrGetCssObject({
+                    theme,
+                    "ownerState": muiStyleOverridesParams === null || muiStyleOverridesParams === void 0 ? void 0 : muiStyleOverridesParams.ownerState,
+                    ...muiStyleOverridesParams === null || muiStyleOverridesParams === void 0 ? void 0 : muiStyleOverridesParams.props
+                })
+                : cssObjectOrGetCssObject);
+        }
+        return themeClasses;
+    }, [
+        styleOverrides,
+        getDependencyArrayRef(muiStyleOverridesParams === null || muiStyleOverridesParams === void 0 ? void 0 : muiStyleOverridesParams.props),
+        getDependencyArrayRef(muiStyleOverridesParams === null || muiStyleOverridesParams === void 0 ? void 0 : muiStyleOverridesParams.ownerState),
+        css
+    ]);
+    classes = useMemo(() => mergeClasses(classes, classesFromThemeStyleOverrides, cx), [classes, classesFromThemeStyleOverrides, cx]);
+    return { classes };
+};
+
+var isDevelopment = false;
+
+/*
+
+Based off glamor's StyleSheet, thanks Sunil ❤️
+
+high performance StyleSheet for css-in-js systems
+
+- uses multiple style tags behind the scenes for millions of rules
+- uses `insertRule` for appending in production for *much* faster performance
+
+// usage
+
+import { StyleSheet } from '@emotion/sheet'
+
+let styleSheet = new StyleSheet({ key: '', container: document.head })
+
+styleSheet.insert('#box { border: 1px solid red; }')
+- appends a css rule into the stylesheet
+
+styleSheet.flush()
+- empties the stylesheet of all its contents
+
+*/
+
+function sheetForTag(tag) {
+  if (tag.sheet) {
+    return tag.sheet;
+  } // this weirdness brought to you by firefox
+
+  /* istanbul ignore next */
+
+
+  for (var i = 0; i < document.styleSheets.length; i++) {
+    if (document.styleSheets[i].ownerNode === tag) {
+      return document.styleSheets[i];
+    }
+  } // this function should always return with a value
+  // TS can't understand it though so we make it stop complaining here
+
+
+  return undefined;
+}
+
+function createStyleElement(options) {
+  var tag = document.createElement('style');
+  tag.setAttribute('data-emotion', options.key);
+
+  if (options.nonce !== undefined) {
+    tag.setAttribute('nonce', options.nonce);
+  }
+
+  tag.appendChild(document.createTextNode(''));
+  tag.setAttribute('data-s', '');
+  return tag;
+}
+
+var StyleSheet = /*#__PURE__*/function () {
+  // Using Node instead of HTMLElement since container may be a ShadowRoot
+  function StyleSheet(options) {
+    var _this = this;
+
+    this._insertTag = function (tag) {
+      var before;
+
+      if (_this.tags.length === 0) {
+        if (_this.insertionPoint) {
+          before = _this.insertionPoint.nextSibling;
+        } else if (_this.prepend) {
+          before = _this.container.firstChild;
+        } else {
+          before = _this.before;
+        }
+      } else {
+        before = _this.tags[_this.tags.length - 1].nextSibling;
+      }
+
+      _this.container.insertBefore(tag, before);
+
+      _this.tags.push(tag);
+    };
+
+    this.isSpeedy = options.speedy === undefined ? !isDevelopment : options.speedy;
+    this.tags = [];
+    this.ctr = 0;
+    this.nonce = options.nonce; // key is the value of the data-emotion attribute, it's used to identify different sheets
+
+    this.key = options.key;
+    this.container = options.container;
+    this.prepend = options.prepend;
+    this.insertionPoint = options.insertionPoint;
+    this.before = null;
+  }
+
+  var _proto = StyleSheet.prototype;
+
+  _proto.hydrate = function hydrate(nodes) {
+    nodes.forEach(this._insertTag);
+  };
+
+  _proto.insert = function insert(rule) {
+    // the max length is how many rules we have per style tag, it's 65000 in speedy mode
+    // it's 1 in dev because we insert source maps that map a single rule to a location
+    // and you can only have one source map per style tag
+    if (this.ctr % (this.isSpeedy ? 65000 : 1) === 0) {
+      this._insertTag(createStyleElement(this));
+    }
+
+    var tag = this.tags[this.tags.length - 1];
+
+    if (this.isSpeedy) {
+      var sheet = sheetForTag(tag);
+
+      try {
+        // this is the ultrafast version, works across browsers
+        // the big drawback is that the css won't be editable in devtools
+        sheet.insertRule(rule, sheet.cssRules.length);
+      } catch (e) {
+      }
+    } else {
+      tag.appendChild(document.createTextNode(rule));
+    }
+
+    this.ctr++;
+  };
+
+  _proto.flush = function flush() {
+    this.tags.forEach(function (tag) {
+      var _tag$parentNode;
+
+      return (_tag$parentNode = tag.parentNode) == null ? void 0 : _tag$parentNode.removeChild(tag);
+    });
+    this.tags = [];
+    this.ctr = 0;
+  };
+
+  return StyleSheet;
+}();
+
+var MS = '-ms-';
+var MOZ = '-moz-';
+var WEBKIT = '-webkit-';
+
+var COMMENT$1 = 'comm';
+var RULESET = 'rule';
+var DECLARATION = 'decl';
+var IMPORT = '@import';
+var KEYFRAMES = '@keyframes';
+var LAYER = '@layer';
+
+/**
+ * @param {number}
+ * @return {number}
+ */
+var abs = Math.abs;
+
+/**
+ * @param {number}
+ * @return {string}
+ */
+var from = String.fromCharCode;
+
+/**
+ * @param {object}
+ * @return {object}
+ */
+var assign = Object.assign;
+
+/**
+ * @param {string} value
+ * @param {number} length
+ * @return {number}
+ */
+function hash (value, length) {
+	return charat(value, 0) ^ 45 ? (((((((length << 2) ^ charat(value, 0)) << 2) ^ charat(value, 1)) << 2) ^ charat(value, 2)) << 2) ^ charat(value, 3) : 0
+}
+
+/**
+ * @param {string} value
+ * @return {string}
+ */
+function trim (value) {
+	return value.trim()
+}
+
+/**
+ * @param {string} value
+ * @param {RegExp} pattern
+ * @return {string?}
+ */
+function match (value, pattern) {
+	return (value = pattern.exec(value)) ? value[0] : value
+}
+
+/**
+ * @param {string} value
+ * @param {(string|RegExp)} pattern
+ * @param {string} replacement
+ * @return {string}
+ */
+function replace (value, pattern, replacement) {
+	return value.replace(pattern, replacement)
+}
+
+/**
+ * @param {string} value
+ * @param {string} search
+ * @return {number}
+ */
+function indexof (value, search) {
+	return value.indexOf(search)
+}
+
+/**
+ * @param {string} value
+ * @param {number} index
+ * @return {number}
+ */
+function charat (value, index) {
+	return value.charCodeAt(index) | 0
+}
+
+/**
+ * @param {string} value
+ * @param {number} begin
+ * @param {number} end
+ * @return {string}
+ */
+function substr (value, begin, end) {
+	return value.slice(begin, end)
+}
+
+/**
+ * @param {string} value
+ * @return {number}
+ */
+function strlen (value) {
+	return value.length
+}
+
+/**
+ * @param {any[]} value
+ * @return {number}
+ */
+function sizeof (value) {
+	return value.length
+}
+
+/**
+ * @param {any} value
+ * @param {any[]} array
+ * @return {any}
+ */
+function append (value, array) {
+	return array.push(value), value
+}
+
+/**
+ * @param {string[]} array
+ * @param {function} callback
+ * @return {string}
+ */
+function combine (array, callback) {
+	return array.map(callback).join('')
+}
+
+var line = 1;
+var column = 1;
+var length = 0;
+var position = 0;
+var character = 0;
+var characters = '';
+
+/**
+ * @param {string} value
+ * @param {object | null} root
+ * @param {object | null} parent
+ * @param {string} type
+ * @param {string[] | string} props
+ * @param {object[] | string} children
+ * @param {number} length
+ */
+function node (value, root, parent, type, props, children, length) {
+	return {value: value, root: root, parent: parent, type: type, props: props, children: children, line: line, column: column, length: length, return: ''}
+}
+
+/**
+ * @param {object} root
+ * @param {object} props
+ * @return {object}
+ */
+function copy (root, props) {
+	return assign(node('', null, null, '', null, null, 0), root, {length: -root.length}, props)
+}
+
+/**
+ * @return {number}
+ */
+function char () {
+	return character
+}
+
+/**
+ * @return {number}
+ */
+function prev () {
+	character = position > 0 ? charat(characters, --position) : 0;
+
+	if (column--, character === 10)
+		column = 1, line--;
+
+	return character
+}
+
+/**
+ * @return {number}
+ */
+function next () {
+	character = position < length ? charat(characters, position++) : 0;
+
+	if (column++, character === 10)
+		column = 1, line++;
+
+	return character
+}
+
+/**
+ * @return {number}
+ */
+function peek () {
+	return charat(characters, position)
+}
+
+/**
+ * @return {number}
+ */
+function caret () {
+	return position
+}
+
+/**
+ * @param {number} begin
+ * @param {number} end
+ * @return {string}
+ */
+function slice (begin, end) {
+	return substr(characters, begin, end)
+}
+
+/**
+ * @param {number} type
+ * @return {number}
+ */
+function token (type) {
+	switch (type) {
+		// \0 \t \n \r \s whitespace token
+		case 0: case 9: case 10: case 13: case 32:
+			return 5
+		// ! + , / > @ ~ isolate token
+		case 33: case 43: case 44: case 47: case 62: case 64: case 126:
+		// ; { } breakpoint token
+		case 59: case 123: case 125:
+			return 4
+		// : accompanied token
+		case 58:
+			return 3
+		// " ' ( [ opening delimit token
+		case 34: case 39: case 40: case 91:
+			return 2
+		// ) ] closing delimit token
+		case 41: case 93:
+			return 1
+	}
+
+	return 0
+}
+
+/**
+ * @param {string} value
+ * @return {any[]}
+ */
+function alloc (value) {
+	return line = column = 1, length = strlen(characters = value), position = 0, []
+}
+
+/**
+ * @param {any} value
+ * @return {any}
+ */
+function dealloc (value) {
+	return characters = '', value
+}
+
+/**
+ * @param {number} type
+ * @return {string}
+ */
+function delimit (type) {
+	return trim(slice(position - 1, delimiter(type === 91 ? type + 2 : type === 40 ? type + 1 : type)))
+}
+
+/**
+ * @param {number} type
+ * @return {string}
+ */
+function whitespace (type) {
+	while (character = peek())
+		if (character < 33)
+			next();
+		else
+			break
+
+	return token(type) > 2 || token(character) > 3 ? '' : ' '
+}
+
+/**
+ * @param {number} index
+ * @param {number} count
+ * @return {string}
+ */
+function escaping (index, count) {
+	while (--count && next())
+		// not 0-9 A-F a-f
+		if (character < 48 || character > 102 || (character > 57 && character < 65) || (character > 70 && character < 97))
+			break
+
+	return slice(index, caret() + (count < 6 && peek() == 32 && next() == 32))
+}
+
+/**
+ * @param {number} type
+ * @return {number}
+ */
+function delimiter (type) {
+	while (next())
+		switch (character) {
+			// ] ) " '
+			case type:
+				return position
+			// " '
+			case 34: case 39:
+				if (type !== 34 && type !== 39)
+					delimiter(character);
+				break
+			// (
+			case 40:
+				if (type === 41)
+					delimiter(type);
+				break
+			// \
+			case 92:
+				next();
+				break
+		}
+
+	return position
+}
+
+/**
+ * @param {number} type
+ * @param {number} index
+ * @return {number}
+ */
+function commenter (type, index) {
+	while (next())
+		// //
+		if (type + character === 47 + 10)
+			break
+		// /*
+		else if (type + character === 42 + 42 && peek() === 47)
+			break
+
+	return '/*' + slice(index, position - 1) + '*' + from(type === 47 ? type : next())
+}
+
+/**
+ * @param {number} index
+ * @return {string}
+ */
+function identifier (index) {
+	while (!token(peek()))
+		next();
+
+	return slice(index, position)
+}
+
+/**
+ * @param {string} value
+ * @return {object[]}
+ */
+function compile (value) {
+	return dealloc(parse('', null, null, null, [''], value = alloc(value), 0, [0], value))
+}
+
+/**
+ * @param {string} value
+ * @param {object} root
+ * @param {object?} parent
+ * @param {string[]} rule
+ * @param {string[]} rules
+ * @param {string[]} rulesets
+ * @param {number[]} pseudo
+ * @param {number[]} points
+ * @param {string[]} declarations
+ * @return {object}
+ */
+function parse (value, root, parent, rule, rules, rulesets, pseudo, points, declarations) {
+	var index = 0;
+	var offset = 0;
+	var length = pseudo;
+	var atrule = 0;
+	var property = 0;
+	var previous = 0;
+	var variable = 1;
+	var scanning = 1;
+	var ampersand = 1;
+	var character = 0;
+	var type = '';
+	var props = rules;
+	var children = rulesets;
+	var reference = rule;
+	var characters = type;
+
+	while (scanning)
+		switch (previous = character, character = next()) {
+			// (
+			case 40:
+				if (previous != 108 && charat(characters, length - 1) == 58) {
+					if (indexof(characters += replace(delimit(character), '&', '&\f'), '&\f') != -1)
+						ampersand = -1;
+					break
+				}
+			// " ' [
+			case 34: case 39: case 91:
+				characters += delimit(character);
+				break
+			// \t \n \r \s
+			case 9: case 10: case 13: case 32:
+				characters += whitespace(previous);
+				break
+			// \
+			case 92:
+				characters += escaping(caret() - 1, 7);
+				continue
+			// /
+			case 47:
+				switch (peek()) {
+					case 42: case 47:
+						append(comment(commenter(next(), caret()), root, parent), declarations);
+						break
+					default:
+						characters += '/';
+				}
+				break
+			// {
+			case 123 * variable:
+				points[index++] = strlen(characters) * ampersand;
+			// } ; \0
+			case 125 * variable: case 59: case 0:
+				switch (character) {
+					// \0 }
+					case 0: case 125: scanning = 0;
+					// ;
+					case 59 + offset: if (ampersand == -1) characters = replace(characters, /\f/g, '');
+						if (property > 0 && (strlen(characters) - length))
+							append(property > 32 ? declaration(characters + ';', rule, parent, length - 1) : declaration(replace(characters, ' ', '') + ';', rule, parent, length - 2), declarations);
+						break
+					// @ ;
+					case 59: characters += ';';
+					// { rule/at-rule
+					default:
+						append(reference = ruleset(characters, root, parent, index, offset, rules, points, type, props = [], children = [], length), rulesets);
+
+						if (character === 123)
+							if (offset === 0)
+								parse(characters, root, reference, reference, props, rulesets, length, points, children);
+							else
+								switch (atrule === 99 && charat(characters, 3) === 110 ? 100 : atrule) {
+									// d l m s
+									case 100: case 108: case 109: case 115:
+										parse(value, reference, reference, rule && append(ruleset(value, reference, reference, 0, 0, rules, points, type, rules, props = [], length), children), rules, children, length, points, rule ? props : children);
+										break
+									default:
+										parse(characters, reference, reference, reference, [''], children, 0, points, children);
+								}
+				}
+
+				index = offset = property = 0, variable = ampersand = 1, type = characters = '', length = pseudo;
+				break
+			// :
+			case 58:
+				length = 1 + strlen(characters), property = previous;
+			default:
+				if (variable < 1)
+					if (character == 123)
+						--variable;
+					else if (character == 125 && variable++ == 0 && prev() == 125)
+						continue
+
+				switch (characters += from(character), character * variable) {
+					// &
+					case 38:
+						ampersand = offset > 0 ? 1 : (characters += '\f', -1);
+						break
+					// ,
+					case 44:
+						points[index++] = (strlen(characters) - 1) * ampersand, ampersand = 1;
+						break
+					// @
+					case 64:
+						// -
+						if (peek() === 45)
+							characters += delimit(next());
+
+						atrule = peek(), offset = length = strlen(type = characters += identifier(caret())), character++;
+						break
+					// -
+					case 45:
+						if (previous === 45 && strlen(characters) == 2)
+							variable = 0;
+				}
+		}
+
+	return rulesets
+}
+
+/**
+ * @param {string} value
+ * @param {object} root
+ * @param {object?} parent
+ * @param {number} index
+ * @param {number} offset
+ * @param {string[]} rules
+ * @param {number[]} points
+ * @param {string} type
+ * @param {string[]} props
+ * @param {string[]} children
+ * @param {number} length
+ * @return {object}
+ */
+function ruleset (value, root, parent, index, offset, rules, points, type, props, children, length) {
+	var post = offset - 1;
+	var rule = offset === 0 ? rules : [''];
+	var size = sizeof(rule);
+
+	for (var i = 0, j = 0, k = 0; i < index; ++i)
+		for (var x = 0, y = substr(value, post + 1, post = abs(j = points[i])), z = value; x < size; ++x)
+			if (z = trim(j > 0 ? rule[x] + ' ' + y : replace(y, /&\f/g, rule[x])))
+				props[k++] = z;
+
+	return node(value, root, parent, offset === 0 ? RULESET : type, props, children, length)
+}
+
+/**
+ * @param {number} value
+ * @param {object} root
+ * @param {object?} parent
+ * @return {object}
+ */
+function comment (value, root, parent) {
+	return node(value, root, parent, COMMENT$1, from(char()), substr(value, 2, -2), 0)
+}
+
+/**
+ * @param {string} value
+ * @param {object} root
+ * @param {object?} parent
+ * @param {number} length
+ * @return {object}
+ */
+function declaration (value, root, parent, length) {
+	return node(value, root, parent, DECLARATION, substr(value, 0, length), substr(value, length + 1, -1), length)
+}
+
+/**
+ * @param {object[]} children
+ * @param {function} callback
+ * @return {string}
+ */
+function serialize (children, callback) {
+	var output = '';
+	var length = sizeof(children);
+
+	for (var i = 0; i < length; i++)
+		output += callback(children[i], i, children, callback) || '';
+
+	return output
+}
+
+/**
+ * @param {object} element
+ * @param {number} index
+ * @param {object[]} children
+ * @param {function} callback
+ * @return {string}
+ */
+function stringify (element, index, children, callback) {
+	switch (element.type) {
+		case LAYER: if (element.children.length) break
+		case IMPORT: case DECLARATION: return element.return = element.return || element.value
+		case COMMENT$1: return ''
+		case KEYFRAMES: return element.return = element.value + '{' + serialize(element.children, callback) + '}'
+		case RULESET: element.value = element.props.join(',');
+	}
+
+	return strlen(children = serialize(element.children, callback)) ? element.return = element.value + '{' + children + '}' : ''
+}
+
+/**
+ * @param {function[]} collection
+ * @return {function}
+ */
+function middleware (collection) {
+	var length = sizeof(collection);
+
+	return function (element, index, children, callback) {
+		var output = '';
+
+		for (var i = 0; i < length; i++)
+			output += collection[i](element, index, children, callback) || '';
+
+		return output
+	}
+}
+
+/**
+ * @param {function} callback
+ * @return {function}
+ */
+function rulesheet (callback) {
+	return function (element) {
+		if (!element.root)
+			if (element = element.return)
+				callback(element);
+	}
+}
+
+var weakMemoize = function weakMemoize(func) {
+  var cache = new WeakMap();
+  return function (arg) {
+    if (cache.has(arg)) {
+      // Use non-null assertion because we just checked that the cache `has` it
+      // This allows us to remove `undefined` from the return value
+      return cache.get(arg);
+    }
+
+    var ret = func(arg);
+    cache.set(arg, ret);
+    return ret;
+  };
+};
+
+var isBrowser = typeof document !== 'undefined';
+
+var identifierWithPointTracking = function identifierWithPointTracking(begin, points, index) {
+  var previous = 0;
+  var character = 0;
+
+  while (true) {
+    previous = character;
+    character = peek(); // &\f
+
+    if (previous === 38 && character === 12) {
+      points[index] = 1;
+    }
+
+    if (token(character)) {
+      break;
+    }
+
+    next();
+  }
+
+  return slice(begin, position);
+};
+
+var toRules = function toRules(parsed, points) {
+  // pretend we've started with a comma
+  var index = -1;
+  var character = 44;
+
+  do {
+    switch (token(character)) {
+      case 0:
+        // &\f
+        if (character === 38 && peek() === 12) {
+          // this is not 100% correct, we don't account for literal sequences here - like for example quoted strings
+          // stylis inserts \f after & to know when & where it should replace this sequence with the context selector
+          // and when it should just concatenate the outer and inner selectors
+          // it's very unlikely for this sequence to actually appear in a different context, so we just leverage this fact here
+          points[index] = 1;
+        }
+
+        parsed[index] += identifierWithPointTracking(position - 1, points, index);
+        break;
+
+      case 2:
+        parsed[index] += delimit(character);
+        break;
+
+      case 4:
+        // comma
+        if (character === 44) {
+          // colon
+          parsed[++index] = peek() === 58 ? '&\f' : '';
+          points[index] = parsed[index].length;
+          break;
+        }
+
+      // fallthrough
+
+      default:
+        parsed[index] += from(character);
+    }
+  } while (character = next());
+
+  return parsed;
+};
+
+var getRules = function getRules(value, points) {
+  return dealloc(toRules(alloc(value), points));
+}; // WeakSet would be more appropriate, but only WeakMap is supported in IE11
+
+
+var fixedElements = /* #__PURE__ */new WeakMap();
+var compat = function compat(element) {
+  if (element.type !== 'rule' || !element.parent || // positive .length indicates that this rule contains pseudo
+  // negative .length indicates that this rule has been already prefixed
+  element.length < 1) {
+    return;
+  }
+
+  var value = element.value,
+      parent = element.parent;
+  var isImplicitRule = element.column === parent.column && element.line === parent.line;
+
+  while (parent.type !== 'rule') {
+    parent = parent.parent;
+    if (!parent) return;
+  } // short-circuit for the simplest case
+
+
+  if (element.props.length === 1 && value.charCodeAt(0) !== 58
+  /* colon */
+  && !fixedElements.get(parent)) {
+    return;
+  } // if this is an implicitly inserted rule (the one eagerly inserted at the each new nested level)
+  // then the props has already been manipulated beforehand as they that array is shared between it and its "rule parent"
+
+
+  if (isImplicitRule) {
+    return;
+  }
+
+  fixedElements.set(element, true);
+  var points = [];
+  var rules = getRules(value, points);
+  var parentRules = parent.props;
+
+  for (var i = 0, k = 0; i < rules.length; i++) {
+    for (var j = 0; j < parentRules.length; j++, k++) {
+      element.props[k] = points[i] ? rules[i].replace(/&\f/g, parentRules[j]) : parentRules[j] + " " + rules[i];
+    }
+  }
+};
+var removeLabel = function removeLabel(element) {
+  if (element.type === 'decl') {
+    var value = element.value;
+
+    if ( // charcode for l
+    value.charCodeAt(0) === 108 && // charcode for b
+    value.charCodeAt(2) === 98) {
+      // this ignores label
+      element["return"] = '';
+      element.value = '';
+    }
+  }
+};
+
+/* eslint-disable no-fallthrough */
+
+function prefix(value, length) {
+  switch (hash(value, length)) {
+    // color-adjust
+    case 5103:
+      return WEBKIT + 'print-' + value + value;
+    // animation, animation-(delay|direction|duration|fill-mode|iteration-count|name|play-state|timing-function)
+
+    case 5737:
+    case 4201:
+    case 3177:
+    case 3433:
+    case 1641:
+    case 4457:
+    case 2921: // text-decoration, filter, clip-path, backface-visibility, column, box-decoration-break
+
+    case 5572:
+    case 6356:
+    case 5844:
+    case 3191:
+    case 6645:
+    case 3005: // mask, mask-image, mask-(mode|clip|size), mask-(repeat|origin), mask-position, mask-composite,
+
+    case 6391:
+    case 5879:
+    case 5623:
+    case 6135:
+    case 4599:
+    case 4855: // background-clip, columns, column-(count|fill|gap|rule|rule-color|rule-style|rule-width|span|width)
+
+    case 4215:
+    case 6389:
+    case 5109:
+    case 5365:
+    case 5621:
+    case 3829:
+      return WEBKIT + value + value;
+    // appearance, user-select, transform, hyphens, text-size-adjust
+
+    case 5349:
+    case 4246:
+    case 4810:
+    case 6968:
+    case 2756:
+      return WEBKIT + value + MOZ + value + MS + value + value;
+    // flex, flex-direction
+
+    case 6828:
+    case 4268:
+      return WEBKIT + value + MS + value + value;
+    // order
+
+    case 6165:
+      return WEBKIT + value + MS + 'flex-' + value + value;
+    // align-items
+
+    case 5187:
+      return WEBKIT + value + replace(value, /(\w+).+(:[^]+)/, WEBKIT + 'box-$1$2' + MS + 'flex-$1$2') + value;
+    // align-self
+
+    case 5443:
+      return WEBKIT + value + MS + 'flex-item-' + replace(value, /flex-|-self/, '') + value;
+    // align-content
+
+    case 4675:
+      return WEBKIT + value + MS + 'flex-line-pack' + replace(value, /align-content|flex-|-self/, '') + value;
+    // flex-shrink
+
+    case 5548:
+      return WEBKIT + value + MS + replace(value, 'shrink', 'negative') + value;
+    // flex-basis
+
+    case 5292:
+      return WEBKIT + value + MS + replace(value, 'basis', 'preferred-size') + value;
+    // flex-grow
+
+    case 6060:
+      return WEBKIT + 'box-' + replace(value, '-grow', '') + WEBKIT + value + MS + replace(value, 'grow', 'positive') + value;
+    // transition
+
+    case 4554:
+      return WEBKIT + replace(value, /([^-])(transform)/g, '$1' + WEBKIT + '$2') + value;
+    // cursor
+
+    case 6187:
+      return replace(replace(replace(value, /(zoom-|grab)/, WEBKIT + '$1'), /(image-set)/, WEBKIT + '$1'), value, '') + value;
+    // background, background-image
+
+    case 5495:
+    case 3959:
+      return replace(value, /(image-set\([^]*)/, WEBKIT + '$1' + '$`$1');
+    // justify-content
+
+    case 4968:
+      return replace(replace(value, /(.+:)(flex-)?(.*)/, WEBKIT + 'box-pack:$3' + MS + 'flex-pack:$3'), /s.+-b[^;]+/, 'justify') + WEBKIT + value + value;
+    // (margin|padding)-inline-(start|end)
+
+    case 4095:
+    case 3583:
+    case 4068:
+    case 2532:
+      return replace(value, /(.+)-inline(.+)/, WEBKIT + '$1$2') + value;
+    // (min|max)?(width|height|inline-size|block-size)
+
+    case 8116:
+    case 7059:
+    case 5753:
+    case 5535:
+    case 5445:
+    case 5701:
+    case 4933:
+    case 4677:
+    case 5533:
+    case 5789:
+    case 5021:
+    case 4765:
+      // stretch, max-content, min-content, fill-available
+      if (strlen(value) - 1 - length > 6) switch (charat(value, length + 1)) {
+        // (m)ax-content, (m)in-content
+        case 109:
+          // -
+          if (charat(value, length + 4) !== 45) break;
+        // (f)ill-available, (f)it-content
+
+        case 102:
+          return replace(value, /(.+:)(.+)-([^]+)/, '$1' + WEBKIT + '$2-$3' + '$1' + MOZ + (charat(value, length + 3) == 108 ? '$3' : '$2-$3')) + value;
+        // (s)tretch
+
+        case 115:
+          return ~indexof(value, 'stretch') ? prefix(replace(value, 'stretch', 'fill-available'), length) + value : value;
+      }
+      break;
+    // position: sticky
+
+    case 4949:
+      // (s)ticky?
+      if (charat(value, length + 1) !== 115) break;
+    // display: (flex|inline-flex)
+
+    case 6444:
+      switch (charat(value, strlen(value) - 3 - (~indexof(value, '!important') && 10))) {
+        // stic(k)y
+        case 107:
+          return replace(value, ':', ':' + WEBKIT) + value;
+        // (inline-)?fl(e)x
+
+        case 101:
+          return replace(value, /(.+:)([^;!]+)(;|!.+)?/, '$1' + WEBKIT + (charat(value, 14) === 45 ? 'inline-' : '') + 'box$3' + '$1' + WEBKIT + '$2$3' + '$1' + MS + '$2box$3') + value;
+      }
+
+      break;
+    // writing-mode
+
+    case 5936:
+      switch (charat(value, length + 11)) {
+        // vertical-l(r)
+        case 114:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, 'tb') + value;
+        // vertical-r(l)
+
+        case 108:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, 'tb-rl') + value;
+        // horizontal(-)tb
+
+        case 45:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, 'lr') + value;
+      }
+
+      return WEBKIT + value + MS + value + value;
+  }
+
+  return value;
+}
+
+var prefixer = function prefixer(element, index, children, callback) {
+  if (element.length > -1) if (!element["return"]) switch (element.type) {
+    case DECLARATION:
+      element["return"] = prefix(element.value, element.length);
+      break;
+
+    case KEYFRAMES:
+      return serialize([copy(element, {
+        value: replace(element.value, '@', '@' + WEBKIT)
+      })], callback);
+
+    case RULESET:
+      if (element.length) return combine(element.props, function (value) {
+        switch (match(value, /(::plac\w+|:read-\w+)/)) {
+          // :read-(only|write)
+          case ':read-only':
+          case ':read-write':
+            return serialize([copy(element, {
+              props: [replace(value, /:(read-\w+)/, ':' + MOZ + '$1')]
+            })], callback);
+          // :placeholder
+
+          case '::placeholder':
+            return serialize([copy(element, {
+              props: [replace(value, /:(plac\w+)/, ':' + WEBKIT + 'input-$1')]
+            }), copy(element, {
+              props: [replace(value, /:(plac\w+)/, ':' + MOZ + '$1')]
+            }), copy(element, {
+              props: [replace(value, /:(plac\w+)/, MS + 'input-$1')]
+            })], callback);
+        }
+
+        return '';
+      });
+  }
+};
+
+/* import type { StylisPlugin } from './types' */
+
+/*
+export type Options = {
+  nonce?: string,
+  stylisPlugins?: StylisPlugin[],
+  key: string,
+  container?: HTMLElement,
+  speedy?: boolean,
+  prepend?: boolean,
+  insertionPoint?: HTMLElement
+}
+*/
+
+var getServerStylisCache = isBrowser ? undefined : weakMemoize(function () {
+  return memoize(function () {
+    var cache = {};
+    return function (name) {
+      return cache[name];
+    };
+  });
+});
+var defaultStylisPlugins = [prefixer];
+
+var createCache = function
+  /*: EmotionCache */
+createCache(options
+/*: Options */
+) {
+  var key = options.key;
+
+  if (isBrowser && key === 'css') {
+    var ssrStyles = document.querySelectorAll("style[data-emotion]:not([data-s])"); // get SSRed styles out of the way of React's hydration
+    // document.head is a safe place to move them to(though note document.head is not necessarily the last place they will be)
+    // note this very very intentionally targets all style elements regardless of the key to ensure
+    // that creating a cache works inside of render of a React component
+
+    Array.prototype.forEach.call(ssrStyles, function (node
+    /*: HTMLStyleElement */
+    ) {
+      // we want to only move elements which have a space in the data-emotion attribute value
+      // because that indicates that it is an Emotion 11 server-side rendered style elements
+      // while we will already ignore Emotion 11 client-side inserted styles because of the :not([data-s]) part in the selector
+      // Emotion 10 client-side inserted styles did not have data-s (but importantly did not have a space in their data-emotion attributes)
+      // so checking for the space ensures that loading Emotion 11 after Emotion 10 has inserted some styles
+      // will not result in the Emotion 10 styles being destroyed
+      var dataEmotionAttribute = node.getAttribute('data-emotion');
+
+      if (dataEmotionAttribute.indexOf(' ') === -1) {
+        return;
+      }
+
+      document.head.appendChild(node);
+      node.setAttribute('data-s', '');
+    });
+  }
+
+  var stylisPlugins = options.stylisPlugins || defaultStylisPlugins;
+
+  var inserted = {};
+  var container;
+  /* : Node */
+
+  var nodesToHydrate = [];
+
+  if (isBrowser) {
+    container = options.container || document.head;
+    Array.prototype.forEach.call( // this means we will ignore elements which don't have a space in them which
+    // means that the style elements we're looking at are only Emotion 11 server-rendered style elements
+    document.querySelectorAll("style[data-emotion^=\"" + key + " \"]"), function (node
+    /*: HTMLStyleElement */
+    ) {
+      var attrib = node.getAttribute("data-emotion").split(' ');
+
+      for (var i = 1; i < attrib.length; i++) {
+        inserted[attrib[i]] = true;
+      }
+
+      nodesToHydrate.push(node);
+    });
+  }
+
+  var _insert;
+  /*: (
+  selector: string,
+  serialized: SerializedStyles,
+  sheet: StyleSheet,
+  shouldCache: boolean
+  ) => string | void */
+
+
+  var omnipresentPlugins = [compat, removeLabel];
+
+  if (isBrowser) {
+    var currentSheet;
+    var finalizingPlugins = [stringify, rulesheet(function (rule) {
+      currentSheet.insert(rule);
+    })];
+    var serializer = middleware(omnipresentPlugins.concat(stylisPlugins, finalizingPlugins));
+
+    var stylis = function stylis(styles) {
+      return serialize(compile(styles), serializer);
+    };
+
+    _insert = function
+      /*: void */
+    insert(selector
+    /*: string */
+    , serialized
+    /*: SerializedStyles */
+    , sheet
+    /*: StyleSheet */
+    , shouldCache
+    /*: boolean */
+    ) {
+      currentSheet = sheet;
+
+      stylis(selector ? selector + "{" + serialized.styles + "}" : serialized.styles);
+
+      if (shouldCache) {
+        cache.inserted[serialized.name] = true;
+      }
+    };
+  } else {
+    var _finalizingPlugins = [stringify];
+
+    var _serializer = middleware(omnipresentPlugins.concat(stylisPlugins, _finalizingPlugins));
+
+    var _stylis = function _stylis(styles) {
+      return serialize(compile(styles), _serializer);
+    };
+
+    var serverStylisCache = getServerStylisCache(stylisPlugins)(key);
+
+    var getRules = function
+      /*: string */
+    getRules(selector
+    /*: string */
+    , serialized
+    /*: SerializedStyles */
+    ) {
+      var name = serialized.name;
+
+      if (serverStylisCache[name] === undefined) {
+        serverStylisCache[name] = _stylis(selector ? selector + "{" + serialized.styles + "}" : serialized.styles);
+      }
+
+      return serverStylisCache[name];
+    };
+
+    _insert = function
+      /*: string | void */
+    _insert(selector
+    /*: string */
+    , serialized
+    /*: SerializedStyles */
+    , sheet
+    /*: StyleSheet */
+    , shouldCache
+    /*: boolean */
+    ) {
+      var name = serialized.name;
+      var rules = getRules(selector, serialized);
+
+      if (cache.compat === undefined) {
+        // in regular mode, we don't set the styles on the inserted cache
+        // since we don't need to and that would be wasting memory
+        // we return them so that they are rendered in a style tag
+        if (shouldCache) {
+          cache.inserted[name] = true;
+        }
+
+        return rules;
+      } else {
+        // in compat mode, we put the styles on the inserted cache so
+        // that emotion-server can pull out the styles
+        // except when we don't want to cache it which was in Global but now
+        // is nowhere but we don't want to do a major right now
+        // and just in case we're going to leave the case here
+        // it's also not affecting client side bundle size
+        // so it's really not a big deal
+        if (shouldCache) {
+          cache.inserted[name] = rules;
+        } else {
+          return rules;
+        }
+      }
+    };
+  }
+
+  var cache
+  /*: EmotionCache */
+  = {
+    key: key,
+    sheet: new StyleSheet({
+      key: key,
+      container: container,
+      nonce: options.nonce,
+      speedy: options.speedy,
+      prepend: options.prepend,
+      insertionPoint: options.insertionPoint
+    }),
+    nonce: options.nonce,
+    inserted: inserted,
+    registered: {},
+    insert: _insert
+  };
+  cache.sheet.hydrate(nodesToHydrate);
+  return cache;
+};
+
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+/* import { type EmotionCache } from '@emotion/utils' */
+var EmotionCacheContext
+/*: React.Context<EmotionCache | null> */
+= /* #__PURE__ */React.createContext( // we're doing this to avoid preconstruct's dead code elimination in this one case
+// because this module is primarily intended for the browser and node
+// but it's also required in react native and similar environments sometimes
+// and we could have a special build just for that
+// but this is much easier and the native packages
+// might use a different theme context in the future anyway
+typeof HTMLElement !== 'undefined' ? /* #__PURE__ */createCache({
+  key: 'css'
+}) : null);
+
+EmotionCacheContext.Provider;
+var __unsafe_useEmotionCache = function useEmotionCache()
+/*: EmotionCache | null*/
+{
+  return useContext(EmotionCacheContext);
+};
+
+let counter$1 = 0;
+function createMakeStyles(params) {
+    const { useTheme, cache: cacheProvidedAtInception } = params;
+    const { useCache } = createUseCache({ cacheProvidedAtInception });
+    const { useCssAndCx } = createUseCssAndCx({ useCache });
+    /** returns useStyle. */
+    function makeStyles(params) {
+        const { name: nameOrWrappedName, uniqId = `${counter$1++}` } = params !== null && params !== void 0 ? params : {};
+        const name = typeof nameOrWrappedName !== "object"
+            ? nameOrWrappedName
+            : Object.keys(nameOrWrappedName)[0];
+        return function (cssObjectByRuleNameOrGetCssObjectByRuleName) {
+            const getCssObjectByRuleName = typeof cssObjectByRuleNameOrGetCssObjectByRuleName ===
+                "function"
+                ? cssObjectByRuleNameOrGetCssObjectByRuleName
+                : () => cssObjectByRuleNameOrGetCssObjectByRuleName;
+            return function useStyles(params, muiStyleOverridesParams) {
+                const theme = useTheme();
+                let { css, cx } = useCssAndCx();
+                const cache = useCache();
+                let classes = useMemo(() => {
+                    const refClassesCache = {};
+                    const refClasses = typeof Proxy !== "undefined" &&
+                        new Proxy({}, {
+                            "get": (_target, propertyKey) => {
+                                if (typeof propertyKey === "symbol") {
+                                    assert(false);
+                                }
+                                return (refClassesCache[propertyKey] = `${cache.key}-${uniqId}${name !== undefined ? `-${name}` : ""}-${propertyKey}-ref`);
+                            }
+                        });
+                    const cssObjectByRuleName = getCssObjectByRuleName(theme, params, refClasses || {});
+                    const classes = objectFromEntries(objectKeys(cssObjectByRuleName).map(ruleName => {
+                        const cssObject = cssObjectByRuleName[ruleName];
+                        if (!cssObject.label) {
+                            cssObject.label = `${name !== undefined ? `${name}-` : ""}${ruleName}`;
+                        }
+                        return [
+                            ruleName,
+                            `${css(cssObject)}${typeGuard(ruleName, ruleName in refClassesCache)
+                                ? ` ${refClassesCache[ruleName]}`
+                                : ""}`
+                        ];
+                    }));
+                    objectKeys(refClassesCache).forEach(ruleName => {
+                        if (ruleName in classes) {
+                            return;
+                        }
+                        classes[ruleName] =
+                            refClassesCache[ruleName];
+                    });
+                    return classes;
+                }, [cache, css, cx, theme, getDependencyArrayRef(params)]);
+                {
+                    const propsClasses = muiStyleOverridesParams === null || muiStyleOverridesParams === void 0 ? void 0 : muiStyleOverridesParams.props.classes;
+                    classes = useMemo(() => mergeClasses(classes, propsClasses, cx), [classes, getDependencyArrayRef(propsClasses), cx]);
+                }
+                {
+                    const pluginResultWrap = useMuiThemeStyleOverridesPlugin({
+                        classes,
+                        css,
+                        cx,
+                        "name": name !== null && name !== void 0 ? name : "makeStyle no name",
+                        "idOfUseStyles": uniqId,
+                        muiStyleOverridesParams,
+                        // NOTE: If it's not a Mui Theme the plugin is resilient, it will not crash
+                        "theme": theme
+                    });
+                    if (pluginResultWrap.classes !== undefined) {
+                        classes = pluginResultWrap.classes;
+                    }
+                    if (pluginResultWrap.css !== undefined) {
+                        css = pluginResultWrap.css;
+                    }
+                    if (pluginResultWrap.cx !== undefined) {
+                        cx = pluginResultWrap.cx;
+                    }
+                }
+                return {
+                    classes,
+                    theme,
+                    css,
+                    cx
+                };
+            };
+        };
+    }
+    function useStyles() {
+        const theme = useTheme();
+        const { css, cx } = useCssAndCx();
+        return { theme, css, cx };
+    }
+    return { makeStyles, useStyles };
+}
+const reactContext = createContext(undefined);
+const { createUseCache } = (() => {
+    function useCacheProvidedByProvider() {
+        const cacheExplicitlyProvidedForTss = useContext(reactContext);
+        return cacheExplicitlyProvidedForTss;
+    }
+    function createUseCache(params) {
+        const { cacheProvidedAtInception } = params;
+        function useCache() {
+            var _a;
+            const contextualCache = __unsafe_useEmotionCache();
+            const cacheExplicitlyProvidedForTss = useCacheProvidedByProvider();
+            const cacheToBeUsed = (_a = cacheProvidedAtInception !== null && cacheProvidedAtInception !== void 0 ? cacheProvidedAtInception : cacheExplicitlyProvidedForTss) !== null && _a !== void 0 ? _a : contextualCache;
+            if (cacheToBeUsed === null) {
+                throw new Error([
+                    "In order to get SSR working with tss-react you need to explicitly provide an Emotion cache.",
+                    "MUI users be aware: This is not an error strictly related to tss-react, with or without tss-react,",
+                    "MUI needs an Emotion cache to be provided for SSR to work.",
+                    "Here is the MUI documentation related to SSR setup: https://mui.com/material-ui/guides/server-rendering/",
+                    "TSS provides helper that makes the process of setting up SSR easier: https://docs.tss-react.dev/ssr"
+                ].join("\n"));
+            }
+            return cacheToBeUsed;
+        }
+        return { useCache };
+    }
+    return { createUseCache };
+})();
+
+/** @see <https://docs.tsafe.dev/capitalize> */
+function capitalize(str) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (str.charAt(0).toUpperCase() + str.slice(1));
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function createWithStyles(params) {
+    const { useTheme, cache } = params;
+    const { makeStyles } = createMakeStyles({ useTheme, cache });
+    function withStyles(Component, cssObjectByRuleNameOrGetCssObjectByRuleName, params) {
+        const Component_ = typeof Component === "string"
+            ? (() => {
+                const tag = Component;
+                const Out = function ({ children, ...props }) {
+                    return createElement(tag, props, children);
+                };
+                Object.defineProperty(Out, "name", {
+                    "value": capitalize(tag)
+                });
+                return Out;
+            })()
+            : Component;
+        /**
+         * Get component name for wrapping
+         * @see https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
+         */
+        const name = (() => {
+            {
+                const { name: nameOrWrappedName } = params !== null && params !== void 0 ? params : {};
+                if (nameOrWrappedName !== undefined) {
+                    return typeof nameOrWrappedName !== "object"
+                        ? nameOrWrappedName
+                        : Object.keys(nameOrWrappedName)[0];
+                }
+            }
+            let name = undefined;
+            displayName: {
+                const displayName = Component_.displayName;
+                if (typeof displayName !== "string" || displayName === "") {
+                    break displayName;
+                }
+                name = displayName;
+            }
+            functionName: {
+                if (name !== undefined) {
+                    break functionName;
+                }
+                const functionName = Component_.name;
+                if (typeof functionName !== "string" || functionName === "") {
+                    break functionName;
+                }
+                name = functionName;
+            }
+            if (name === undefined) {
+                return undefined;
+            }
+            // Special case for dollar sign
+            name = name.replace(/\$/g, "usd");
+            // Replacing open and close parentheses
+            name = name.replace(/\(/g, "_").replace(/\)/g, "_");
+            // Catch-all replacement for characters not allowed in CSS class names
+            name = name.replace(/[^a-zA-Z0-9-_]/g, "_");
+            return name;
+        })();
+        const useStyles = makeStyles({ ...params, name })(typeof cssObjectByRuleNameOrGetCssObjectByRuleName === "function"
+            ? (theme, props, classes) => incorporateMediaQueries(cssObjectByRuleNameOrGetCssObjectByRuleName(theme, props, classes))
+            : incorporateMediaQueries(cssObjectByRuleNameOrGetCssObjectByRuleName));
+        function getHasNonRootClasses(classes) {
+            for (const name in classes) {
+                if (name === "root") {
+                    continue;
+                }
+                return true;
+            }
+            return false;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const Out = forwardRef(function (props, ref) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { className, classes: _classes, ...rest } = props;
+            const { classes, cx } = useStyles(props, { props });
+            const rootClassName = cx(classes.root, className);
+            fixedClassesByClasses.set(classes, {
+                ...classes,
+                "root": rootClassName
+            });
+            return (React__default.createElement(Component_, { ref: ref, className: getHasNonRootClasses(classes)
+                    ? className
+                    : rootClassName, ...(typeof Component === "string" ? {} : { classes }), ...rest }));
+        });
+        if (name !== undefined) {
+            Out.displayName = `${capitalize(name)}WithStyles`;
+            Object.defineProperty(Out, "name", { "value": Out.displayName });
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return Out;
+    }
+    withStyles.getClasses = getClasses;
+    return { withStyles };
+}
+const fixedClassesByClasses = new WeakMap();
+const errorMessageGetClasses = "getClasses should only be used in conjunction with withStyles";
+function getClasses(props) {
+    const classesIn = props.classes;
+    if (classesIn === undefined) {
+        throw new Error(errorMessageGetClasses);
+    }
+    const classes = fixedClassesByClasses.get(classesIn);
+    if (classes === undefined) {
+        throw new Error(errorMessageGetClasses);
+    }
+    return classes;
+}
+function incorporateMediaQueries(cssObjectByRuleNameWithMediaQueries) {
+    const cssObjectByRuleName = {};
+    const cssObjectByRuleNameWithMediaQueriesByMediaQuery = {};
+    Object.keys(cssObjectByRuleNameWithMediaQueries).forEach(ruleNameOrMediaQuery => ((ruleNameOrMediaQuery.startsWith("@media")
+        ? cssObjectByRuleNameWithMediaQueriesByMediaQuery
+        : cssObjectByRuleName)[ruleNameOrMediaQuery] =
+        cssObjectByRuleNameWithMediaQueries[ruleNameOrMediaQuery]));
+    Object.keys(cssObjectByRuleNameWithMediaQueriesByMediaQuery).forEach(mediaQuery => {
+        const cssObjectByRuleNameBis = cssObjectByRuleNameWithMediaQueriesByMediaQuery[mediaQuery];
+        Object.keys(cssObjectByRuleNameBis).forEach(ruleName => {
+            var _a;
+            return (cssObjectByRuleName[ruleName] = {
+                ...((_a = cssObjectByRuleName[ruleName]) !== null && _a !== void 0 ? _a : {}),
+                [mediaQuery]: cssObjectByRuleNameBis[ruleName]
+            });
+        });
+    });
+    return cssObjectByRuleName;
+}
+
+const isSSR = (() => {
+    const isBrowser = typeof document === "object" &&
+        typeof (document === null || document === void 0 ? void 0 : document.getElementById) === "function";
+    // Check for common testing framework global variables
+    const isJest = typeof jest !== "undefined";
+    const isMocha = typeof mocha !== "undefined";
+    const isVitest = typeof __vitest_worker__ !== "undefined";
+    return !isBrowser && !isJest && !isMocha && !isVitest;
+})();
+
+/* eslint-disable @typescript-eslint/ban-types */
+function createTss(params) {
+    counter = 0;
+    nestedSelectorUsageTrackRecord.splice(0, nestedSelectorUsageTrackRecord.length);
+    const { useContext, usePlugin, cache: cacheProvidedAtInception } = params;
+    const { useCache } = createUseCache({ cacheProvidedAtInception });
+    const { useCssAndCx } = createUseCssAndCx({ useCache });
+    const usePluginDefault = ({ classes, cx, css }) => ({ classes, cx, css });
+    const tss = createTss_internal({
+        useContext,
+        useCache,
+        useCssAndCx,
+        "usePlugin": usePlugin !== null && usePlugin !== void 0 ? usePlugin : usePluginDefault,
+        "name": undefined,
+        "doesUseNestedSelectors": false
+    });
+    return { tss };
+}
+let counter = 0;
+const nestedSelectorUsageTrackRecord = [];
+function createTss_internal(params) {
+    const { useContext, useCache, useCssAndCx, usePlugin, name, doesUseNestedSelectors } = params;
+    return {
+        "withParams": () => createTss_internal({ ...params }),
+        "withName": nameOrWrappedName => createTss_internal({
+            ...params,
+            "name": typeof nameOrWrappedName !== "object"
+                ? nameOrWrappedName
+                : Object.keys(nameOrWrappedName)[0]
+        }),
+        "withNestedSelectors": () => createTss_internal({
+            ...params,
+            "doesUseNestedSelectors": true
+        }),
+        "create": (cssObjectByRuleNameOrGetCssObjectByRuleName) => {
+            // NOTE: Not isomorphic. Not guaranteed to be the same on client and server.
+            // Do not attempt to 'simplify' the code without taking this fact into account.
+            const idOfUseStyles = `x${counter++}`;
+            // NOTE: Cleanup for hot module reloading.
+            if (name !== undefined) {
+                // eslint-disable-next-line no-constant-condition
+                while (true) {
+                    const wrap = nestedSelectorUsageTrackRecord.find(wrap => wrap.name === name);
+                    if (wrap === undefined) {
+                        break;
+                    }
+                    nestedSelectorUsageTrackRecord.splice(nestedSelectorUsageTrackRecord.indexOf(wrap), 1);
+                }
+            }
+            const getCssObjectByRuleName = typeof cssObjectByRuleNameOrGetCssObjectByRuleName ===
+                "function"
+                ? cssObjectByRuleNameOrGetCssObjectByRuleName
+                : () => cssObjectByRuleNameOrGetCssObjectByRuleName;
+            return function useStyles(params) {
+                var _a, _b, _c;
+                const { classesOverrides, ...paramsAndPluginParams } = (params !== null && params !== void 0 ? params : {});
+                const context = useContext();
+                const { css, cx } = useCssAndCx();
+                const cache = useCache();
+                const getClasses = () => {
+                    const refClassesCache = {};
+                    // @ts-expect-error: Type safety non achievable.
+                    const cssObjectByRuleName = getCssObjectByRuleName({
+                        ...params,
+                        ...context,
+                        ...(!doesUseNestedSelectors
+                            ? {}
+                            : {
+                                "classes": typeof Proxy === "undefined"
+                                    ? {}
+                                    : new Proxy({}, {
+                                        "get": (_target, ruleName) => {
+                                            /* prettier-ignore */
+                                            if (typeof ruleName === "symbol") {
+                                                assert(false);
+                                            }
+                                            if (isSSR &&
+                                                name === undefined) {
+                                                throw new Error([
+                                                    `tss-react: In SSR setups, in order to use nested selectors, you must also give a unique name to the useStyle function.`,
+                                                    `Solution: Use tss.withName("ComponentName").withNestedSelectors<...>()... to set a name.`
+                                                ].join("\n"));
+                                            }
+                                            update_nested_selector_usage_track_record: {
+                                                if (name === undefined) {
+                                                    break update_nested_selector_usage_track_record;
+                                                }
+                                                /* prettier-ignore */
+                                                let wrap = nestedSelectorUsageTrackRecord.find(wrap => wrap.name === name && wrap.idOfUseStyles === idOfUseStyles);
+                                                /* prettier-ignore */
+                                                if (wrap === undefined) {
+                                                    /* prettier-ignore */
+                                                    wrap = { name, idOfUseStyles, "nestedSelectorRuleNames": new Set() };
+                                                    /* prettier-ignore */
+                                                    nestedSelectorUsageTrackRecord.push(wrap);
+                                                }
+                                                /* prettier-ignore */
+                                                wrap.nestedSelectorRuleNames.add(ruleName);
+                                            }
+                                            detect_potential_conflicts: {
+                                                if (name === undefined) {
+                                                    break detect_potential_conflicts;
+                                                }
+                                                const hasPotentialConflict = nestedSelectorUsageTrackRecord.find(wrap => wrap.name ===
+                                                    name &&
+                                                    wrap.idOfUseStyles !==
+                                                        idOfUseStyles &&
+                                                    wrap.nestedSelectorRuleNames.has(ruleName)) !== undefined;
+                                                if (!hasPotentialConflict) {
+                                                    break detect_potential_conflicts;
+                                                }
+                                                throw new Error([
+                                                    `tss-react: There are in your codebase two different useStyles named "${name}" that`,
+                                                    `both use use the nested selector ${ruleName}.\n`,
+                                                    `This may lead to CSS class name collisions, causing nested selectors to target elements outside of the intended scope.\n`,
+                                                    `Solution: Ensure each useStyles using nested selectors has a unique name.\n`,
+                                                    `Use: tss.withName("UniqueName").withNestedSelectors<...>()...`
+                                                ].join(" "));
+                                            }
+                                            /* prettier-ignore */
+                                            return (refClassesCache[ruleName] = `${cache.key}-${name !== undefined ? name : idOfUseStyles}-${ruleName}-ref`);
+                                        }
+                                    })
+                            })
+                    });
+                    let classes = objectFromEntries(objectKeys(cssObjectByRuleName).map(ruleName => {
+                        const cssObject = cssObjectByRuleName[ruleName];
+                        if (!cssObject.label) {
+                            cssObject.label = `${name !== undefined ? `${name}-` : ""}${ruleName}`;
+                        }
+                        return [
+                            ruleName,
+                            `${css(cssObject)}${typeGuard(ruleName, ruleName in refClassesCache)
+                                ? ` ${refClassesCache[ruleName]}`
+                                : ""}`
+                        ];
+                    }));
+                    objectKeys(refClassesCache).forEach(ruleName => {
+                        if (ruleName in classes) {
+                            return;
+                        }
+                        classes[ruleName] =
+                            refClassesCache[ruleName];
+                    });
+                    classes = mergeClasses(classes, classesOverrides, cx);
+                    return classes;
+                };
+                const classes = runGetClassesOrUseCache({
+                    cache,
+                    cssObjectByRuleNameOrGetCssObjectByRuleName,
+                    "classesOverridesRef": getDependencyArrayRef(classesOverrides),
+                    "paramsAndPluginParamsRef": getDependencyArrayRef(paramsAndPluginParams),
+                    idOfUseStyles,
+                    context,
+                    getClasses
+                });
+                // @ts-expect-error: Type safety non achievable.
+                const pluginResultWrap = usePlugin({
+                    classes,
+                    css,
+                    cx,
+                    idOfUseStyles,
+                    name,
+                    ...context,
+                    ...paramsAndPluginParams
+                });
+                return {
+                    "classes": (_a = pluginResultWrap.classes) !== null && _a !== void 0 ? _a : classes,
+                    "css": (_b = pluginResultWrap.css) !== null && _b !== void 0 ? _b : css,
+                    "cx": (_c = pluginResultWrap.cx) !== null && _c !== void 0 ? _c : cx,
+                    ...context
+                };
+            };
+        }
+    };
+}
+const mapCache = new WeakMap();
+function runGetClassesOrUseCache(params) {
+    const { cache, cssObjectByRuleNameOrGetCssObjectByRuleName, classesOverridesRef, paramsAndPluginParamsRef, idOfUseStyles, context, getClasses } = params;
+    use_cache: {
+        const mapCache_in = mapCache.get(cache);
+        if (mapCache_in === undefined) {
+            break use_cache;
+        }
+        const mapCache_in_in = mapCache_in.get(cssObjectByRuleNameOrGetCssObjectByRuleName);
+        if (mapCache_in_in === undefined) {
+            break use_cache;
+        }
+        const mapCache_in_in_in = mapCache_in_in.get(classesOverridesRef);
+        if (mapCache_in_in_in === undefined) {
+            break use_cache;
+        }
+        const arr = mapCache_in_in_in.get(paramsAndPluginParamsRef);
+        if (arr === undefined) {
+            break use_cache;
+        }
+        const entry = arr.find(({ context: context_i }) => {
+            if (context_i === context) {
+                return true;
+            }
+            if (objectKeys(context_i).length !== objectKeys(context).length) {
+                return false;
+            }
+            for (const key in context_i) {
+                if (getDependencyArrayRef(context_i[key]) !==
+                    getDependencyArrayRef(context[key])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        if (entry === undefined) {
+            break use_cache;
+        }
+        if ((entry === null || entry === void 0 ? void 0 : entry.idOfUseStyles) !== idOfUseStyles) {
+            arr.splice(arr.indexOf(entry), 1);
+            break use_cache;
+        }
+        return entry.result;
+    }
+    const result = getClasses();
+    {
+        if (!mapCache.has(cache)) {
+            mapCache.set(cache, new WeakMap());
+        }
+        const mapCache_in = mapCache.get(cache);
+        assert(mapCache_in !== undefined);
+        if (!mapCache_in.has(cssObjectByRuleNameOrGetCssObjectByRuleName)) {
+            mapCache_in.set(cssObjectByRuleNameOrGetCssObjectByRuleName, new Map());
+        }
+        const mapCache_in_in = mapCache_in.get(cssObjectByRuleNameOrGetCssObjectByRuleName);
+        assert(mapCache_in_in !== undefined);
+        if (!mapCache_in_in.has(classesOverridesRef)) {
+            if (mapCache_in_in.size > 200) {
+                mapCache_in_in.clear();
+            }
+            mapCache_in_in.set(classesOverridesRef, new Map());
+        }
+        const mapCache_in_in_in = mapCache_in_in.get(classesOverridesRef);
+        assert(mapCache_in_in_in !== undefined);
+        if (!mapCache_in_in_in.has(paramsAndPluginParamsRef)) {
+            clear_cache: {
+                const threshold = typeof paramsAndPluginParamsRef === "string" ? 257 : 5;
+                if (mapCache_in_in_in.size < threshold) {
+                    break clear_cache;
+                }
+                mapCache_in_in_in.clear();
+            }
+            mapCache_in_in_in.set(paramsAndPluginParamsRef, []);
+        }
+        let arr = mapCache_in_in_in.get(paramsAndPluginParamsRef);
+        assert(arr !== undefined);
+        if (arr.length > 5) {
+            arr = [];
+        }
+        arr.push({ idOfUseStyles, context, result });
+    }
+    return result;
+}
+
+/** @see <https://docs.tss-react.dev/api/makestyles> */
+function createMakeAndWithStyles(params) {
+    return {
+        ...createMakeStyles(params),
+        ...createWithStyles(params)
+    };
+}
+const { tss: tss$1 } = createTss({
+    "useContext": () => ({})
+});
+tss$1.create({});
+
+/** @see <https://docs.tss-react.dev/setup> */
+const { makeStyles, withStyles } = createMakeAndWithStyles({
+    useTheme
+});
+const { tss } = createTss({
+    "useContext": function useContext() {
+        const theme = useTheme();
+        return { theme };
+    },
+    "usePlugin": useMuiThemeStyleOverridesPlugin
+});
+tss.create({});
+
+const useStyles = makeStyles()((theme) => ({
+    pathSelectorInputRoot: {
+        flexGrow: 1
+    },
+    pathSelectorWrapper: {
+        flex: 1,
+        minHeight: 40,
+        display: 'flex',
+        cursor: 'pointer',
+        padding: '0 0 0 10px',
+        '&:hover:not(.disabled)': {
+            borderColor: theme.palette.action.active
+        },
+        '&.disabled': {
+            opacity: 0.7,
+            cursor: 'default'
+        }
+    },
+    invisibleInput: {
+        border: 0,
+        padding: '0 0 0 5px',
+        height: '100%',
+        cursor: 'pointer',
+        background: 'none',
+        '&:focus': {
+            borderColor: 'none',
+            boxShadow: 'inherit'
+        },
+        '&:disabled': {
+            cursor: 'default'
+        }
+    }
+}));
+const messages = defineMessages({
+    searchIn: {
+        id: 'pathSelector.inputPlaceholderText',
+        defaultMessage: 'Select path'
+    }
+});
+function PathSelector(props) {
+    const { onPathSelected, value, disabled = false, stripXmlIndex = true, rootPath } = props;
+    const { formatMessage } = useIntl();
+    const dispatch = useDispatch();
+    const { classes, cx } = useStyles();
+    const [path, setPath] = useState(value ?? '');
+    useEffect(() => {
+        setPath(value ?? '');
+    }, [value]);
+    const onClean = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        let cleanPath = rootPath ?? '';
+        setPath(cleanPath);
+        onPathSelected(cleanPath);
+    };
+    const onOpenPathSelectionDialog = () => {
+        const callbackId = 'pathSelectionDialogCallback';
+        const callbackAccept = 'accept';
+        dispatch(showPathSelectionDialog({
+            rootPath: rootPath ?? `/${path.split('/')[1] ?? ''}`,
+            initialPath: path,
+            showCreateFolderOption: true, // customized from studio-ui components to show create folder option
+            allowSwitchingRootPath: !Boolean(rootPath),
+            stripXmlIndex,
+            onClosed: batchActions([dispatchDOMEvent({ id: callbackId, action: 'close' }), pathSelectionDialogClosed()]),
+            onOk: batchActions([dispatchDOMEvent({ id: callbackId, action: callbackAccept }), closePathSelectionDialog()])
+        }));
+        createCustomDocumentEventListener(callbackId, (detail) => {
+            if (detail.action === callbackAccept) {
+                const path = detail.path;
+                setPath(path);
+                onPathSelected(path);
+            }
+        });
+    };
+    return (jsx(Paper, { variant: "outlined", onClick: disabled ? null : onOpenPathSelectionDialog, className: cx(classes.pathSelectorWrapper, disabled && 'disabled'), children: jsx(InputBase, { classes: { root: classes.pathSelectorInputRoot, input: classes.invisibleInput }, disabled: disabled, readOnly: true, value: path, placeholder: formatMessage(messages.searchIn), startAdornment: disabled ? null : jsx(SiteExplorer, { sx: { color: 'text.secondary' } }), endAdornment: !disabled && value ? (jsx(IconButton, { onClick: onClean, size: "small", children: jsx(CloseIcon, {}) })) : null }) }));
 }
 
 function SaveImageDialog(props) {
@@ -9397,10 +12104,6 @@ function escape$2(html, encode) {
   }
 
   return html;
-}
-
-function getDefaultExportFromCjs (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
 /* eslint-disable no-multi-assign */
@@ -70510,7 +73213,7 @@ const ChatGPT = forwardRef((props, ref) => {
     const mountedOnceRef = useRef(false); // Pretty much for React's Strict dev mode double mounting.
     const inputRef = useRef();
     const recognitionRef = useRef(null);
-    const theme = useTheme();
+    const theme = useTheme$1();
     const isDark = theme.palette.mode === 'dark';
     const userColour = stringToColor(userName);
     const maxMessageIndex = messages.length - 1;
@@ -70741,13 +73444,13 @@ const ChatGPT = forwardRef((props, ref) => {
                                 width: 42,
                                 position: 'relative'
                             }
-                        }, children: jsxs("div", { children: [jsx(IconButton, { color: mode === 'chat' ? 'primary' : 'default', onClick: () => {
+                        }, children: jsxs("div", { children: [jsx(IconButton$1, { color: mode === 'chat' ? 'primary' : 'default', onClick: () => {
                                         setMode('chat');
                                         onModeSelected?.('chat');
-                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton, { color: mode === 'image' ? 'primary' : 'default', onClick: () => {
+                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton$1, { color: mode === 'image' ? 'primary' : 'default', onClick: () => {
                                         setMode('image');
                                         onModeSelected?.('image');
-                                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
+                                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper$1, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
                                             mx: 'auto',
                                             display: 'grid',
                                             maxWidth: '700px',
@@ -70799,7 +73502,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                                             node.style.height = `${node.contentWindow.document.body.scrollHeight + 5}px`;
                                                         }
                                                     }
-                                                } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Box, { display: "inline-grid", alignItems: "center", children: [jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                } })) : (jsx(StyledPre, { children: content })), role === 'assistant' && (jsx(Box, { children: streaming && index === maxMessageIndex ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton$1, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Box, { display: "inline-grid", alignItems: "center", children: [jsx(Tooltip, { title: "Copy to clipboard", children: jsx(IconButton$1, { size: "small", onClick: () => {
                                                                     const imageUrlMatch = /src="([^"]+)"/.exec(content);
                                                                     const url = imageUrlMatch ? imageUrlMatch[1] : null;
                                                                     if (url) {
@@ -70808,13 +73511,13 @@ const ChatGPT = forwardRef((props, ref) => {
                                                                     else {
                                                                         copyTextToClipboard(content);
                                                                     }
-                                                                }, children: copyingIndex === index ? (jsx(CircularProgress, { size: 20 })) : (jsx(ContentPasteRounded, { fontSize: "small" })) }) }), content.startsWith('<img') && (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Download Image", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                                }, children: copyingIndex === index ? (jsx(CircularProgress, { size: 20 })) : (jsx(ContentPasteRounded, { fontSize: "small" })) }) }), content.startsWith('<img') && (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Download Image", children: jsx(IconButton$1, { size: "small", onClick: () => {
                                                                             const imageUrlMatch = /src="([^"]+)"/.exec(content);
                                                                             const url = imageUrlMatch ? imageUrlMatch[1] : null;
                                                                             if (url) {
                                                                                 window.open(url, '_blank');
                                                                             }
-                                                                        }, children: jsx(DownloadRouned, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Save Image", children: jsx(IconButton, { size: "small", onClick: () => {
+                                                                        }, children: jsx(DownloadRouned, { fontSize: "small" }) }) }), jsx(Tooltip, { title: "Save Image", children: jsx(IconButton$1, { size: "small", onClick: () => {
                                                                             const imageUrlMatch = /src="([^"]+)"/.exec(content);
                                                                             const url = imageUrlMatch ? imageUrlMatch[1] : null;
                                                                             if (url) {
@@ -70837,8 +73540,8 @@ const ChatGPT = forwardRef((props, ref) => {
                                 handleSubmit(e);
                             }
                         }, multiline: true, maxRows: 4, InputProps: {
-                            endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onMouseLeave: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
-                        } }), jsx(IconButton, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl })] })] }));
+                            endAdornment: (jsx(InputAdornment, { position: "end", children: streaming ? (jsx(Tooltip, { title: "Stop/abort", children: jsx(IconButton$1, { size: "small", onClick: abortStream, children: jsx(StopRounded, { fontSize: "small" }) }) })) : (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Click and hold to talk", children: jsx(IconButton$1, { size: "small", onMouseDown: startVoiceInput, onMouseUp: stopVoiceInput, onMouseLeave: stopVoiceInput, onTouchStart: startVoiceInput, onTouchEnd: stopVoiceInput, children: jsx(MicRounded, { fontSize: "small", style: { color: recording ? 'red' : 'inherit' } }) }) }), jsx(Tooltip, { title: "Send message", children: jsx(IconButton$1, { type: "submit", disabled: streaming, onClick: handleSubmit, children: jsx(SendIcon, {}) }) })] })) }))
+                        } }), jsx(IconButton$1, { sx: { ml: 1 }, onClick: handleMenuClick, children: jsx(MoreVertRounded, {}) }), jsx(Menu, { anchorEl: settingMenuAnchorEl, open: Boolean(settingMenuAnchorEl), onClose: handleSettingMenuClose, children: jsx(MenuItem, { onClick: handleLanguageDialogOpen, children: "Set Speech to Text Language" }) }), jsx(SelectLanguageDialog, { open: languageDialogOpen, language: selectedLanguage, onClose: handleLanguageDialogClose, onLanguageChange: handleLanguageChange }), jsx(SaveImageDialog, { open: saveImageDialogOpen, onClose: () => setSaveImageDialogOpen(false), url: imageUrl })] })] }));
 });
 
 function ChatGPTModelSelectMenu({ models, enableCustomModel, handleModelMenuClick, modelMenuAnchorEl, selectedModel, handleModelSelect, handleClose }) {
@@ -70890,7 +73593,7 @@ function ImageSizeSelection(props) {
 }
 
 function ChatGPTPopover(props) {
-    const theme = useTheme();
+    const theme = useTheme$1();
     const { open, onClose, chatGPTProps, isMinimized = false, onMinimize, onMaximize, appBarTitle = 'AI Assistant', width = 492, height = 595, enableCustomModel = true, ...popoverProps } = props;
     const chatGptRef = useRef(null);
     const [speakerMode, setSpeakerMode] = useState(false);
@@ -71041,7 +73744,7 @@ function ChatGptHelper(props) {
         }
     }, [user]);
     return (jsxs(Fragment, { children: [Boolean(ui) &&
-                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton, { onClick: handleOpenButtonClick, children: jsx(OpenAI$1, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, enableCustomModel: enableCustomModel.toLowerCase() === 'true', open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
+                (ui === 'IconButton' ? (jsx(Tooltip, { title: "Chat GPT", children: jsx(IconButton$1, { onClick: handleOpenButtonClick, children: jsx(OpenAI$1, {}) }) })) : (jsx(ToolsPanelListItemButton, { icon: { id: 'craftercms.components.openai.OpenAILogo' }, title: "Chat GPT", onClick: handleOpenButtonClick }))), jsx(ChatGPTPopover, { ...chatGPTPopoverProps, enableCustomModel: enableCustomModel.toLowerCase() === 'true', open: open, onClose: handleClose, isMinimized: isMinimized, onMinimize: () => setIsMinimized(true), onMaximize: () => setIsMinimized(false) })] }));
 }
 
 const plugin = {

@@ -36,6 +36,7 @@
     "redux-observable": "^2.0.0",
     "rxjs": "^7.8.1",
     "tinymce": "5.10.9",
+    "tss-react": "^4.9.10",
     "uuid": "^11.0.2",
     "video.js": "^7.21.5"
   },
