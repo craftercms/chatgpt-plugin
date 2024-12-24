@@ -998,7 +998,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the path from current context. Could you please provide more detail the content you would like to publish?"
+            "I'm not able to resolve the path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the content you would like to publish?"
         };
       }
 
@@ -1024,7 +1024,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+            "I'm not able to resolve the template path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the template you would like to update?"
         };
       }
 
@@ -1049,7 +1049,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
+            "I'm not able to resolve the content type from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide more detail the content type you would like to update?"
         };
       }
 
@@ -1079,7 +1079,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+            "I'm not able to resolve the template path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the template you would like to update?"
         };
       }
 
@@ -1103,7 +1103,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the content path from current context. Could you please provide more detail the content you would like to update?"
+            "I'm not able to resolve the content path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the content you would like to update?"
         };
       }
 
@@ -1123,7 +1123,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
         return {
           succeed: false,
           message:
-            "I'm not able to resolve the path from current context. Could you please provide more detail the path you would like to revert?"
+            "I'm not able to resolve the path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path you would like to revert?"
         };
       }
 

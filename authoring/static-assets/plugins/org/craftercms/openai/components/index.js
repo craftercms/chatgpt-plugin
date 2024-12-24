@@ -6529,7 +6529,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.path) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the path from current context. Could you please provide more detail the content you would like to publish?"
+                    message: "I'm not able to resolve the path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the content you would like to publish?"
                 };
             }
             return await publishContent(args);
@@ -6550,7 +6550,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.templatePath) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+                    message: "I'm not able to resolve the template path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the template you would like to update?"
                 };
             }
             return await chatGPTAnalyzeTemplate(args.templatePath, args.instructions);
@@ -6571,7 +6571,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.contentType) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the content type from current context. Could you please provide more detail the content type you would like to update?"
+                    message: "I'm not able to resolve the content type from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide more detail the content type you would like to update?"
                 };
             }
             return await chatGPTUpdateContentType(args.contentType, args.templatePath, args.instructions);
@@ -6595,7 +6595,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.templatePath) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the template path from current context. Could you please provide more detail the template you would like to update?"
+                    message: "I'm not able to resolve the template path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the template you would like to update?"
                 };
             }
             return await chatGPTUpdateTemplate(args.templatePath, args.contentPath, args.contentType, args.instructions);
@@ -6613,7 +6613,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.contentPath) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the content path from current context. Could you please provide more detail the content you would like to update?"
+                    message: "I'm not able to resolve the content path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path of the content you would like to update?"
                 };
             }
             return await chatGPTUpdateContent(args.contentPath, args.instructions);
@@ -6628,7 +6628,7 @@ async function chatGPTFunctionCall(name, params = '') {
             if (!args.path) {
                 return {
                     succeed: false,
-                    message: "I'm not able to resolve the path from current context. Could you please provide more detail the path you would like to revert?"
+                    message: "I'm not able to resolve the path from current context. This could happen if the preview application is broken. Please try to correct the preview and try again. Or could you please provide the path you would like to revert?"
                 };
             }
             return await chatGPTRevertContent(args.path);
