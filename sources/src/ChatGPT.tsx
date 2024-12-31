@@ -8,7 +8,6 @@ import {
   CardActionArea,
   CardHeader,
   CircularProgress,
-  Drawer,
   IconButton,
   InputAdornment,
   Menu,
@@ -56,6 +55,7 @@ import ImageRounded from '@mui/icons-material/ImageRounded';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
+import ChatGptSideBar from './ChatGPTSideBar';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -235,6 +235,7 @@ export interface ChatGPTProps {
   onExtraActionClick?: (e: React.MouseEvent, id: string, content: string, api: ClickApi) => void;
   initialMessages?: Array<ChatCompletionMessageParam>;
   aiAvatarColour?: string;
+  mode: ChatMode;
   onModeSelected: (mode: ChatMode) => void;
   speakerMode: boolean;
   imageSize: string;
@@ -242,7 +243,6 @@ export interface ChatGPTProps {
 
 export interface ChatGPTRef {
   hasConversation: () => boolean;
-  mode: () => ChatMode;
 }
 
 const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
@@ -266,6 +266,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
         api.pushMessages(option.messages);
       }
     },
+    mode,
     onModeSelected,
     speakerMode,
     imageSize = defaultDallEImageSize
@@ -292,11 +293,9 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
       }
     ]
   );
-  const [mode, setMode] = useState<ChatMode>('chat');
   const [imageUrl, setImageUrl] = useState('');
   const [copyingIndex, setCopyingIndex] = useState<number | null>(null);
   const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
-  const chatModeRef = useRef<ChatMode>('chat');
   const hasConversationRef = useRef<boolean>(false);
   const messagesRef = useRef<Array<ChatCompletionMessageParam>>(messages);
   const streamRef = useRef<Stream<ChatCompletionChunk>>();
@@ -509,8 +508,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   }, [messages, initialMessages, prompt]);
 
   useImperativeHandle(ref, () => ({
-    hasConversation: () => hasConversationRef.current,
-    mode: () => chatModeRef.current
+    hasConversation: () => hasConversationRef.current
   }));
 
   const startVoiceInput = () => {
@@ -561,42 +559,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }}>
       <Box sx={{ display: 'flex', ...sxs?.chat }}>
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: 42,
-            marginTop: '-1px',
-            [`& .MuiDrawer-paper`]: {
-              width: 42,
-              position: 'relative'
-            }
-          }}
-        >
-          <div>
-            <IconButton
-              color={mode === 'chat' ? 'primary' : 'default'}
-              onClick={() => {
-                setMode('chat');
-                onModeSelected?.('chat');
-              }}
-            >
-              <Tooltip title="Chat Completion" arrow>
-                <OpenAILogo />
-              </Tooltip>
-            </IconButton>
-            <IconButton
-              color={mode === 'image' ? 'primary' : 'default'}
-              onClick={() => {
-                setMode('image');
-                onModeSelected?.('image');
-              }}
-            >
-              <Tooltip title="Image Generation" arrow>
-                <ImageRounded />
-              </Tooltip>
-            </IconButton>
-          </div>
-        </Drawer>
+        <ChatGptSideBar mode={mode} onModeSelected={onModeSelected} />
         <Box sx={{ overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }}>
           {messages.filter((msg) => msg.role !== 'system').length === 0 && (
             <Box sx={{ width: '100%', p: 2 }}>

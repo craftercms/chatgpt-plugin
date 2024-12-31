@@ -171,6 +171,7 @@ function ChatGPTPopover(props: Readonly<ChatGPTPopoverProps>) {
             chat: { height: 'calc(100% - 97px)' },
             ...chatGPTProps?.sxs
           }}
+          mode={selectedMode}
           onModeSelected={(mode) => {
             if (mode === 'chat') {
               setSelectedModel(defaultChatModel);

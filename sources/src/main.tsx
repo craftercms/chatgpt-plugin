@@ -1,18 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import {
-  Box,
-  createTheme,
-  IconButton,
-  InputAdornment,
-  TextField,
-  Tooltip,
-  Typography,
-  useMediaQuery
-} from '@mui/material';
+import { Box, createTheme, IconButton, InputAdornment, TextField, Tooltip, useMediaQuery } from '@mui/material';
 import Tiny from './Tiny.tsx';
 import OpenAILogo from './OpenAI';
-import ChatGPTPopover from './ChatGPTPopover';
 import ChatGPTPromptPopover from './ChatGPTPromptPopover';
 import GlobalStyles from '@craftercms/studio-ui/components/GlobalStyles';
 import CrafterThemeProvider from '@craftercms/studio-ui/components/CrafterThemeProvider';
@@ -31,8 +21,6 @@ function AppWrap() {
   }, [prefersDarkMode]);
   const [value, setValue] = useState('Skydiving risks');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [chatGPTPromptPopoverAnchorEl, setChatGPTPromptPopoverAnchorEl] = useState(null);
-  const [isMinimized, setIsMinimized] = useState(false);
   return (
     <CrafterThemeProvider themeOptions={theme}>
       <I18nProvider>
@@ -63,30 +51,6 @@ function AppWrap() {
           />
           <Tiny />
           <GlobalStyles cssBaseline={true} />
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ mr: 2, color: theme.palette.text.primary }}>
-              Open ChatGPT Prompt Popover:
-            </Typography>
-            <IconButton
-              onClick={(e) => {
-                setChatGPTPromptPopoverAnchorEl(e.target);
-                setIsMinimized(false);
-              }}
-            >
-              <OpenAILogo />
-            </IconButton>
-          </Box>
-          <ChatGPTPopover
-            open={Boolean(chatGPTPromptPopoverAnchorEl)}
-            anchorEl={chatGPTPromptPopoverAnchorEl}
-            onClose={() => setChatGPTPromptPopoverAnchorEl(null)}
-            chatGPTProps={{
-              userName: 'John Doe'
-            }}
-            isMinimized={isMinimized}
-            onMinimize={() => setIsMinimized(true)}
-            onMaximize={() => setIsMinimized(false)}
-          />
         </Box>
       </I18nProvider>
     </CrafterThemeProvider>

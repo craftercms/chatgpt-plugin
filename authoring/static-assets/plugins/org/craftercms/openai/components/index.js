@@ -1,5 +1,5 @@
 const { jsx, jsxs, Fragment } = craftercms.libs?.reactJsxRuntime;
-const { Dialog, MenuItem, ListItemIcon, TextField, styled, Box, Avatar, useTheme: useTheme$1, Drawer, IconButton: IconButton$1, Tooltip, Paper: Paper$1, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, FormControl, Select, Popover, paperClasses } = craftercms.libs.MaterialUI;
+const { Dialog, MenuItem, ListItemIcon, TextField, Drawer, IconButton: IconButton$1, Tooltip, styled, Box, Avatar, useTheme: useTheme$1, Paper: Paper$1, Typography, Card, CardActionArea, CardHeader, CircularProgress, Button, Alert, InputAdornment, Menu, FormControlLabel, Radio, FormControl, Select, Popover, paperClasses } = craftercms.libs.MaterialUI;
 const React = craftercms.libs.React;
 const { useRef, useMemo, useContext, createContext, forwardRef, createElement, useState, useEffect, useImperativeHandle } = craftercms.libs.React;
 const React__default = craftercms.libs.React && Object.prototype.hasOwnProperty.call(craftercms.libs.React, 'default') ? craftercms.libs.React['default'] : craftercms.libs.React;
@@ -73043,6 +73043,22 @@ var lib = hljs;
 
 var HighlightJS = /*@__PURE__*/getDefaultExportFromCjs(lib);
 
+function ChatGptSideBar(props) {
+    const { mode, onModeSelected } = props;
+    return (jsx(Drawer, { variant: "permanent", sx: {
+            width: 42,
+            marginTop: '-1px',
+            [`& .MuiDrawer-paper`]: {
+                width: 42,
+                position: 'relative'
+            }
+        }, children: jsxs("div", { children: [jsx(IconButton$1, { color: mode === 'chat' ? 'primary' : 'default', onClick: () => {
+                        onModeSelected?.('chat');
+                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton$1, { color: mode === 'image' ? 'primary' : 'default', onClick: () => {
+                        onModeSelected?.('image');
+                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }));
+}
+
 const StyledBox = styled(Box)(
 // language=CSS
 ({ theme }) => `
@@ -73183,7 +73199,7 @@ const ChatGPT = forwardRef((props, ref) => {
         else if (option?.messages) {
             api.pushMessages(option.messages);
         }
-    }, onModeSelected, speakerMode, imageSize = defaultDallEImageSize } = props;
+    }, mode, onModeSelected, speakerMode, imageSize = defaultDallEImageSize } = props;
     // endregion
     const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
     const [settingMenuAnchorEl, setSettingMenuAnchorEl] = useState(null);
@@ -73202,11 +73218,9 @@ const ChatGPT = forwardRef((props, ref) => {
             content: "Use the 'publish_content' function when the user asks about publishing a specific content providing a path, or publishing the current content. Ask the confirmation from user if the path is not provided and resolved by the current context or by querying the name."
         }
     ]);
-    const [mode, setMode] = useState('chat');
     const [imageUrl, setImageUrl] = useState('');
     const [copyingIndex, setCopyingIndex] = useState(null);
     const [saveImageDialogOpen, setSaveImageDialogOpen] = useState(false);
-    const chatModeRef = useRef('chat');
     const hasConversationRef = useRef(false);
     const messagesRef = useRef(messages);
     const streamRef = useRef();
@@ -73399,8 +73413,7 @@ const ChatGPT = forwardRef((props, ref) => {
         hasConversationRef.current = messages.length > (initialMessages?.length ?? 0) || prompt.length > 0;
     }, [messages, initialMessages, prompt]);
     useImperativeHandle(ref, () => ({
-        hasConversation: () => hasConversationRef.current,
-        mode: () => chatModeRef.current
+        hasConversation: () => hasConversationRef.current
     }));
     const startVoiceInput = () => {
         if (!('webkitSpeechRecognition' in window)) {
@@ -73437,20 +73450,7 @@ const ChatGPT = forwardRef((props, ref) => {
             recognitionRef.current.stop();
         }
     };
-    return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { display: 'flex', ...sxs?.chat }, children: [jsx(Drawer, { variant: "permanent", sx: {
-                            width: 42,
-                            marginTop: '-1px',
-                            [`& .MuiDrawer-paper`]: {
-                                width: 42,
-                                position: 'relative'
-                            }
-                        }, children: jsxs("div", { children: [jsx(IconButton$1, { color: mode === 'chat' ? 'primary' : 'default', onClick: () => {
-                                        setMode('chat');
-                                        onModeSelected?.('chat');
-                                    }, children: jsx(Tooltip, { title: "Chat Completion", arrow: true, children: jsx(OpenAI$1, {}) }) }), jsx(IconButton$1, { color: mode === 'image' ? 'primary' : 'default', onClick: () => {
-                                        setMode('image');
-                                        onModeSelected?.('image');
-                                    }, children: jsx(Tooltip, { title: "Image Generation", arrow: true, children: jsx(ImageRounded, {}) }) })] }) }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper$1, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
+    return (jsxs(Box, { sx: { display: 'flex', flexDirection: 'column', width: '100%', ...sxs?.root }, children: [jsxs(Box, { sx: { display: 'flex', ...sxs?.chat }, children: [jsx(ChatGptSideBar, { mode: mode, onModeSelected: onModeSelected }), jsxs(Box, { sx: { overflow: 'auto', width: '100%', '*': { boxSizing: 'border-box' }, ...sxs?.messages }, children: [messages.filter((msg) => msg.role !== 'system').length === 0 && (jsxs(Box, { sx: { width: '100%', p: 2 }, children: [jsxs(Paper$1, { sx: { maxWidth: '400px', p: 2, mr: 'auto', ml: 'auto', textAlign: 'center', background: 'transparent' }, elevation: 0, children: [mode === 'image' ? jsx(ImageRounded, {}) : jsx(OpenAI$1, {}), jsx(Typography, { variant: "h6", children: mode === 'chat' ? 'Generative AI Assistant' : 'Generate Image with AI Assistant' })] }), jsx(Box, { sx: {
                                             mx: 'auto',
                                             display: 'grid',
                                             maxWidth: '700px',
@@ -73664,7 +73664,7 @@ function ChatGPTPopover(props) {
                             root: { height: 'calc(100% - 113px)' },
                             chat: { height: 'calc(100% - 97px)' },
                             ...chatGPTProps?.sxs
-                        }, onModeSelected: (mode) => {
+                        }, mode: selectedMode, onModeSelected: (mode) => {
                             if (mode === 'chat') {
                                 setSelectedModel(defaultChatModel);
                             }
