@@ -20,7 +20,8 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import OpenAILogo, { ThinkingIcon } from './OpenAI';
+import OpenAILogo from './OpenAI';
+import ThinkingIcon from './ThinkingIcon';
 import SendIcon from '@mui/icons-material/SendRounded';
 import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/index';
 import { SxProps } from '@mui/system/styleFunctionSx';
