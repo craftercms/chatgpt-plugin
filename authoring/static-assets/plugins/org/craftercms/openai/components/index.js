@@ -16,6 +16,7 @@ const { createAction } = craftercms.libs.ReduxToolkit;
 const { stripDuplicateSlashes } = craftercms.utils.path;
 const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
 const { fetchDetailedItem } = craftercms.services.content;
+const { getGlobalHeaders } = craftercms.utils.ajax;
 const { firstValueFrom, merge } = craftercms.libs.rxjs;
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
 const DialogHeader = craftercms.components.DialogHeader && Object.prototype.hasOwnProperty.call(craftercms.components.DialogHeader, 'default') ? craftercms.components.DialogHeader['default'] : craftercms.components.DialogHeader;
@@ -5710,7 +5711,7 @@ const getOpenAiInstance = () => {
             const siteId = state.sites.active;
             const authoringBase = state.env.authoringBase;
             const baseOptions = { maxRetries: 0, dangerouslyAllowBrowser: true };
-            const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+            const headers = getGlobalHeaders() ?? {};
             return (openai = new OpenAI({
                 ...baseOptions,
                 // When we have a working proxy service....
@@ -5781,7 +5782,7 @@ async function copyImageToClipboard(url) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`, {
         headers
     });
@@ -5803,7 +5804,7 @@ async function saveImage(request) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
         method: 'PUT',
         headers: {
@@ -5834,7 +5835,7 @@ async function fetchContextData() {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`, {
         headers: {
             'Content-Type': 'application/json',
@@ -5959,7 +5960,7 @@ async function publishContent({ path, date, publishingTarget = 'live' }) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const body = {
         publishingTarget,
         items: [path],
@@ -5998,7 +5999,7 @@ async function fetchItemVersions(path) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/2/content/item_history?siteId=${siteId}&path=${path}`, {
         headers
     });
@@ -6018,7 +6019,7 @@ async function revertItemVersion(path, versionId) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/1/services/api/1/content/revert-content.json?site=${siteId}&path=${path}&version=${versionId}`, {
         headers
     });
@@ -6033,7 +6034,7 @@ async function fetchContentPath(internalName) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`, {
         headers: {
             'Content-Type': 'application/json',
@@ -6055,7 +6056,7 @@ async function fetchContent(path) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const response = await fetch(`${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`, {
         headers
     });
@@ -6074,7 +6075,7 @@ async function writeContent(path, content) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
-    const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+    const headers = getGlobalHeaders() ?? {};
     const fileName = path.substring(path.lastIndexOf('/') + 1);
     const folderPath = path.substring(0, path.lastIndexOf('/'));
     const response = await fetch(`${authoringBase}/api/1/services/api/1/content/write-content.json?site=${siteId}&path=${folderPath}&unlock=true&fileName=${fileName}`, {

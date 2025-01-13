@@ -20,6 +20,7 @@ import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
 import { fetchDetailedItem } from '@craftercms/studio-ui/services/content';
+import { getGlobalHeaders } from '@craftercms/studio-ui/utils/ajax';
 import { firstValueFrom } from 'rxjs';
 
 let openai: OpenAI;
@@ -43,7 +44,7 @@ const getOpenAiInstance =
           const siteId = state.sites.active;
           const authoringBase = state.env.authoringBase;
           const baseOptions = { maxRetries: 0, dangerouslyAllowBrowser: true };
-          const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+          const headers = getGlobalHeaders() ?? {};
           return (openai = new OpenAI({
             ...baseOptions,
             // When we have a working proxy service....
@@ -147,7 +148,7 @@ export async function copyImageToClipboard(url: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(
     `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`,
     {
@@ -173,7 +174,7 @@ export async function saveImage(request: SaveImageRequest) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
     method: 'PUT',
     headers: {
@@ -206,7 +207,7 @@ export async function fetchContextData() {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(
     `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`,
     {
@@ -364,7 +365,7 @@ export async function publishContent({
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const body: PublishingParams = {
     publishingTarget,
     items: [path],
@@ -404,7 +405,7 @@ export async function fetchItemVersions(path: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(`${authoringBase}/api/2/content/item_history?siteId=${siteId}&path=${path}`, {
     headers
   });
@@ -426,7 +427,7 @@ export async function revertItemVersion(path: string, versionId: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(
     `${authoringBase}/api/1/services/api/1/content/revert-content.json?site=${siteId}&path=${path}&version=${versionId}`,
     {
@@ -445,7 +446,7 @@ export async function fetchContentPath(internalName: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(
     `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`,
     {
@@ -473,7 +474,7 @@ export async function fetchContent(path: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const response = await fetch(
     `${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`,
     {
@@ -497,7 +498,7 @@ export async function writeContent(path: string, content: string) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
+  const headers = getGlobalHeaders() ?? {};
   const fileName = path.substring(path.lastIndexOf('/') + 1);
   const folderPath = path.substring(0, path.lastIndexOf('/'));
   const response = await fetch(
