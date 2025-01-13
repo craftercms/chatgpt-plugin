@@ -66,7 +66,7 @@
                 }
                 op = body.call(thisArg, _);
             } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : undefined, done: true };
         }
     }
 
@@ -75,7 +75,7 @@
         if (m) return m.call(o);
         if (o && typeof o.length === "number") return {
             next: function () {
-                if (o && i >= o.length) o = void 0;
+                if (o && i >= o.length) o = undefined;
                 return { value: o && o[i++], done: !o };
             }
         };
@@ -261,7 +261,7 @@
                         }
                         teardown._addParent(this);
                     }
-                    (this._finalizers = (_a = this._finalizers) !== null && _a !== void 0 ? _a : []).push(teardown);
+                    (this._finalizers = (_a = this._finalizers) !== null && _a !== undefined ? _a : []).push(teardown);
                 }
             }
         };
@@ -324,11 +324,11 @@
             for (var _i = 2; _i < arguments.length; _i++) {
                 args[_i - 2] = arguments[_i];
             }
-            return setTimeout.apply(void 0, __spreadArray([handler, timeout], __read(args)));
+            return setTimeout.apply(undefined, __spreadArray([handler, timeout], __read(args)));
         },
         clearTimeout: function (handle) {
             var delegate = timeoutProvider.delegate;
-            return ((delegate === null || delegate === void 0 ? void 0 : delegate.clearTimeout) || clearTimeout)(handle);
+            return ((delegate === null || delegate === undefined ? undefined : delegate.clearTimeout) || clearTimeout)(handle);
         },
         delegate: undefined,
     };
@@ -416,10 +416,6 @@
         };
         return Subscriber;
     }(Subscription));
-    var _bind = Function.prototype.bind;
-    function bind(fn, thisArg) {
-        return _bind.call(fn, thisArg);
-    }
     var ConsumerObserver = (function () {
         function ConsumerObserver(partialObserver) {
             this.partialObserver = partialObserver;
@@ -469,23 +465,13 @@
             var partialObserver;
             if (isFunction(observerOrNext) || !observerOrNext) {
                 partialObserver = {
-                    next: (observerOrNext !== null && observerOrNext !== void 0 ? observerOrNext : undefined),
-                    error: error !== null && error !== void 0 ? error : undefined,
-                    complete: complete !== null && complete !== void 0 ? complete : undefined,
+                    next: (observerOrNext !== null && observerOrNext !== undefined ? observerOrNext : undefined),
+                    error: error !== null && error !== undefined ? error : undefined,
+                    complete: complete !== null && complete !== undefined ? complete : undefined,
                 };
             }
             else {
-                var context_1;
-                if (_this && config.useDeprecatedNextContext) {
-                    context_1 = Object.create(observerOrNext);
-                    context_1.unsubscribe = function () { return _this.unsubscribe(); };
-                    partialObserver = {
-                        next: observerOrNext.next && bind(observerOrNext.next, context_1),
-                        error: observerOrNext.error && bind(observerOrNext.error, context_1),
-                        complete: observerOrNext.complete && bind(observerOrNext.complete, context_1),
-                    };
-                }
-                else {
+                {
                     partialObserver = observerOrNext;
                 }
             }
@@ -585,7 +571,7 @@
         };
         Observable.prototype._subscribe = function (subscriber) {
             var _a;
-            return (_a = this.source) === null || _a === void 0 ? void 0 : _a.subscribe(subscriber);
+            return (_a = this.source) === null || _a === undefined ? undefined : _a.subscribe(subscriber);
         };
         Observable.prototype[observable] = function () {
             return this;
@@ -612,7 +598,7 @@
     }());
     function getPromiseCtor(promiseCtor) {
         var _a;
-        return (_a = promiseCtor !== null && promiseCtor !== void 0 ? promiseCtor : config.Promise) !== null && _a !== void 0 ? _a : Promise;
+        return (_a = promiseCtor !== null && promiseCtor !== undefined ? promiseCtor : config.Promise) !== null && _a !== undefined ? _a : Promise;
     }
     function isObserver(value) {
         return value && isFunction(value.next) && isFunction(value.error) && isFunction(value.complete);
@@ -622,7 +608,7 @@
     }
 
     function hasLift(source) {
-        return isFunction(source === null || source === void 0 ? void 0 : source.lift);
+        return isFunction(source === null || source === undefined ? undefined : source.lift);
     }
     function operate(init) {
         return function (source) {
@@ -692,7 +678,7 @@
             if (!this.shouldUnsubscribe || this.shouldUnsubscribe()) {
                 var closed_1 = this.closed;
                 _super.prototype.unsubscribe.call(this);
-                !closed_1 && ((_a = this.onFinalize) === null || _a === void 0 ? void 0 : _a.call(this));
+                !closed_1 && ((_a = this.onFinalize) === null || _a === undefined ? undefined : _a.call(this));
             }
         };
         return OperatorSubscriber;
@@ -703,7 +689,7 @@
     var isArrayLike = (function (x) { return x && typeof x.length === 'number' && typeof x !== 'function'; });
 
     function isPromise(value) {
-        return isFunction(value === null || value === void 0 ? void 0 : value.then);
+        return isFunction(value === null || value === undefined ? undefined : value.then);
     }
 
     function isInteropObservable(input) {
@@ -711,7 +697,7 @@
     }
 
     function isAsyncIterable(obj) {
-        return Symbol.asyncIterator && isFunction(obj === null || obj === void 0 ? void 0 : obj[Symbol.asyncIterator]);
+        return Symbol.asyncIterator && isFunction(obj === null || obj === undefined ? undefined : obj[Symbol.asyncIterator]);
     }
 
     function createInvalidObservableTypeError(input) {
@@ -727,7 +713,7 @@
     var iterator = getSymbolIterator();
 
     function isIterable(input) {
-        return isFunction(input === null || input === void 0 ? void 0 : input[iterator]);
+        return isFunction(input === null || input === undefined ? undefined : input[iterator]);
     }
 
     function readableStreamLikeToAsyncGenerator(readableStream) {
@@ -746,7 +732,7 @@
                     case 3:
                         _a = _b.sent(), value = _a.value, done = _a.done;
                         if (!done) return [3, 5];
-                        return [4, __await(void 0)];
+                        return [4, __await(undefined)];
                     case 4: return [2, _b.sent()];
                     case 5: return [4, __await(value)];
                     case 6: return [4, _b.sent()];
@@ -763,7 +749,7 @@
         });
     }
     function isReadableStreamLike(obj) {
-        return isFunction(obj === null || obj === void 0 ? void 0 : obj.getReader);
+        return isFunction(obj === null || obj === undefined ? undefined : obj.getReader);
     }
 
     function innerFrom(input) {
@@ -854,7 +840,7 @@
     function process(asyncIterable, subscriber) {
         var asyncIterable_1, asyncIterable_1_1;
         var e_2, _a;
-        return __awaiter(this, void 0, void 0, function () {
+        return __awaiter(this, undefined, undefined, function () {
             var value, e_2_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
