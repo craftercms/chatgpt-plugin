@@ -52,10 +52,8 @@ import {
 import SelectLanguageDialog from './SelectLanguageDialog';
 import SaveImageDialog from './SaveImageDialog';
 import ImageRounded from '@mui/icons-material/ImageRounded';
-import { Marked } from 'marked';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
 import ChatGptSideBar from './ChatGPTSideBar';
+import userMarkdownParser from './hooks/useMarkdownParser';
 
 const StyledBox = styled(Box)(
   // language=CSS
@@ -317,28 +315,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const userColour = stringToColor(userName);
   const maxMessageIndex = messages.length - 1;
   const srcDoc = messages.length ? createSrcDoc('', theme) : '';
-
-  const marked = new Marked(
-    markedHighlight({
-      emptyLangClass: 'hljs',
-      langPrefix: 'hljs language-',
-      highlight(code, lang) {
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        return hljs.highlight(code, { language }).value;
-      }
-    })
-  );
-  marked.setOptions({
-    async: false,
-    breaks: false,
-    extensions: null,
-    gfm: true,
-    hooks: null,
-    pedantic: false,
-    silent: false,
-    tokenizer: null,
-    walkTokens: null
-  });
+  const marked = userMarkdownParser();
 
   useEffect(() => {
     fetchMemoryData().then((items) => {
