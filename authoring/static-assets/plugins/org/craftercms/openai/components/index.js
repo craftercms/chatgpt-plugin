@@ -15,7 +15,7 @@ const { getHostToGuestBus, getHostToHostBus, getGuestToHostBus } = craftercms.ut
 const { createAction } = craftercms.libs.ReduxToolkit;
 const { stripDuplicateSlashes } = craftercms.utils.path;
 const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
-const { fetchDetailedItem, fetchItemHistory } = craftercms.services.content;
+const { fetchDetailedItem, fetchItemHistory, revertTo } = craftercms.services.content;
 const { publish } = craftercms.services.workflow;
 const { getGlobalHeaders } = craftercms.utils.ajax;
 const { firstValueFrom, merge } = craftercms.libs.rxjs;
@@ -5981,22 +5981,6 @@ async function publishContent({ path, date, publishingTarget = 'live' }) {
     };
 }
 /**
- * Revert item to a version
- * @param path the item path
- * @param versionId the version to revert
- * @returns true if succeeded, false otherwise
- */
-async function revertItemVersion(path, versionId) {
-    const state = window.craftercms.getStore().getState();
-    const siteId = state.sites.active;
-    const authoringBase = state.env.authoringBase;
-    const headers = getGlobalHeaders() ?? {};
-    const response = await fetch(`${authoringBase}/api/1/services/api/1/content/revert-content.json?site=${siteId}&path=${path}&version=${versionId}`, {
-        headers
-    });
-    return response.status === 200;
-}
-/**
  * Fetch the content path by internal name
  * @param internalName internal-name of the content
  * @returns the content path
@@ -6312,7 +6296,7 @@ async function chatGPTRevertContent(path) {
         };
     }
     const previousCommitId = versions[1]?.versionNumber;
-    const succeed = await revertItemVersion(path, previousCommitId);
+    const succeed = await firstValueFrom(revertTo(siteId, path, previousCommitId));
     if (succeed) {
         reloadPreview();
         return {
