@@ -19,7 +19,7 @@ import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
-import { fetchDetailedItem } from '@craftercms/studio-ui/services/content';
+import { fetchDetailedItem, fetchItemHistory } from '@craftercms/studio-ui/services/content';
 import { publish } from '@craftercms/studio-ui/services/workflow';
 import { getGlobalHeaders } from '@craftercms/studio-ui/utils/ajax';
 import { firstValueFrom } from 'rxjs';
@@ -383,27 +383,6 @@ export async function publishContent({
 }
 
 /**
- * Fetch item versions by path
- * @param path the path to fetch
- * @returns versions
- */
-export async function fetchItemVersions(path: string) {
-  const state = window.craftercms.getStore().getState();
-  const siteId = state.sites.active;
-  const authoringBase = state.env.authoringBase;
-  const headers = getGlobalHeaders() ?? {};
-  const response = await fetch(`${authoringBase}/api/2/content/item_history?siteId=${siteId}&path=${path}`, {
-    headers
-  });
-  if (response.status !== 200) {
-    return '';
-  }
-
-  const data = await response.json();
-  return data?.items;
-}
-
-/**
  * Revert item to a version
  * @param path the item path
  * @param versionId the version to revert
@@ -759,7 +738,9 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
  * @param path the path to revert
  */
 export async function chatGPTRevertContent(path: string) {
-  const versions = await fetchItemVersions(path);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const versions = await firstValueFrom(fetchItemHistory(siteId, path));
   if (!versions || versions.length <= 1) {
     return {
       succeed: false,
