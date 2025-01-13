@@ -241,7 +241,7 @@ export async function resolveContentPath(internalName: string) {
  * Resolve the content type for the current previewing page
  * @returns content type id
  */
-export async function resolveCurrentContentModel() {
+export async function resolveCurrentContentTypeId() {
   const currentPath = window.craftercms.getStore().getState().preview.guest?.path;
   if (!currentPath) {
     return '';
@@ -435,7 +435,7 @@ export async function revertItemVersion(path: string, versionId: string) {
 }
 
 /**
- * Fetch the content path by name
+ * Fetch the content path by internal name
  * @param internalName internal-name of the content
  * @returns the content path
  */
@@ -1021,7 +1021,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       }
 
       if (!args.contentType && args.currentContent) {
-        args.contentType = await resolveCurrentContentModel();
+        args.contentType = await resolveCurrentContentTypeId();
       }
       if (!args.templatePath && args.currentContent) {
         args.templatePath = await resolveTemplatePath('');
@@ -1056,7 +1056,7 @@ export async function chatGPTFunctionCall(name: string, params: string = '') {
       }
 
       if (!args.contentType) {
-        args.contentType = await resolveCurrentContentModel();
+        args.contentType = await resolveCurrentContentTypeId();
       }
 
       if (!args.templatePath) {
