@@ -15,7 +15,7 @@ const { getHostToGuestBus, getHostToHostBus, getGuestToHostBus } = craftercms.ut
 const { createAction } = craftercms.libs.ReduxToolkit;
 const { stripDuplicateSlashes } = craftercms.utils.path;
 const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
-const { fetchDetailedItem, fetchContentXML, fetchItemHistory, revertTo } = craftercms.services.content;
+const { fetchDetailedItem, fetchContentXML, fetchItemHistory, revertTo, writeContent } = craftercms.services.content;
 const { publish } = craftercms.services.workflow;
 const { getGlobalHeaders } = craftercms.utils.ajax;
 const { firstValueFrom, merge } = craftercms.libs.rxjs;
@@ -6007,22 +6007,10 @@ async function fetchContentPath(internalName) {
  * @param path the path to write
  * @param content the content to write
  */
-async function writeContent(path, content) {
+async function writeContentAndRespond(path, content) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
-    const authoringBase = state.env.authoringBase;
-    const headers = getGlobalHeaders() ?? {};
-    const fileName = path.substring(path.lastIndexOf('/') + 1);
-    const folderPath = path.substring(0, path.lastIndexOf('/'));
-    const response = await fetch(`${authoringBase}/api/1/services/api/1/content/write-content.json?site=${siteId}&path=${folderPath}&unlock=true&fileName=${fileName}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain;charset=UTF-8',
-            ...headers
-        },
-        body: content
-    });
-    const succeed = response.status === 200;
+    const succeed = await firstValueFrom(writeContent(siteId, path, content, { unlock: true }));
     return {
         succeed,
         message: succeed
@@ -6082,7 +6070,7 @@ async function chatGPTUpdateContent(contentPath, instructions) {
             };
         }
         else {
-            const result = await writeContent(contentPath, newContent);
+            const result = await writeContentAndRespond(contentPath, newContent);
             if (result.succeed) {
                 reloadPreview();
             }
@@ -6422,7 +6410,7 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
     const message = completion.choices[0]?.message?.content;
     if (message) {
         const newTemplate = message.replace(/```[a-zA-Z]*\s*(.*?)\s*```/gs, '$1').trim();
-        const result = await writeContent(templatePath, newTemplate);
+        const result = await writeContentAndRespond(templatePath, newTemplate);
         if (result.succeed) {
             reloadPreview();
         }
