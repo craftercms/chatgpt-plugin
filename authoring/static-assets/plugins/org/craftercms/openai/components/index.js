@@ -5701,6 +5701,8 @@ const reloadRequest = /*#__PURE__*/ createAction('RELOAD_REQUEST');
 const contentTypeDropTargetsResponse = /*#__PURE__*/ createAction('CONTENT_TYPE_DROP_TARGETS_RESPONSE');
 /*#__PURE__*/ createAction(contentTypeDropTargetsResponse.type);
 
+const pluginBaseUrl = '/api/2/plugin/script/plugins/org/craftercms/openai';
+const createFetchUrl = (authoringBase, url) => `${authoringBase}${pluginBaseUrl}/${url}`;
 let openai;
 const getOpenAiInstance = () => {
         if (openai) {
@@ -5720,7 +5722,7 @@ const getOpenAiInstance = () => {
                 // Meanwhile...
                 apiKey: null,
                 // Retrieves the key when first invoked. Then caches it.
-                fetch: async (url, init) => fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/key?siteId=${siteId}`, {
+                fetch: async (url, init) => fetch(createFetchUrl(authoringBase, `key?siteId=${siteId}`), {
                     headers
                 })
                     .then((response) => response.json())
@@ -5783,7 +5785,7 @@ async function copyImageToClipboard(url) {
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
     const headers = getGlobalHeaders() ?? {};
-    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`, {
+    const response = await fetch(createFetchUrl(authoringBase, `image?siteId=${siteId}&url=${encodeURIComponent(url)}`), {
         headers
     });
     if (response.ok) {
@@ -5805,7 +5807,7 @@ async function saveImage(request) {
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
     const headers = getGlobalHeaders() ?? {};
-    await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
+    await fetch(createFetchUrl(authoringBase, `image?siteId=${siteId}`), {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -5836,7 +5838,7 @@ async function fetchContextData() {
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
     const headers = getGlobalHeaders() ?? {};
-    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`, {
+    const response = await fetch(createFetchUrl(authoringBase, `data?siteId=${siteId}`), {
         headers: {
             'Content-Type': 'application/json',
             ...headers
@@ -6035,7 +6037,7 @@ async function fetchContentPath(internalName) {
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
     const headers = getGlobalHeaders() ?? {};
-    const response = await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`, {
+    const response = await fetch(createFetchUrl(authoringBase, `path?siteId=${siteId}&internalName=${internalName}`), {
         headers: {
             'Content-Type': 'application/json',
             ...headers

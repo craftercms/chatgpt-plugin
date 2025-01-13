@@ -23,6 +23,9 @@ import { fetchDetailedItem } from '@craftercms/studio-ui/services/content';
 import { getGlobalHeaders } from '@craftercms/studio-ui/utils/ajax';
 import { firstValueFrom } from 'rxjs';
 
+export const pluginBaseUrl = '/api/2/plugin/script/plugins/org/craftercms/openai';
+export const createFetchUrl = (authoringBase, url) => `${authoringBase}${pluginBaseUrl}/${url}`;
+
 let openai: OpenAI;
 const getOpenAiInstance =
   import.meta.env.MODE === 'development'
@@ -54,7 +57,7 @@ const getOpenAiInstance =
             apiKey: null,
             // Retrieves the key when first invoked. Then caches it.
             fetch: async (url: RequestInfo, init?: RequestInfo): Promise<Response> =>
-              fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/key?siteId=${siteId}`, {
+              fetch(createFetchUrl(authoringBase, `key?siteId=${siteId}`), {
                 headers
               })
                 .then((response) => response.json())
@@ -149,12 +152,9 @@ export async function copyImageToClipboard(url: string) {
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
   const headers = getGlobalHeaders() ?? {};
-  const response = await fetch(
-    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}&url=${encodeURIComponent(url)}`,
-    {
-      headers
-    }
-  );
+  const response = await fetch(createFetchUrl(authoringBase, `image?siteId=${siteId}&url=${encodeURIComponent(url)}`), {
+    headers
+  });
 
   if (response.ok) {
     const blob = await response.blob();
@@ -175,7 +175,7 @@ export async function saveImage(request: SaveImageRequest) {
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
   const headers = getGlobalHeaders() ?? {};
-  await fetch(`${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/image?siteId=${siteId}`, {
+  await fetch(createFetchUrl(authoringBase, `image?siteId=${siteId}`), {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -208,15 +208,12 @@ export async function fetchContextData() {
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
   const headers = getGlobalHeaders() ?? {};
-  const response = await fetch(
-    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/data?siteId=${siteId}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      }
+  const response = await fetch(createFetchUrl(authoringBase, `data?siteId=${siteId}`), {
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
     }
-  );
+  });
 
   if (response.status !== 200) {
     return {};
@@ -447,15 +444,12 @@ export async function fetchContentPath(internalName: string) {
   const siteId = state.sites.active;
   const authoringBase = state.env.authoringBase;
   const headers = getGlobalHeaders() ?? {};
-  const response = await fetch(
-    `${authoringBase}/api/2/plugin/script/plugins/org/craftercms/openai/path?siteId=${siteId}&internalName=${internalName}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      }
+  const response = await fetch(createFetchUrl(authoringBase, `path?siteId=${siteId}&internalName=${internalName}`), {
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
     }
-  );
+  });
 
   if (response.status !== 200) {
     return '';
