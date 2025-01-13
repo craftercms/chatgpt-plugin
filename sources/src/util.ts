@@ -20,6 +20,7 @@ import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
 import { fetchDetailedItem } from '@craftercms/studio-ui/services/content';
+import { publish } from '@craftercms/studio-ui/services/workflow';
 import { getGlobalHeaders } from '@craftercms/studio-ui/utils/ajax';
 import { firstValueFrom } from 'rxjs';
 
@@ -361,30 +362,18 @@ export async function publishContent({
 }) {
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
-  const authoringBase = state.env.authoringBase;
-  const headers = getGlobalHeaders() ?? {};
+  const dateMessage = date ? `on ${date}` : '';
   const body: PublishingParams = {
     publishingTarget,
     items: [path],
     sendEmailNotifications: false,
-    comment: `Publish content ${path} on ${date} with AI Assistant`
+    comment: `Publish content ${path} ${dateMessage} with AI Assistant`
   };
   if (date) {
     body.schedule = date;
   }
-  const response = await fetch(`${authoringBase}/api/2/workflow/publish`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    },
-    body: JSON.stringify({
-      siteId,
-      ...body
-    })
-  });
-  const succeed = response.status === 200;
-  const dateMessage = date ? `on ${date}` : 'now';
+  const succeed = await firstValueFrom(publish(siteId, body));
+
   return {
     succeed,
     message: succeed

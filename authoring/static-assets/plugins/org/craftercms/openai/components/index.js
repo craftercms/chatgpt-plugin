@@ -16,6 +16,7 @@ const { createAction } = craftercms.libs.ReduxToolkit;
 const { stripDuplicateSlashes } = craftercms.utils.path;
 const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
 const { fetchDetailedItem } = craftercms.services.content;
+const { publish } = craftercms.services.workflow;
 const { getGlobalHeaders } = craftercms.utils.ajax;
 const { firstValueFrom, merge } = craftercms.libs.rxjs;
 const CheckRounded = craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded') && Object.prototype.hasOwnProperty.call(craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded'), 'default') ? craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded')['default'] : craftercms.utils.constants.components.get('@mui/icons-material/CheckRounded');
@@ -277,7 +278,7 @@ function inner_stringify(object, prefix, generateArrayPrefix, commaRoundTrip, al
     }
     for (let j = 0; j < obj_keys.length; ++j) {
         const key = obj_keys[j];
-        const value = 
+        const value =
         // @ts-ignore
         typeof key === 'object' && typeof key.value !== 'undefined' ? key.value : obj[key];
         if (skipNulls && value === null) {
@@ -293,7 +294,7 @@ function inner_stringify(object, prefix, generateArrayPrefix, commaRoundTrip, al
         sideChannel.set(object, step);
         const valueSideChannel = new WeakMap();
         valueSideChannel.set(sentinel, sideChannel);
-        push_to_array(values, inner_stringify(value, key_prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, 
+        push_to_array(values, inner_stringify(value, key_prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys,
         // @ts-ignore
         generateArrayPrefix === 'comma' && encodeValuesOnly && is_array(obj) ? null : encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, valueSideChannel));
     }
@@ -398,7 +399,7 @@ function stringify$1(object, opts = {}) {
         if (options.skipNulls && obj[key] === null) {
             continue;
         }
-        push_to_array(keys, inner_stringify(obj[key], key, 
+        push_to_array(keys, inner_stringify(obj[key], key,
         // @ts-expect-error
         generateArrayPrefix, commaRoundTrip, options.allowEmptyArrays, options.strictNullHandling, options.skipNulls, options.encodeDotInKeys, options.encode ? options.encoder : null, options.filter, options.sort, options.allowDots, options.serializeDate, options.format, options.formatter, options.encodeValuesOnly, options.charset, sideChannel));
     }
@@ -487,7 +488,7 @@ function getRuntime({ manuallyImported } = {}) {
         Request: _Request,
         Response: _Response,
         Headers: _Headers,
-        FormData: 
+        FormData:
         // @ts-ignore
         typeof FormData !== 'undefined' ? FormData : (class FormData {
             // @ts-ignore
@@ -500,7 +501,7 @@ function getRuntime({ manuallyImported } = {}) {
                 throw new Error(`file uploads aren't supported in this environment yet as 'Blob' is undefined. ${recommendation}`);
             }
         }),
-        File: 
+        File:
         // @ts-ignore
         typeof File !== 'undefined' ? File : (class File {
             // @ts-ignore
@@ -508,7 +509,7 @@ function getRuntime({ manuallyImported } = {}) {
                 throw new Error(`file uploads aren't supported in this environment yet as 'File' is undefined. ${recommendation}`);
             }
         }),
-        ReadableStream: 
+        ReadableStream:
         // @ts-ignore
         typeof ReadableStream !== 'undefined' ? ReadableStream : (class ReadableStream {
             // @ts-ignore
@@ -5961,30 +5962,17 @@ async function resolveTemplatePath(contentPath) {
 async function publishContent({ path, date, publishingTarget = 'live' }) {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
-    const authoringBase = state.env.authoringBase;
-    const headers = getGlobalHeaders() ?? {};
+    const dateMessage = date ? `on ${date}` : '';
     const body = {
         publishingTarget,
         items: [path],
         sendEmailNotifications: false,
-        comment: `Publish content ${path} on ${date} with AI Assistant`
+        comment: `Publish content ${path} ${dateMessage} with AI Assistant`
     };
     if (date) {
         body.schedule = date;
     }
-    const response = await fetch(`${authoringBase}/api/2/workflow/publish`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...headers
-        },
-        body: JSON.stringify({
-            siteId,
-            ...body
-        })
-    });
-    const succeed = response.status === 200;
-    const dateMessage = date ? `on ${date}` : 'now';
+    const succeed = await firstValueFrom(publish(siteId, body));
     return {
         succeed,
         message: succeed
@@ -36928,7 +36916,7 @@ function requireJavascript () {
 	  const PARAMS = {
 	    className: 'params',
 	    // convert this to negative lookbehind in v12
-	    begin: /(\s*)\(/, // to match the parms with 
+	    begin: /(\s*)\(/, // to match the parms with
 	    end: /\)/,
 	    excludeBegin: true,
 	    excludeEnd: true,
@@ -39732,7 +39720,7 @@ function requireLess () {
 	      MIXIN_GUARD_MODE,
 	      IDENT_MODE('keyword', 'all\\b'),
 	      IDENT_MODE('variable', '@\\{' + IDENT_RE + '\\}'), // otherwise it’s identified as tag
-	      
+
 	      {
 	        begin: '\\b(' + TAGS.join('|') + ')\\b',
 	        className: 'selector-tag'
@@ -56270,7 +56258,7 @@ function requireReasonml () {
 	        scope: 'operator',
 	        match: /\s+(\|\||\+[\+\.]?|\*[\*\/\.]?|\/[\.]?|\.\.\.|\|>|&&|===?)\s+/,
 	        relevance: 0
-	      },      
+	      },
 	      hljs.inherit(hljs.APOS_STRING_MODE, {
 	        scope: 'string',
 	        relevance: 0
@@ -57834,10 +57822,10 @@ function requireScala () {
 	        excludeBegin: true,
 	        excludeEnd: true,
 	        relevance: 0,
-	        contains: [ 
-	          TYPE, 
-	          hljs.C_LINE_COMMENT_MODE, 
-	          hljs.C_BLOCK_COMMENT_MODE, 
+	        contains: [
+	          TYPE,
+	          hljs.C_LINE_COMMENT_MODE,
+	          hljs.C_BLOCK_COMMENT_MODE,
 	        ]
 	      },
 	      {
@@ -57847,10 +57835,10 @@ function requireScala () {
 	        excludeBegin: true,
 	        excludeEnd: true,
 	        relevance: 0,
-	        contains: [ 
-	          TYPE, 
-	          hljs.C_LINE_COMMENT_MODE, 
-	          hljs.C_BLOCK_COMMENT_MODE, 
+	        contains: [
+	          TYPE,
+	          hljs.C_LINE_COMMENT_MODE,
+	          hljs.C_BLOCK_COMMENT_MODE,
 	        ]
 	      },
 	      NAME
@@ -59460,11 +59448,11 @@ function requireSqf () {
 	/*
 	////////////////////////////////////////////////////////////////////////////////////////////
 	  * Author: Leopard20
-	  
+
 	  * Description:
 	  This script can be used to dump all commands to the clipboard.
 	  Make sure you're using the Diag EXE to dump all of the commands.
-	  
+
 	  * How to use:
 	  Simply replace the _KEYWORDS and _LITERAL arrays with the one from this sqf.js file.
 	  Execute the script from the debug console.
@@ -62051,7 +62039,7 @@ function requireSqf () {
 	    'worldToModelVisual',
 	    'worldToScreen'
 	  ];
-	  
+
 	  // list of keywords from:
 	  // https://community.bistudio.com/wiki/PreProcessor_Commands
 	  const PREPROCESSOR = {
@@ -62074,7 +62062,7 @@ function requireSqf () {
 	      hljs.C_BLOCK_COMMENT_MODE
 	    ]
 	  };
-	  
+
 	  return {
 	    name: 'SQF',
 	    case_insensitive: true,
@@ -62094,7 +62082,7 @@ function requireSqf () {
 	    ],
 	    illegal: [
 	      //$ is only valid when used with Hex numbers (e.g. $FF)
-	      /\$[^a-fA-F0-9]/, 
+	      /\$[^a-fA-F0-9]/,
 	      /\w\$/,
 	      /\?/,      //There's no ? in SQF
 	      /@/,       //There's no @ in SQF
@@ -65487,7 +65475,7 @@ function requireYaml () {
 	  const KEY = {
 	    className: 'attr',
 	    variants: [
-	      // added brackets support 
+	      // added brackets support
 	      { begin: /\w[\w :()\./-]*:(?=[ \t]|$)/ },
 	      { // double quoted keys - with brackets
 	        begin: /"\w[\w :()\./-]*":(?=[ \t]|$)/ },
@@ -66885,7 +66873,7 @@ function requireTypescript () {
 	  const PARAMS = {
 	    className: 'params',
 	    // convert this to negative lookbehind in v12
-	    begin: /(\s*)\(/, // to match the parms with 
+	    begin: /(\s*)\(/, // to match the parms with
 	    end: /\)/,
 	    excludeBegin: true,
 	    excludeEnd: true,
