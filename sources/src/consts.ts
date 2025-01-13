@@ -347,3 +347,19 @@ export const emptyStateOptionsGenerateImages: Array<EmptyStateOption> = [
     prompt: 'Generate an image based on an article body text concept. Concept: '
   }
 ];
+
+// Default function call system message
+export const defaultFunctionCallSystemMessage = {
+  role: 'system',
+  content: `
+    You are Crafter Studio's helpful CrafterCMS and content management assistant.
+    Use your expertise to support the author with CrafterCMS content operations, including:
+    - Creating and updating content
+    - Updating CrafterCMS Freemarker templates
+    - Updating CrafterCMS content models
+    - Revert / undo changes to previous versions
+    - Publishing,
+    - Managing, and troubleshooting content-related tasks.
+    Utilize the supplied tools to provide accurate and efficient assistance.
+  `
+};

@@ -5681,6 +5681,21 @@ const emptyStateOptionsGenerateImages = [
         prompt: 'Generate an image based on an article body text concept. Concept: '
     }
 ];
+// Default function call system message
+const defaultFunctionCallSystemMessage = {
+    role: 'system',
+    content: `
+    You are Crafter Studio's helpful CrafterCMS and content management assistant.
+    Use your expertise to support the author with CrafterCMS content operations, including:
+    - Creating and updating content
+    - Updating CrafterCMS Freemarker templates
+    - Updating CrafterCMS content models
+    - Revert / undo changes to previous versions
+    - Publishing,
+    - Managing, and troubleshooting content-related tasks.
+    Utilize the supplied tools to provide accurate and efficient assistance.
+  `
+};
 
 /*
  * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
@@ -6031,19 +6046,7 @@ async function chatGPTUpdateContent(contentPath, instructions) {
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
-            {
-                role: 'system',
-                content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-        Use your expertise to support the author with CrafterCMS content operations, including:
-        - Creating and updating content
-        - Updating CrafterCMS Freemarker templates
-        - Updating CrafterCMS content models
-        - Revert / undo changes
-        - Publishing,
-        - Managing, and troubleshooting content-related tasks.
-        Utilize the supplied tools to provide accurate and efficient assistance.`
-            },
+            defaultFunctionCallSystemMessage,
             {
                 role: 'user',
                 content: `Here is the current content:\n\n${content}\n\nHere is the current content model: ${JSON.stringify(contentTypeDescription)}`
@@ -6097,21 +6100,7 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
-            {
-                role: 'system',
-                content: `
-         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
-
-          Use your expertise to support the author with CrafterCMS content operations, including:\n
-          - Creating and updating content\n
-          - Updating CrafterCMS Freemarker templates\n
-          - Updating CrafterCMS content models\n
-          - Revert / undo changes to previous versions\n
-          - Publishing\n
-          - Managing, and troubleshooting content-related tasks\n\n
-
-          Utilize the supplied tools to provide accurate and efficient assistance.`
-            },
+            defaultFunctionCallSystemMessage,
             {
                 role: 'system',
                 content: `
@@ -6352,21 +6341,7 @@ async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, i
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
-            {
-                role: 'system',
-                content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
-
-        Use your expertise to support the author with CrafterCMS content operations, including:\n
-        - Creating and updating content\n
-        - Updating CrafterCMS Freemarker templates\n
-        - Updating CrafterCMS content models\n
-        - Revert / undo changes to previous versions\n
-        - Publishing\n
-        - Managing, and troubleshooting content-related tasks\n\n
-
-        Utilize the supplied tools to provide accurate and efficient assistance.`
-            },
+            defaultFunctionCallSystemMessage,
             {
                 role: 'user',
                 content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n

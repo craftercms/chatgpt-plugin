@@ -14,7 +14,7 @@ import { Stream } from 'openai/src/streaming';
 import { RequestInfo, Response } from 'openai/_shims';
 import { User } from '@craftercms/studio-ui';
 import { PublishingParams, PublishingTargets } from '@craftercms/studio-ui/models/Publishing';
-import { defaultChatModel } from './consts';
+import { defaultChatModel, defaultFunctionCallSystemMessage } from './consts';
 import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils/subjects';
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
@@ -444,19 +444,7 @@ export async function chatGPTUpdateContent(contentPath: string, instructions: st
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
-      {
-        role: 'system',
-        content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n
-        Use your expertise to support the author with CrafterCMS content operations, including:
-        - Creating and updating content
-        - Updating CrafterCMS Freemarker templates
-        - Updating CrafterCMS content models
-        - Revert / undo changes
-        - Publishing,
-        - Managing, and troubleshooting content-related tasks.
-        Utilize the supplied tools to provide accurate and efficient assistance.`
-      },
+      defaultFunctionCallSystemMessage,
       {
         role: 'user',
         content: `Here is the current content:\n\n${content}\n\nHere is the current content model: ${JSON.stringify(contentTypeDescription)}`
@@ -518,22 +506,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
-      {
-        role: 'system',
-        content: `
-         You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
-
-          Use your expertise to support the author with CrafterCMS content operations, including:\n
-          - Creating and updating content\n
-          - Updating CrafterCMS Freemarker templates\n
-          - Updating CrafterCMS content models\n
-          - Revert / undo changes to previous versions\n
-          - Publishing\n
-          - Managing, and troubleshooting content-related tasks\n\n
-
-          Utilize the supplied tools to provide accurate and efficient assistance.`
-      },
-
+      defaultFunctionCallSystemMessage,
       {
         role: 'system',
         content: `
@@ -794,21 +767,7 @@ export async function chatGPTUpdateTemplate(
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
-      {
-        role: 'system',
-        content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
-
-        Use your expertise to support the author with CrafterCMS content operations, including:\n
-        - Creating and updating content\n
-        - Updating CrafterCMS Freemarker templates\n
-        - Updating CrafterCMS content models\n
-        - Revert / undo changes to previous versions\n
-        - Publishing\n
-        - Managing, and troubleshooting content-related tasks\n\n
-
-        Utilize the supplied tools to provide accurate and efficient assistance.`
-      },
+      defaultFunctionCallSystemMessage,
       {
         role: 'user',
         content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
