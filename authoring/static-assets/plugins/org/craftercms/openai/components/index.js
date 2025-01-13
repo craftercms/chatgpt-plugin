@@ -5815,10 +5815,22 @@ async function saveImage(request) {
     return true;
 }
 /**
- * Fetch memory data from CMS
- * @returns list of page items
+ * Fetch data from the CrafterCMS project for context stuffing.
+ *
+ * This function retrieves a list of pages and components from the CrafterCMS project.
+ * The fetched data can be used to provide context to ChatGPT, such as resolving internal names
+ * to their corresponding paths or URLs when users prompt the assistant.
+ *
+ * The API in the backend makes an OpenSearch API request to gather all relevant pages and components
+ * from the project, which are then returned as a list.
+ *
+ * @returns {Promise<Array>} A promise that resolves to a list of pages and components.
+ *
+ * Example Use Case:
+ * - When a user asks ChatGPT to "update the the Home page," this data helps the assistant
+ *   identify the internal name and return the correct path for the page.
  */
-async function fetchMemoryData() {
+async function fetchContextData() {
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const authoringBase = state.env.authoringBase;
@@ -73048,7 +73060,7 @@ const ChatGPT = forwardRef((props, ref) => {
     const srcDoc = messages.length ? createSrcDoc('', theme) : '';
     const marked = userMarkdownParser();
     useEffect(() => {
-        fetchMemoryData().then((items) => {
+        fetchContextData().then((items) => {
             items.forEach((item) => {
                 const newMessage = {
                     role: 'system',

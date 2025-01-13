@@ -37,7 +37,7 @@ import {
   copyImageToClipboard,
   createChatCompletion,
   createImageGeneration,
-  fetchMemoryData,
+  fetchContextData,
   speakText,
   removeMarkdown
 } from './util';
@@ -318,7 +318,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
   const marked = userMarkdownParser();
 
   useEffect(() => {
-    fetchMemoryData().then((items) => {
+    fetchContextData().then((items) => {
       items.forEach((item) => {
         const newMessage: ChatCompletionMessageParam = {
           role: 'system',
