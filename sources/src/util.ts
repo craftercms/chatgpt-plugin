@@ -510,46 +510,43 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
       {
         role: 'system',
         content: `
-          When there is an instruction to update a form defintions aways eforce these rules:\n
-          - The response must only contains the updated content in XML.\n
-          - Never update the form definition if the response is not XML.\n
-          - Do not remove or replace other fields in the model unless instructed to do so.\n
-          \n\n
+          When there is an instruction to update a form defintions aways eforce these rules:
+          - The response must only contains the updated content in XML.
+          - Never update the form definition if the response is not XML.
+          - Do not remove or replace other fields in the model unless instructed to do so.
 
-          When there is an instruction to add a field use th following rules:\n
-          - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.\n
+          When there is an instruction to add a field use th following rules:
+          - Forms are made up of sections that contain fields. Typically related fields are grouped in a section. If it's not obvious which section to add a field to, add it to the last section.
           - A repeat group is a special kind of field that acts like an array and contains other fields.
-          - Fields have a type that maps to the type of contnt they store:\n
-          - Text should use an "input" type\n
-          - Numbers should use the "numberic-input" type\n
-          - Text with HTML tags should use the "rte" type\n
-          - Images should use the "image-picker" type\n
+          - Fields have a type that maps to the type of contnt they store:
+          - Text should use an "input" type
+          - Numbers should use the "numberic-input" type
+          - Text with HTML tags should use the "rte" type
+          - Images should use the "image-picker" type
           - If it's not clear what field type to use, assume the "input" type
-          \n\n
 
-          You should use the correct postfix for the id of a field using the following CSV data when there is an instruction to add a new field:\n\n
-          Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
-          integer,_i,_is,a 32 bit signed integer\n
-          string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
-          long,_l,_ls,a 64 bit signed integer\n
-          text,_t,_txt,Multiple words or tokens\n
-          boolean,_b,_bs,true or false\n
-          float,_f,_fs,IEEE 32 bit floating point number\n
-          double,_d,_ds,IEEE 64 bit floating point number\n
-          date,_dt,_dts,A date in ISO 8601 date format\n
-          time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
-          text with html tags,_html,,Rich Text Editor content\n'
-          image,_s,,Image path\n'
-          \n\n
+          You should use the correct postfix for the id of a field using the following CSV data when there is an instruction to add a new field:
+          Type,Field Suffix,Multivalue Suffix (repeating groups),Description
+          integer,_i,_is,a 32 bit signed integer
+          string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.
+          long,_l,_ls,a 64 bit signed integer
+          text,_t,_txt,Multiple words or tokens
+          boolean,_b,_bs,true or false
+          float,_f,_fs,IEEE 32 bit floating point number
+          double,_d,_ds,IEEE 64 bit floating point number
+          date,_dt,_dts,A date in ISO 8601 date format
+          time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)
+          text with html tags,_html,,Rich Text Editor content
+          image,_s,,Image path
 
 
 
-          If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:\n
-          - The purpose of the form definition is to provide a schema or data structure for content in the template.\n
+          If asked to add new fields to the form defintion based on the content in the template, follow these guidelines:
+          - The purpose of the form definition is to provide a schema or data structure for content in the template.
           - Analyze the content elements in the provided template.
-          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a template placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.\n
-          - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.\n
-          - Add new fields and/or sections to the form definition but do not remove or replace existing elements.\n
+          - If you find hard coded content in the form of text or images in the HTML it's example content that will ultimately be replace with a template placeholder. The aim of this task is to create a field to match and ultimately supply values to those placeholders.
+          - if you find Freemarker variable place holders (e.g.: contentModel.PLACE_HOLDER_NAME were PLACE_HOLDER_NAME is the id of the field) it should be added as a new field if a field with that ID does not already exist.
+          - Add new fields and/or sections to the form definition but do not remove or replace existing elements.
           - Create an individual field for each img element.
             If the size of the image is known, set the height and width properties according to the image requirements, for example:
             <property>
@@ -589,7 +586,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
                     <type>content-path-input</type>
                   </property>
                 </properties>
-              </datasource>\n\n
+              </datasource>
 
               Associate a new image or rte fields with this data source by referencing the data source id in the imageManager property like so:
 
@@ -597,14 +594,12 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
                 <name>imageManager</name>
                 <value>upload,library</value>
                 <type>datasource:image</type>
-              </property>\n
-          - Create an individaul text field for each h1,h2,h3,h4,h5 element\n
-          - Create an individual RTE field for any text or markup inside of div tags\n
-          - Use field labels and ids that are based on the subject or purpose of the content\n
-          - For each new field, set the required property to true\n
-          \n\n
-
-          \n\n`
+              </property>
+          - Create an individaul text field for each h1,h2,h3,h4,h5 element
+          - Create an individual RTE field for any text or markup inside of div tags
+          - Use field labels and ids that are based on the subject or purpose of the content
+          - For each new field, set the required property to true
+          `
       },
       {
         role: 'user',
@@ -702,7 +697,7 @@ export async function chatGPTAnalyzeTemplate(templatePath: string, instructions:
       {
         role: 'system',
         content: `
-        You are Crafter Studio's helpful CrafterCMS and content management assistant.\n\n
+        You are Crafter Studio's helpful CrafterCMS and content management assistant.
 
         Use your expertise an expert in CrafterCMS Freemarker Templates and Contnt Modeling, web design and front end development.
         You can help user with the following tasks:
@@ -711,25 +706,27 @@ export async function chatGPTAnalyzeTemplate(templatePath: string, instructions:
       },
       {
         role: 'user',
-        content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+        content: `This is the current CrafterCMS Freemarker Template:
 
-                  If asked to identifty the content model variables or placeholders in the template, follow these instructions:\n
+                  ${templateContent}
+
+                  If asked to identifty the content model variables or placeholders in the template, follow these instructions:
                   1. identify for every instance of "model.PLACE_HOLDER_NAME" or "contentModel.PLACE_HOLDER_NAME" where PLACE_HOLDER_NAME is a variable
                   2. Use the following CSV file to match the suffix of the PLACE_HOLDER_NAME to a field type:
-                            Type,Field Suffix,Multivalue Suffix (repeating groups),Description\n
-                            integer,_i,_is,a 32 bit signed integer\n
-                            string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.\n
-                            long,_l,_ls,a 64 bit signed integer\n
-                            text,_t,_txt,Multiple words or tokens\n
-                            boolean,_b,_bs,true or false\n
-                            float,_f,_fs,IEEE 32 bit floating point number\n
-                            double,_d,_ds,IEEE 64 bit floating point number\n
-                            date,_dt,_dts,A date in ISO 8601 date format\n
-                            time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)\n
-                            text with html tags,_html,,Rich Text Editor content\n'
-                            image,_s,,Image path\n'
+                            Type,Field Suffix,Multivalue Suffix (repeating groups),Description
+                            integer,_i,_is,a 32 bit signed integer
+                            string,_s,_ss,String (UTF-8 encoded string or Unicode). A string value is indexed as a single unit.
+                            long,_l,_ls,a 64 bit signed integer
+                            text,_t,_txt,Multiple words or tokens
+                            boolean,_b,_bs,true or false
+                            float,_f,_fs,IEEE 32 bit floating point number
+                            double,_d,_ds,IEEE 64 bit floating point number
+                            date,_dt,_dts,A date in ISO 8601 date format
+                            time,_to,_tos,A time in HH:mm:ss format (the value will be set to date 1/1/1970 automatically)
+                            text with html tags,_html,,Rich Text Editor content
+                            image,_s,,Image path
                   3. Return a table of content place holders to the user in the form of a table with the first colume as the name and the second column as the type
-                  \n\n`
+                  `
       },
       {
         role: 'user',
@@ -770,36 +767,39 @@ export async function chatGPTUpdateTemplate(
       defaultFunctionCallSystemMessage,
       {
         role: 'user',
-        content: `This is the current CrafterCMS Freemarker Template:\n\n${templateContent}\n\n
+        content: `This is the current CrafterCMS Freemarker Template:
 
-                  This is the current Content stuctured as an XML document:\n\n
-                  ${content}\n\n
+                  ${templateContent}
 
-                  Each field is an element. The element name is the field id in the content type form definition\n
-                  This is the current content type form definition:\n\n
-                  ${contentTypeDescriptor} \n\n
+                  This is the current Content stuctured as an XML document:
+                  ${content}
 
-                  The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.\n\n
+                  Each field is an element. The element name is the field id in the content type form definition
+                  This is the current content type form definition:
 
-                  If asked to update the template with new markup or a new design follow thsse instructions:\n
-                  - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}\n
-                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image\n
-                  - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>\n
-                  - When adding images to the template use img tags rather than putting the image url in the CSS\n
-                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>\n
-                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''}" />\n
-                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>\n
-                  - Example editable a href: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>\n\n
+                  ${contentTypeDescriptor}
 
-                  If asked to create or update a template with a completely new design follow this process:\n
-                  1. Analyze the content and functional requirements and instructions carefully\n
-                  2. Design a visual presentation with mock images and other content to meet the requirements\n
-                  3. Analize the visual representation to determine what placeholders would be used in place of the image and text values\n
-                  4. Update for form definiton with the new fields required by the design\n
-                  5. Updatee the template using editbale placeholders where images and content will be displayed\n
-                  6. Update the content xml for the page with example content.\n
-                  7. This is a image url that can generate images of any size: https://placehold.co/600x400/EEE/31343C  The size parameters are in the URL. When generating default values for images use this url and generate the proper size image for the given placeholder.\n
-                  \n\n`
+                  The form definition is an XML document that contains field elements. Each field element has an id. The id in the field is the variable name to reference in the template to retrieve the field value.
+
+                  If asked to update the template with new markup or a new design follow thsse instructions:
+                  - Content values should be provided as defaults to placeholder variables. For example \${contentModel.heroText_s!"My Headline"}
+                  - Placeholder varibale names should be semantic and relate to the purpose of the content. For example: "heroText_s" for the text in a hero or "heroImage_s" for the hero background image
+                  - The element enclosing a placeholder variable should me made editable. example: <div><@crafter.h1 $field="heroText_s">\${contentModel.heroText_s!"My Headline"}</@crafter.h1></div>
+                  - When adding images to the template use img tags rather than putting the image url in the CSS
+                  - Example editable div: <@crafter.div $field="description_html">\${contentModel.description_html!"Vroom Vroom, 42 and what not"}</@crafter.div>
+                  - Example editable image: <@crafter.img $field="myImage_s" src="\${contentModel.myImage!''}" />
+                  - Example editable h1: <@crafter.h1 $field="headline_s">\${contentModel.headline_s!"A headline"}</@crafter.h1>
+                  - Example editable a href: <@crafter.a $field="aLink" href="\${contentModel.aLink_s!'#'}">\${contentModel.linkTitle_s!"Click Here"}</@crafter.a>
+
+                  If asked to create or update a template with a completely new design follow this process:
+                  1. Analyze the content and functional requirements and instructions carefully
+                  2. Design a visual presentation with mock images and other content to meet the requirements
+                  3. Analize the visual representation to determine what placeholders would be used in place of the image and text values
+                  4. Update for form definiton with the new fields required by the design
+                  5. Updatee the template using editbale placeholders where images and content will be displayed
+                  6. Update the content xml for the page with example content.
+                  7. This is a image url that can generate images of any size: https://placehold.co/600x400/EEE/31343C  The size parameters are in the URL. When generating default values for images use this url and generate the proper size image for the given placeholder.
+                  `
       },
       {
         role: 'user',
