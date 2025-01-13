@@ -19,7 +19,7 @@ import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
-import { fetchDetailedItem, fetchItemHistory, revertTo } from '@craftercms/studio-ui/services/content';
+import { fetchDetailedItem, fetchItemHistory, revertTo, fetchContentXML } from '@craftercms/studio-ui/services/content';
 import { publish } from '@craftercms/studio-ui/services/workflow';
 import { getGlobalHeaders } from '@craftercms/studio-ui/utils/ajax';
 import { firstValueFrom } from 'rxjs';
@@ -408,30 +408,6 @@ export async function fetchContentPath(internalName: string) {
 }
 
 /**
- * Fetch content from CMS
- * @param path the path to fetch content
- * @returns content
- */
-export async function fetchContent(path: string) {
-  const state = window.craftercms.getStore().getState();
-  const siteId = state.sites.active;
-  const authoringBase = state.env.authoringBase;
-  const headers = getGlobalHeaders() ?? {};
-  const response = await fetch(
-    `${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`,
-    {
-      headers
-    }
-  );
-  if (response.status !== 200) {
-    return '';
-  }
-
-  const data = await response.json();
-  return data?.content;
-}
-
-/**
  * Write a content to CMS
  * @param path the path to write
  * @param content the content to write
@@ -470,7 +446,9 @@ export async function writeContent(path: string, content: string) {
  * @param instructions the instructions
  */
 export async function chatGPTUpdateContent(contentPath: string, instructions: string) {
-  const content = await fetchContent(contentPath);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const content = await firstValueFrom(fetchContentXML(siteId, contentPath));
   const contentTypeDescription = await fetchContentTypeDescription(contentPath);
   const completion = await createChatCompletion({
     model: defaultChatModel,
@@ -544,7 +522,7 @@ export async function chatGPTUpdateContentType(contentTypeId: string, templatePa
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
   const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
-  const templateContent = await fetchContent(templatePath);
+  const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
 
   const completion = await createChatCompletion({
     model: defaultChatModel,
@@ -751,7 +729,9 @@ export async function chatGPTRevertContent(path: string) {
  * @param instruction the instruction to update template
  */
 export async function chatGPTAnalyzeTemplate(templatePath: string, instructions: string) {
-  const templateContent = await fetchContent(templatePath);
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+  const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
   const completion = await createChatCompletion({
     model: defaultChatModel,
     messages: [
@@ -813,11 +793,11 @@ export async function chatGPTUpdateTemplate(
   contentTypeId: string,
   instructions: string
 ) {
-  const templateContent = await fetchContent(templatePath);
-  const content = ''; //= await fetchContent(contentPath);
-  const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const state = window.craftercms.getStore().getState();
   const siteId = state.sites.active;
+  const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
+  const content = '';
+  const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
   const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
 
   const completion = await createChatCompletion({

@@ -15,7 +15,7 @@ const { getHostToGuestBus, getHostToHostBus, getGuestToHostBus } = craftercms.ut
 const { createAction } = craftercms.libs.ReduxToolkit;
 const { stripDuplicateSlashes } = craftercms.utils.path;
 const { fetchConfigurationXML, writeConfiguration } = craftercms.services.configuration;
-const { fetchDetailedItem, fetchItemHistory, revertTo } = craftercms.services.content;
+const { fetchDetailedItem, fetchContentXML, fetchItemHistory, revertTo } = craftercms.services.content;
 const { publish } = craftercms.services.workflow;
 const { getGlobalHeaders } = craftercms.utils.ajax;
 const { firstValueFrom, merge } = craftercms.libs.rxjs;
@@ -6003,25 +6003,6 @@ async function fetchContentPath(internalName) {
     return data.result?.path;
 }
 /**
- * Fetch content from CMS
- * @param path the path to fetch content
- * @returns content
- */
-async function fetchContent(path) {
-    const state = window.craftercms.getStore().getState();
-    const siteId = state.sites.active;
-    const authoringBase = state.env.authoringBase;
-    const headers = getGlobalHeaders() ?? {};
-    const response = await fetch(`${authoringBase}/api/1/services/api/1/content/get-content.json?edit=false&site_id=${siteId}&path=${path}`, {
-        headers
-    });
-    if (response.status !== 200) {
-        return '';
-    }
-    const data = await response.json();
-    return data?.content;
-}
-/**
  * Write a content to CMS
  * @param path the path to write
  * @param content the content to write
@@ -6055,7 +6036,9 @@ async function writeContent(path, content) {
  * @param instructions the instructions
  */
 async function chatGPTUpdateContent(contentPath, instructions) {
-    const content = await fetchContent(contentPath);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const content = await firstValueFrom(fetchContentXML(siteId, contentPath));
     const contentTypeDescription = await fetchContentTypeDescription(contentPath);
     const completion = await createChatCompletion({
         model: defaultChatModel,
@@ -6122,7 +6105,7 @@ async function chatGPTUpdateContentType(contentTypeId, templatePath, instruction
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
     const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
-    const templateContent = await fetchContent(templatePath);
+    const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
@@ -6315,7 +6298,9 @@ async function chatGPTRevertContent(path) {
  * @param instruction the instruction to update template
  */
 async function chatGPTAnalyzeTemplate(templatePath, instructions) {
-    const templateContent = await fetchContent(templatePath);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
     const completion = await createChatCompletion({
         model: defaultChatModel,
         messages: [
@@ -6370,11 +6355,11 @@ async function chatGPTAnalyzeTemplate(templatePath, instructions) {
  * @param instruction the instruction to update template
  */
 async function chatGPTUpdateTemplate(templatePath, contentPath, contentTypeId, instructions) {
-    const templateContent = await fetchContent(templatePath);
-    const content = ''; //= await fetchContent(contentPath);
-    const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
     const state = window.craftercms.getStore().getState();
     const siteId = state.sites.active;
+    const templateContent = await firstValueFrom(fetchContentXML(siteId, templatePath));
+    const content = '';
+    const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
     const contentTypeDescriptor = await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
     const completion = await createChatCompletion({
         model: defaultChatModel,
