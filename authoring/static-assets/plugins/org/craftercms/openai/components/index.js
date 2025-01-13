@@ -72974,8 +72974,8 @@ function createSrcDoc(html, theme) {
   <body>${html}</body>
   </html>`;
 }
-function copyTextToClipboard(textToCopy) {
-    // Copy text to clipboard if no image is found
+function copyToClipboard(textToCopy) {
+    // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
     return (navigator.clipboard?.writeText(textToCopy) ??
         Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.')));
 }
@@ -73320,7 +73320,7 @@ const ChatGPT = forwardRef((props, ref) => {
                                                                         handleCopyImage(url, index);
                                                                     }
                                                                     else {
-                                                                        copyTextToClipboard(content);
+                                                                        copyToClipboard(content);
                                                                     }
                                                                 }, children: copyingIndex === index ? (jsx(CircularProgress, { size: 20 })) : (jsx(ContentPasteRounded, { fontSize: "small" })) }) }), content.startsWith('<img') && (jsxs(Fragment, { children: [jsx(Tooltip, { title: "Download Image", children: jsx(IconButton$1, { size: "small", onClick: () => {
                                                                             const imageUrlMatch = /src="([^"]+)"/.exec(content);

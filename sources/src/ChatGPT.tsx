@@ -180,8 +180,8 @@ function createSrcDoc(html: string, theme: Theme) {
   </html>`;
 }
 
-function copyTextToClipboard(textToCopy: string): Promise<void> {
-  // Copy text to clipboard if no image is found
+function copyToClipboard(textToCopy: string): Promise<void> {
+  // Clipboard is only available on user-initiated callbacks over non-secure contexts (e.g. not https).
   return (
     navigator.clipboard?.writeText(textToCopy) ??
     Promise.reject(new Error('Copying to clipboard is only available in secure contexts or user-initiated callbacks.'))
@@ -700,7 +700,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                                 if (url) {
                                   handleCopyImage(url, index);
                                 } else {
-                                  copyTextToClipboard(content);
+                                  copyToClipboard(content);
                                 }
                               }}
                             >
