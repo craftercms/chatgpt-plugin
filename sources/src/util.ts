@@ -19,6 +19,7 @@ import { getHostToHostBus, getHostToGuestBus } from '@craftercms/studio-ui/utils
 import { reloadRequest } from '@craftercms/studio-ui/state/actions/preview';
 import { stripDuplicateSlashes } from '@craftercms/studio-ui/utils/path';
 import { fetchConfigurationXML, writeConfiguration } from '@craftercms/studio-ui/services/configuration';
+import { fetchDetailedItem } from '@craftercms/studio-ui/services/content';
 import { firstValueFrom } from 'rxjs';
 
 let openai: OpenAI;
@@ -214,37 +215,6 @@ export async function fetchMemoryData() {
 }
 
 /**
- * Fetch sandbox item by path
- * @param path the path to fetch
- * @returns sandbox item
- */
-export async function fetchSandboxItemByPath(path: string) {
-  const state = window.craftercms.getStore().getState();
-  const siteId = state.sites.active;
-  const authoringBase = state.env.authoringBase;
-  const headers = window.craftercms.utils.ajax.getGlobalHeaders() ?? {};
-  const body = {
-    siteId,
-    paths: [path],
-    preferContent: true
-  };
-  const response = await fetch(`${authoringBase}/api/2/content/sandbox_items_by_path`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    },
-    body: JSON.stringify(body)
-  });
-  if (response.status !== 200) {
-    return null;
-  }
-
-  const data = await response.json();
-  return data?.items?.[0];
-}
-
-/**
  * Resolve content path base on the internal name
  * @params internalName the name of the content
  * @returns content path
@@ -269,7 +239,9 @@ export async function resolveCurrentContentModel() {
 
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[currentPath];
   if (!storedContent) {
-    storedContent = await fetchSandboxItemByPath(currentPath);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    storedContent = await firstValueFrom(fetchDetailedItem(siteId, currentPath));
   }
 
   return storedContent.contentTypeId;
@@ -297,7 +269,9 @@ export async function resolveCurrentPath(type: string) {
   if (type === 'contentType' || type === 'contentModel') {
     let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
     if (!storedContent) {
-      storedContent = await fetchSandboxItemByPath(contentPath);
+      const state = window.craftercms.getStore().getState();
+      const siteId = state.sites.active;
+      storedContent = await firstValueFrom(fetchDetailedItem(siteId, contentPath));
     }
     const contentTypeId = storedContent.contentTypeId;
     return stripDuplicateSlashes(`/config/studio/content-types/${contentTypeId}/form-definition.xml`);
@@ -320,14 +294,15 @@ export async function fetchContentTypeDescription(contentPath: string) {
     return {};
   }
 
+  const state = window.craftercms.getStore().getState();
+  const siteId = state.sites.active;
+
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
   if (!storedContent) {
-    storedContent = await fetchSandboxItemByPath(contentPath);
+    storedContent = await firstValueFrom(fetchDetailedItem(siteId, contentPath));
   }
   const contentTypeId = storedContent.contentTypeId;
   const path = stripDuplicateSlashes(`/content-types/${contentTypeId}/form-definition.xml`);
-  const state = window.craftercms.getStore().getState();
-  const siteId = state.sites.active;
   return await firstValueFrom(fetchConfigurationXML(siteId, path, 'studio'));
 }
 
@@ -348,7 +323,9 @@ export async function resolveTemplatePath(contentPath: string) {
 
   let storedContent = window.craftercms.getStore().getState().content.itemsByPath[contentPath];
   if (!storedContent) {
-    storedContent = await fetchSandboxItemByPath(contentPath);
+    const state = window.craftercms.getStore().getState();
+    const siteId = state.sites.active;
+    storedContent = await firstValueFrom(fetchDetailedItem(siteId, contentPath));
   }
 
   const contentTypeId = storedContent.contentTypeId;
