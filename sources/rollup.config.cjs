@@ -26,6 +26,7 @@ const globals = {
   'react-intl': 'craftercms.libs.ReactIntl',
   'react-redux': 'craftercms.libs.ReactRedux',
   '@mui/material': 'craftercms.libs.MaterialUI',
+  '@mui/material/styles': 'craftercms.libs.MaterialUI',
   '@craftercms/studio-ui': 'craftercms.components',
   '@craftercms/studio-ui/components': 'craftercms.components',
   '@mui/material/utils': 'craftercms.libs.MaterialUI',

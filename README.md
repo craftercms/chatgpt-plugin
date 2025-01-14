@@ -7,7 +7,7 @@ Install the plugin via Crafter Studio's Plugin Management UI under "Project Tool
 You'll enter your key on the plugin configuration form, and it will end up on a file on your CrafterCMS project:
 ```
 {sandbox}/config/plugins/org/craftercms/openai/config.xml
-``` 
+```
 
 You may update the configuration at any time using the Plugin Management function of Crafter Studio.
 
@@ -18,10 +18,8 @@ You may update the configuration at any time using the Plugin Management functio
 </config>
 ```
 
-<!-- TODO: Add the cli command for copy-plugin -->
-
-If you're contributing and want to install from local sources, you can install the plugin 
-using the CrafterCMS CLI, or using the `/studio/api/2/marketplace/copy` API in Postman or similar. 
+If you're contributing and want to install from local sources, you can install the plugin
+using the [CrafterCMS CLI](https://docs.craftercms.org/en/4.1/by-role/common/crafter-cli.html), or using the `/studio/api/2/marketplace/copy` [API](https://docs.craftercms.org/en/4.1/_static/api/studio.html#tag/marketplace/operation/installPlugin) in Postman or similar.
 Either way, you can use the following _JSON_ body:
 
 ```json
@@ -32,11 +30,31 @@ Either way, you can use the following _JSON_ body:
 }
 ```
 
+* To install with the CLI:
+
+```bash
+./crafter-cli copy-plugin -e local -s YOUR_SITE_ID --path /Users/your/path/to/this/repo/chatgpt-plugin \
+  --param key='sk-abcdefghijklmnopqrstuvwxyz'
+```
+
+* To install with the API `/studio/api/2/marketplace/copy`:
+
+```bash
+curl --location --request POST 'http://localhost:8080/studio/api/2/marketplace/copy' \
+--header 'Authorization: Bearer YOUR_JWT_TOKEN' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "siteId": "YOUR_SITE_ID",
+  "path": "/Users/your/path/to/this/repo/chatgpt-plugin",
+  "parameters": { "key": "sk-abcdefghijklmnopqrstuvwxyz" }
+}'
+```
+
 ## Usage
 
 ### Adding to your RTE
 
-On your `ui.xml`, find the widget id "craftercms.components.TinyMCE". Inside of it, you'll find the `tinymceOptions`. 
+On your `ui.xml`, find the widget id "craftercms.components.TinyMCE". Inside of it, you'll find the `tinymceOptions`.
 
 ```xml
 <widget id="craftercms.components.TinyMCE">
@@ -46,7 +64,7 @@ On your `ui.xml`, find the widget id "craftercms.components.TinyMCE". Inside of 
 				<tinymceOptions>
 ```
 
-Merge the JSON below with your `tinymceOptions`: 
+Merge the JSON below with your `tinymceOptions`:
 
 **Notice** you must replace `YOUR_SITE_ID` to your actual site id.
 
@@ -67,12 +85,12 @@ Merge the JSON below with your `tinymceOptions`:
 }
 ```
 
-The plugin exports certain TinyMCE buttons that you can use in your editor toolbar(s). You don't need to use all of them, 
+The plugin exports certain TinyMCE buttons that you can use in your editor toolbar(s). You don't need to use all of them,
 choose the one that suits you best.
 
 #### `chatgptdialog`
 
-A simple button that will update the Chat window for a free-form chat experience. The chat window will provide a button to 
+A simple button that will update the Chat window for a free-form chat experience. The chat window will provide a button to
 insert the generated text into the editor. If there's a selection before clicking the button, the selection will be passed
 as "context" to the API so people can speak with the assistant referring to said context.
 
@@ -139,12 +157,12 @@ Review `CrafterCMSOpenAIConfig` and `BASE_CONFIG` on [the tiny plugin source](./
 
 The helper component enables ChatGPT to work with XB's RTE.
 
-The ChatGptHelper component must be added to your `ui.xml` to either the sidebar (`craftercms.components.ToolsPanel`) or the 
-toolbar (`craftercms.components.PreviewToolbar`). 
+The ChatGptHelper component must be added to your `ui.xml` to either the sidebar (`craftercms.components.ToolsPanel`) or the
+toolbar (`craftercms.components.PreviewToolbar`).
 
 This is done automatically by the plugin installation process (see `craftercms-plugin.yaml` > `installation` property). By
 default, the helper is added to the sidebar, and it doesn't render anything visible to the user; it is there to attend XB's
-requests to the plugin. 
+requests to the plugin.
 
 If desired, the helper can render a button to open the Chat window on demand. This is done by  adding a `ui`
 property to the widget configuration with a value of "IconButton" or "ListItemButton".
@@ -172,11 +190,19 @@ The example below shows how to add the helper to the **toolbar** and display a b
 ...
 ```
 
+By default, user can select the model from the dropdown menu. Administrators can disable this feature by updating the `enableCustomModel` property to `false` in the widget configuration.
+
+```xml
+...
+<configuration enableCustomModel="false" />
+...
+```
+
 ## Contributing
 
 - Clone this repository.
 - Run `yarn install` to install dependencies.
-   - If everything is installed correctly, the `postinstall` script should have copied the TinyMCE directory to `public/tinymce`. If not, you can manually run `yarn postinstall` or `node postinstall.cjs`. 
+   - If everything is installed correctly, the `postinstall` script should have copied the TinyMCE directory to `public/tinymce`. If not, you can manually run `yarn postinstall` or `node postinstall.cjs`.
 - Run `yarn start` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
 - Run `yarn package` to create the CrafterCMS plugin build. See local installation instructions above for instructions on continually deploying and testing locally.
 - Fork and create a pull request to contribute.
