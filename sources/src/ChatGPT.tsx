@@ -21,7 +21,6 @@ import {
   useTheme
 } from '@mui/material';
 import OpenAILogo from './OpenAI';
-import ThinkingIcon from './ThinkingIcon';
 import SendIcon from '@mui/icons-material/SendRounded';
 import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/index';
 import { SxProps } from '@mui/system/styleFunctionSx';
@@ -601,7 +600,7 @@ const ChatGPT = forwardRef<ChatGPTRef, ChatGPTProps>((props, ref) => {
                   </StyledAvatar>
                   {streaming && content?.length === 0 && index === maxMessageIndex && (
                     <Box>
-                      <ThinkingIcon />
+                      <CircularProgress size={24} />
                     </Box>
                   )}
                   {role === 'assistant' ? (
